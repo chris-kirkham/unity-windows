@@ -130,6 +130,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pixelPerfectCamera: {fileID: 0}
+  cursorImage: {fileID: 7086738631033864737}
+  defaultCursorSprite: {fileID: -4056669267574797703, guid: 1030702e92f623a40bb394cf6c6032ad, type: 3}
   raycaster: {fileID: 0}
 --- !u!1 &8873970778670759290
 GameObject:

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,7 +8,26 @@ using UnityEngine.UI;
 
 public class Cursor : MonoBehaviour
 {
+    //high-level cursor event enum for use by other scripts. Necessary, or use InputSystem somehow?
+    [Flags]
+    public enum CursorEvent
+    {
+        None = 0,
+        MouseMove = 1 << 0,
+        LeftClickDown = 1 << 1,
+        LeftClickHold = 1 << 2,
+        LeftClickUp = 1 << 3,
+        RightClickDown = 1 << 4,
+        RightClickHold = 1 << 5,
+        RightClickUp = 1 << 6,
+        MiddleClickDown = 1 << 7,
+        MiddleClickHold = 1 << 8,
+        MiddleClickUp = 1 << 9
+    }
+
     [SerializeField] private PixelPerfectCamera pixelPerfectCamera;
+    [SerializeField] private Image cursorImage;
+    [SerializeField] private Sprite defaultCursorSprite;
 
     private Camera cam;
 
@@ -20,27 +40,28 @@ public class Cursor : MonoBehaviour
     //input
     private Vector2 mousePosition;
     private Vector2 clampedMousePos;
-    private Vector2 inputMousePos;
 
     private void OnEnable()
     {
         cam = pixelPerfectCamera.GetComponent<Camera>();
         eventSystem = FindFirstObjectByType<EventSystem>();
-
     }
 
     private void Update()
     {
-        inputMousePos = Input.mousePosition;
+        cursorImage.sprite = defaultCursorSprite;
+
+        DoRaycast();
     }
 
     private void LeftClick()
     {
         Debug.Log("LeftClick");
-        DoClickRaycast();
+        DoRaycast();
     }
 
-    private void DoClickRaycast()
+    //TODO: make this more efficient!
+    private void DoRaycast()
     {
         pointerEventData = new PointerEventData(eventSystem);
         pointerEventData.position = clampedMousePos;
@@ -51,7 +72,25 @@ public class Cursor : MonoBehaviour
 
         foreach(var result in raycastResults)
         {
+            if(result.gameObject.TryGetComponent<IOverrideCursorSprite>(out var cursorOverride))
+            {
+                DoCursorSpriteOverride(cursorOverride);
+            }
+
             Debug.Log(result.gameObject.name);
+        }
+    }
+
+    //TODO: refactor!!!!
+    private void DoCursorSpriteOverride(IOverrideCursorSprite cursorOverride)
+    {
+        if(cursorOverride.OverrideOnInputEvent == CursorEvent.None || cursorOverride.OverrideOnInputEvent == CursorEvent.MouseMove)
+        {
+            if (cursorOverride.CursorSpriteOverride 
+                && cursorImage.sprite != cursorOverride.CursorSpriteOverride)
+            {
+                cursorImage.sprite = cursorOverride.CursorSpriteOverride;
+            }
         }
     }
 

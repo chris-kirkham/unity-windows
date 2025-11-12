@@ -1,8 +1,13 @@
 using UnityEngine;
 
-public class WindowDragHandle : MonoBehaviour
+public class WindowDragHandle : MonoBehaviour, IOverrideCursorSprite
 {
     [SerializeField] private RectTransform handleRect;
+    [SerializeField] private Sprite cursorSpriteOverride;
+
+    //IOverrideCursorSprite
+    public Sprite CursorSpriteOverride => cursorSpriteOverride;
+    public Cursor.CursorEvent OverrideOnInputEvent => Cursor.CursorEvent.MouseMove;
 
     private void OnDrawGizmos()
     {
