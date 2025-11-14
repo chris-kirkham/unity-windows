@@ -5,7 +5,14 @@ using UnityEngine.InputSystem.LowLevel;
 
 public interface IOverrideCursorSprite
 {
+    public class CursorOverrideEvent
+    {
+
+    }
+
     public Cursor.CursorEvent OverrideOnInputEvent { get; }
 
     public Sprite CursorSpriteOverride { get; }
+
+    //public CursorOverrideEvent GetCursorOverrideEvent();
 }

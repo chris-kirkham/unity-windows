@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
-public class Cursor : MonoBehaviour
+public class Cursor : SingletonMonoBehaviour<Cursor>
 {
     //high-level cursor event enum for use by other scripts. Necessary, or use InputSystem somehow?
     [Flags]
@@ -15,14 +15,16 @@ public class Cursor : MonoBehaviour
         None = 0,
         MouseMove = 1 << 0,
         LeftClickDown = 1 << 1,
-        LeftClickHold = 1 << 2,
+        LeftClickDrag = 1 << 2,
         LeftClickUp = 1 << 3,
+        /*
         RightClickDown = 1 << 4,
-        RightClickHold = 1 << 5,
+        RightClickDrag = 1 << 5,
         RightClickUp = 1 << 6,
         MiddleClickDown = 1 << 7,
-        MiddleClickHold = 1 << 8,
-        MiddleClickUp = 1 << 9
+        MiddleClickDrag = 1 << 8,
+        MiddleClickUp = 1 << 9 
+        */
     }
 
     [SerializeField] private PixelPerfectCamera pixelPerfectCamera;
@@ -36,10 +38,27 @@ public class Cursor : MonoBehaviour
     [SerializeField] private GraphicRaycaster raycaster;
     private PointerEventData pointerEventData;
     private List<RaycastResult> raycastResults = new List<RaycastResult>();
-
+    private const int MaxRaycastListenerHits = 50;
+    private ICursorEventListener[] listenerRaycastHits = new ICursorEventListener[MaxRaycastListenerHits];
+    
     //input
+    private CursorEvent currentEvent;
+    private bool leftClickPressed;
     private Vector2 mousePosition;
     private Vector2 clampedMousePos;
+    private Vector2 prevClampedMousePos;
+
+    //event listeners
+    private HashSet<ICursorEventListener> trackedListeners = new HashSet<ICursorEventListener>();
+
+    //event listeners the cursor is currently on top of
+    private List<ICursorEventListener> hoveredListeners = new List<ICursorEventListener>();
+
+    public Vector2 Position => mousePosition;
+
+    public Vector2 PositionDelta => clampedMousePos - prevClampedMousePos;
+
+    public Vector2 PositionDelta_WS => cam.ScreenToWorldPoint(clampedMousePos) - cam.ScreenToWorldPoint(prevClampedMousePos);
 
     private void OnEnable()
     {
@@ -52,12 +71,22 @@ public class Cursor : MonoBehaviour
         cursorImage.sprite = defaultCursorSprite;
 
         DoRaycast();
+
+        if(currentEvent != CursorEvent.None)
+        {
+            Debug.Log(currentEvent);
+
+            foreach (var listener in trackedListeners)
+            {
+                listener.OnCursorEvent(currentEvent);
+            }
+        }
     }
 
-    private void LeftClick()
+    private void LateUpdate()
     {
-        Debug.Log("LeftClick");
-        DoRaycast();
+        currentEvent = CursorEvent.None;
+        prevClampedMousePos = clampedMousePos;
     }
 
     //TODO: make this more efficient!
@@ -70,33 +99,89 @@ public class Cursor : MonoBehaviour
         //raycaster.Raycast(pointerEventData, raycastResults);
         eventSystem.RaycastAll(pointerEventData, raycastResults);
 
+        int listenerHitCount = 0;
         foreach(var result in raycastResults)
         {
-            if(result.gameObject.TryGetComponent<IOverrideCursorSprite>(out var cursorOverride))
+            if(result.gameObject.TryGetComponent<ICursorEventListener>(out var hitListener))
             {
-                DoCursorSpriteOverride(cursorOverride);
+                listenerRaycastHits[listenerHitCount] = hitListener;
+                listenerHitCount++;
+                
+                //add to hovered elements
+                if(trackedListeners.Contains(hitListener) && !hoveredListeners.Contains(hitListener))
+                {
+                    hoveredListeners.Add(hitListener);
+                    hitListener.OnCursorEnter();
+                }
             }
 
-            Debug.Log(result.gameObject.name);
+            //TODO: refactor this somewhere else?
+            if(result.gameObject.TryGetComponent<IOverrideCursorSprite>(out var cursorOverride))
+            {
+                SetCursorSpriteOverride(cursorOverride);
+            }
+        }
+
+        //check for elements the mouse is no longer hovering over
+        for(int i = hoveredListeners.Count - 1; i >= 0; i--)
+        {
+            var listener = hoveredListeners[i];
+
+            var hitByRaycast = false;
+            for(int k = 0; k < listenerHitCount; k++)
+            {
+                if (listenerRaycastHits[k] == listener)
+                {
+                    hitByRaycast = true;
+                    break;
+                }
+            }
+
+            if(!hitByRaycast)
+            {
+                if(trackedListeners.Contains(listener))
+                {
+                    listener.OnCursorExit();
+                }
+                hoveredListeners.RemoveAt(i);
+            }
         }
     }
 
     //TODO: refactor!!!!
-    private void DoCursorSpriteOverride(IOverrideCursorSprite cursorOverride)
+    public void SetCursorSpriteOverride(IOverrideCursorSprite cursorOverride)
     {
-        if(cursorOverride.OverrideOnInputEvent == CursorEvent.None || cursorOverride.OverrideOnInputEvent == CursorEvent.MouseMove)
+        if (cursorOverride.CursorSpriteOverride && cursorImage.sprite != cursorOverride.CursorSpriteOverride)
         {
-            if (cursorOverride.CursorSpriteOverride 
-                && cursorImage.sprite != cursorOverride.CursorSpriteOverride)
-            {
-                cursorImage.sprite = cursorOverride.CursorSpriteOverride;
-            }
+            cursorImage.sprite = cursorOverride.CursorSpriteOverride;
         }
+    }
+
+    public void AddCursorEventListener(ICursorEventListener listener)
+    {
+        if(!trackedListeners.Contains(listener))
+        {
+            trackedListeners.Add(listener);
+        }
+    }
+
+    public void RemoveCursorEventListener(ICursorEventListener listener)
+    {
+        trackedListeners.Remove(listener);
     }
 
     #region InputActions
     private void OnMouseMove(InputValue value)
     {
+        if(leftClickPressed)
+        {
+            currentEvent = CursorEvent.LeftClickDrag;
+        }
+        else
+        {
+            currentEvent = CursorEvent.MouseMove;
+        }
+
         mousePosition = value.Get<Vector2>();
         clampedMousePos = new Vector3(
             Mathf.Clamp(mousePosition.x, 0f, Screen.width),
@@ -111,9 +196,20 @@ public class Cursor : MonoBehaviour
 
     private void OnMouseLeftClick(InputValue value)
     {
-        if(value.isPressed)
+        var floatVal = value.Get<float>();
+
+        if(floatVal > 0f)
         {
-            LeftClick();
+            if(!leftClickPressed)
+            {
+                currentEvent = CursorEvent.LeftClickDown;
+                leftClickPressed = true;
+            }
+        }
+        else if(leftClickPressed)
+        {
+            currentEvent = CursorEvent.LeftClickUp;
+            leftClickPressed = false;
         }
     }
     

@@ -595,6 +595,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: side
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: windowCanvas
+      value: 
+      objectReference: {fileID: 5779397891246857081}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: cursorSpriteOverride
+      value: 
+      objectReference: {fileID: 21300000, guid: fa305201142d64840b8c6543314aa66d, type: 3}
     - target: {fileID: 7410138523020161038, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
       propertyPath: m_Name
       value: DragHandle_Right
@@ -697,6 +709,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: side
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: windowCanvas
+      value: 
+      objectReference: {fileID: 5779397891246857081}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: cursorSpriteOverride
+      value: 
+      objectReference: {fileID: 21300000, guid: cea2f69efd39e19459ec0129707a94b0, type: 3}
     - target: {fileID: 7410138523020161038, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
       propertyPath: m_Name
       value: DragHandle_BottomLeft
@@ -912,6 +936,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: side
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: windowCanvas
+      value: 
+      objectReference: {fileID: 5779397891246857081}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: cursorSpriteOverride
+      value: 
+      objectReference: {fileID: 21300000, guid: 09228d6b0b33c31498fa4f656a739997, type: 3}
     - target: {fileID: 7410138523020161038, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
       propertyPath: m_Name
       value: DragHandle_Top
@@ -1131,6 +1167,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: side
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: windowCanvas
+      value: 
+      objectReference: {fileID: 5779397891246857081}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: cursorSpriteOverride
+      value: 
+      objectReference: {fileID: 21300000, guid: ed7fca0d1b232924b869fe9292257327, type: 3}
     - target: {fileID: 7410138523020161038, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
       propertyPath: m_Name
       value: DragHandle_TopLeft
@@ -1233,6 +1281,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: side
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: windowCanvas
+      value: 
+      objectReference: {fileID: 5779397891246857081}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: cursorSpriteOverride
+      value: 
+      objectReference: {fileID: 21300000, guid: cea2f69efd39e19459ec0129707a94b0, type: 3}
     - target: {fileID: 7410138523020161038, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
       propertyPath: m_Name
       value: DragHandle_TopRight
@@ -1335,6 +1395,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: side
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: windowCanvas
+      value: 
+      objectReference: {fileID: 5779397891246857081}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: cursorSpriteOverride
+      value: 
+      objectReference: {fileID: 21300000, guid: 09228d6b0b33c31498fa4f656a739997, type: 3}
     - target: {fileID: 7410138523020161038, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
       propertyPath: m_Name
       value: DragHandle_Bottom
@@ -1437,6 +1509,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: windowCanvas
+      value: 
+      objectReference: {fileID: 5779397891246857081}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: cursorSpriteOverride
+      value: 
+      objectReference: {fileID: 21300000, guid: fa305201142d64840b8c6543314aa66d, type: 3}
     - target: {fileID: 7410138523020161038, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
       propertyPath: m_Name
       value: DragHandle_Left
@@ -1632,6 +1712,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: side
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: windowCanvas
+      value: 
+      objectReference: {fileID: 5779397891246857081}
+    - target: {fileID: 2935884031165881709, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
+      propertyPath: cursorSpriteOverride
+      value: 
+      objectReference: {fileID: 21300000, guid: ed7fca0d1b232924b869fe9292257327, type: 3}
     - target: {fileID: 7410138523020161038, guid: 4c7e4c8a1a983b94fb223e538cbfd774, type: 3}
       propertyPath: m_Name
       value: DragHandle_BottomRight

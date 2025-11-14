@@ -17,12 +17,12 @@
                 },
                 {
                     "name": "MouseLeftClick",
-                    "type": "Button",
+                    "type": "Value",
                     "id": "c7c9b14f-bd82-49d4-b127-962d8bec05ec",
-                    "expectedControlType": "",
+                    "expectedControlType": "Analog",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
