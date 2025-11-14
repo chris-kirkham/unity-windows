@@ -2,7 +2,7 @@ using NUnit.Framework;
 using System;
 using UnityEngine;
 
-public class WindowDragHandle : MonoBehaviour, ICursorEventListener, IOverrideCursorSprite
+public class ResizeDragHandle : MonoBehaviour, ICursorEventListener, IOverrideCursorSprite
 {
     private enum Side
     {
