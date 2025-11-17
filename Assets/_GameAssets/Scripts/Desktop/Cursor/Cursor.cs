@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class Cursor : SingletonMonoBehaviour<Cursor>
@@ -29,7 +30,7 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
 
     [SerializeField] private PixelPerfectCamera pixelPerfectCamera;
     [SerializeField] private Image cursorImage;
-    [SerializeField] private Sprite defaultCursorSprite;
+    [SerializeField, FormerlySerializedAs("defaultCursorSprite")] private Sprite defaultSprite;
 
     private Camera cam;
 
@@ -68,8 +69,6 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
 
     private void Update()
     {
-        cursorImage.sprite = defaultCursorSprite;
-
         DoRaycast();
 
         if(currentEvent != CursorEvent.None)
@@ -114,12 +113,6 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
                     hitListener.OnCursorEnter();
                 }
             }
-
-            //TODO: refactor this somewhere else?
-            if(result.gameObject.TryGetComponent<IOverrideCursorSprite>(out var cursorOverride))
-            {
-                SetCursorSpriteOverride(cursorOverride);
-            }
         }
 
         //check for elements the mouse is no longer hovering over
@@ -148,12 +141,16 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
         }
     }
 
-    //TODO: refactor!!!!
-    public void SetCursorSpriteOverride(IOverrideCursorSprite cursorOverride)
+    //TODO: refactor!!!! Use IOverrideCursorSprite interface and let cursor decide when/what to override?
+    public void SetCursorSpriteOverride(Sprite overrideSprite)
     {
-        if (cursorOverride.CursorSpriteOverride && cursorImage.sprite != cursorOverride.CursorSpriteOverride)
+        if(!overrideSprite)
         {
-            cursorImage.sprite = cursorOverride.CursorSpriteOverride;
+            cursorImage.sprite = defaultSprite;
+        }
+        else if (cursorImage.sprite != overrideSprite)
+        {
+            cursorImage.sprite = overrideSprite;
         }
     }
 

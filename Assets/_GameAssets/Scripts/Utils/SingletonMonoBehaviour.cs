@@ -15,7 +15,7 @@ public abstract class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBe
 
             Debug.LogErrorFormat($"No instance of {0} found!", nameof(T));
             return null;
-            }
+        }
     }
 
     private void Awake()

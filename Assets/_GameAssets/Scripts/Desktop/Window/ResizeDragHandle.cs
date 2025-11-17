@@ -2,7 +2,8 @@ using NUnit.Framework;
 using System;
 using UnityEngine;
 
-public class ResizeDragHandle : MonoBehaviour, ICursorEventListener, IOverrideCursorSprite
+//TODO: all the drag-resizing code can probably be made much neater
+public class ResizeDragHandle : DragHandle
 {
     private enum Side
     {
@@ -21,10 +22,6 @@ public class ResizeDragHandle : MonoBehaviour, ICursorEventListener, IOverrideCu
     [SerializeField] private RectTransform handleRect;
     [SerializeField] private Sprite cursorSpriteOverride;
 
-    private bool isHovered;
-    private bool isDragging;
-    private Vector2 dragStartPos;
-
     //drag resize pivots
     //(0, 0) == bottom left
     //These pivots are the opposite to the side of the drag bars, so the canvas will move "with" the drag bar 
@@ -38,8 +35,6 @@ public class ResizeDragHandle : MonoBehaviour, ICursorEventListener, IOverrideCu
     private readonly Vector2 resizePivot_BottomRight = new Vector2(0f, 0f);
     private Vector2[] resizePivots;
 
-    private Vector2 prevCursorPos;
-    
     private void Awake()
     {
         resizePivots = new Vector2[]
@@ -55,27 +50,15 @@ public class ResizeDragHandle : MonoBehaviour, ICursorEventListener, IOverrideCu
         };
     }
 
-    private void OnEnable()
-    {
-        if(Cursor.InstExists())
-        {
-            Cursor.Inst.AddCursorEventListener(this);
-        }
-    }
-
-    private void OnDisable()
-    {
-        if(Cursor.InstExists())
-        {
-            Cursor.Inst.RemoveCursorEventListener(this);
-        }
-    }
-
     private void Update()
     {
-        if(isHovered && cursorSpriteOverride)
+        if(cursorSpriteOverride && (isHovered || isDragging))
         {
-            Cursor.Inst.SetCursorSpriteOverride(this);
+            Cursor.Inst.SetCursorSpriteOverride(cursorSpriteOverride);
+        }
+        else //TODO: reset cursor override - probably need a system in Cursor for this
+        {
+            //Cursor.Inst.SetCursorSpriteOverride(null);
         }
 
         if(isDragging && windowCanvas)
@@ -95,10 +78,26 @@ public class ResizeDragHandle : MonoBehaviour, ICursorEventListener, IOverrideCu
                     newWidth = canvasRect.width + mouseDelta.x;
                     break;
                 case Side.Top:
-                    newHeight = canvasRect.height - mouseDelta.y;
+                    newHeight = canvasRect.height + mouseDelta.y;
                     break;
                 case Side.Bottom:
+                    newHeight = canvasRect.height - mouseDelta.y;
+                    break;
+                case Side.TopLeft:
+                    newWidth = canvasRect.width - mouseDelta.x;
                     newHeight = canvasRect.height + mouseDelta.y;
+                    break;
+                case Side.TopRight:
+                    newWidth = canvasRect.width + mouseDelta.x;
+                    newHeight = canvasRect.height + mouseDelta.y;
+                    break;
+                case Side.BottomLeft:
+                    newWidth = canvasRect.width - mouseDelta.x;
+                    newHeight = canvasRect.height - mouseDelta.y;
+                    break;
+                case Side.BottomRight:
+                    newWidth = canvasRect.width + mouseDelta.x;
+                    newHeight = canvasRect.height - mouseDelta.y;
                     break;
                 default:
                     break;
@@ -106,50 +105,18 @@ public class ResizeDragHandle : MonoBehaviour, ICursorEventListener, IOverrideCu
 
             windowCanvas.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, newWidth);
             windowCanvas.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, newHeight);
-            canvasRect.center = Vector2.zero; //TEST
         }
     }
 
-
-    //ICursorEventListener
-    public void OnCursorEvent(Cursor.CursorEvent e)
+    protected override void OnStartDrag()
     {
-        if(isHovered)
-        {
-            if (e == Cursor.CursorEvent.LeftClickDown)
-            {
-                isDragging = true;
-                
-                //TODO: adjust pivot for each side and reposition window properly
-                var prevPivot = windowCanvas.pivot;
-                windowCanvas.pivot = resizePivots[(int)side];
-                //windowCanvas.position *= windowCanvas.pivot - prevPivot;
-                
-                dragStartPos = Cursor.Inst.Position;
-            }
-        }
-
-        if (e == Cursor.CursorEvent.LeftClickUp)
-        {
-            isDragging = false;
-        }
+        //adjust pivot for each side and reposition window properly
+        var prevPivot = windowCanvas.pivot;
+        windowCanvas.pivot = resizePivots[(int)side];
+        var pivotDelta = windowCanvas.pivot - prevPivot;
+        var newPos = windowCanvas.position + (Vector3)(windowCanvas.rect.size * pivotDelta);
+        windowCanvas.position = newPos;
     }
-
-    public void OnCursorEnter()
-    {
-        Debug.Log($"Drag handle {name} entered!");
-        isHovered = true;
-    }
-
-    public void OnCursorExit()
-    {
-        Debug.Log($"Drag handle {name} exited!");
-        isHovered = false;
-    }
-
-    //IOverrideCursorSprite
-    public Sprite CursorSpriteOverride => cursorSpriteOverride;
-    public Cursor.CursorEvent OverrideOnInputEvent => Cursor.CursorEvent.MouseMove;
 
     private void OnDrawGizmos()
     {
