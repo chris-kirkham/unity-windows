@@ -6,6 +6,9 @@ using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class Cursor : SingletonMonoBehaviour<Cursor>
 {
@@ -28,6 +31,12 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
         */
     }
 
+    public struct SpriteOverride
+    {
+        public Sprite sprite;
+        public int priority;
+    }
+
     [SerializeField] private PixelPerfectCamera pixelPerfectCamera;
     [SerializeField] private Image cursorImage;
     [SerializeField, FormerlySerializedAs("defaultCursorSprite")] private Sprite defaultSprite;
@@ -45,9 +54,9 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
     //input
     private CursorEvent currentEvent;
     private bool leftClickPressed;
-    private Vector2 mousePosition;
-    private Vector2 clampedMousePos;
-    private Vector2 prevClampedMousePos;
+    private Vector2 rawMousePosition;
+    private Vector2 clampedRawMousePos;
+    private Vector2 prevClampedMousePos_WS;
 
     //event listeners
     private HashSet<ICursorEventListener> trackedListeners = new HashSet<ICursorEventListener>();
@@ -55,16 +64,18 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
     //event listeners the cursor is currently on top of
     private List<ICursorEventListener> hoveredListeners = new List<ICursorEventListener>();
 
-    public Vector2 Position => mousePosition;
+    private List<SpriteOverride> spriteOverrides = new List<SpriteOverride>();
 
-    public Vector2 PositionDelta => clampedMousePos - prevClampedMousePos;
+    public Vector2 ClampedMousePosition_WS => cam.ScreenToWorldPoint(clampedRawMousePos);
 
-    public Vector2 PositionDelta_WS => cam.ScreenToWorldPoint(clampedMousePos) - cam.ScreenToWorldPoint(prevClampedMousePos);
+    public Vector2 PositionDelta_WS => ClampedMousePosition_WS - prevClampedMousePos_WS;
 
     private void OnEnable()
     {
         cam = pixelPerfectCamera.GetComponent<Camera>();
         eventSystem = FindFirstObjectByType<EventSystem>();
+
+        UnityEngine.Cursor.visible = false; //hide default cursor (TODO: look at using Cursor.SetCursor instead?)
     }
 
     private void Update()
@@ -85,22 +96,30 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
     private void LateUpdate()
     {
         currentEvent = CursorEvent.None;
-        prevClampedMousePos = clampedMousePos;
+        prevClampedMousePos_WS = ClampedMousePosition_WS;
     }
 
     //TODO: make this more efficient!
     private void DoRaycast()
     {
         pointerEventData = new PointerEventData(eventSystem);
-        pointerEventData.position = clampedMousePos;
+        pointerEventData.position = clampedRawMousePos;
 
         raycastResults.Clear();
         //raycaster.Raycast(pointerEventData, raycastResults);
         eventSystem.RaycastAll(pointerEventData, raycastResults);
 
         int listenerHitCount = 0;
-        foreach(var result in raycastResults)
+        foreach (var result in raycastResults)
         {
+            //DEBUG
+            if(result.gameObject.TryGetComponent<DraggableUIElement>(out var draggable))
+            {
+                Debug.Log($"Hit {draggable.name} at {pointerEventData.position}");
+            }
+            
+            //var hitListener = result.gameObject.GetComponentInParent<ICursorEventListener>(); //TODO: should look in parents, children, or only on the GameObject itself?
+            //if(hitListener != null)
             if(result.gameObject.TryGetComponent<ICursorEventListener>(out var hitListener))
             {
                 listenerRaycastHits[listenerHitCount] = hitListener;
@@ -142,15 +161,41 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
     }
 
     //TODO: refactor!!!! Use IOverrideCursorSprite interface and let cursor decide when/what to override?
-    public void SetCursorSpriteOverride(Sprite overrideSprite)
+    public void AddSpriteOverride(SpriteOverride spriteOverride)
     {
-        if(!overrideSprite)
+        if(spriteOverrides.Contains(spriteOverride))
+        {
+            return;
+        }
+
+        spriteOverrides.Add(spriteOverride);
+        SetSpriteFromOverride(spriteOverride);
+    }
+
+    public void RemoveSpriteOverride(SpriteOverride spriteOverride)
+    {
+        spriteOverrides.Remove(spriteOverride);
+
+        if(spriteOverrides.Count == 0)
         {
             cursorImage.sprite = defaultSprite;
         }
-        else if (cursorImage.sprite != overrideSprite)
+        else //use most recently-added override
         {
-            cursorImage.sprite = overrideSprite;
+            SetSpriteFromOverride(spriteOverrides[spriteOverrides.Count - 1]);
+        }
+    }
+
+    private void SetSpriteFromOverride(SpriteOverride spriteOverride)
+    {
+        if (spriteOverride.sprite)
+        {
+            cursorImage.sprite = spriteOverride.sprite;
+        }
+        else
+        {
+            Debug.LogError($"Cursor sprite override has null sprite!");
+            cursorImage.sprite = Resources.Load<Sprite>("TX_Error_Sprite");
         }
     }
 
@@ -159,12 +204,27 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
         if(!trackedListeners.Contains(listener))
         {
             trackedListeners.Add(listener);
+            Debug.Log($"Adding cursor event listener {listener.ToString()};" +
+                $" tracked listener listener count: {trackedListeners.Count}");
         }
     }
 
     public void RemoveCursorEventListener(ICursorEventListener listener)
     {
+        Debug.Log($"Removing cursor event listener {listener.ToString()}; new listener count: {trackedListeners.Count - 1}");
         trackedListeners.Remove(listener);
+    }
+
+    private void OnDrawGizmos()
+    {
+#if UNITY_EDITOR
+        if(cam)
+        {
+            Handles.Label(transform.position + (Vector3.right * 10f),
+                $"World: {ClampedMousePosition_WS.x.ToString("0000")}, {ClampedMousePosition_WS.y.ToString("0000")} \n"
+                + $"Raw: {rawMousePosition.x.ToString("0000")}, {rawMousePosition.y.ToString("0000")}");
+        }
+#endif
     }
 
     #region InputActions
@@ -178,17 +238,19 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
         {
             currentEvent = CursorEvent.MouseMove;
         }
+        
+        var screenOffset = cam.transform.position - (new Vector3(Screen.width, Screen.height, 0f) / 2);
+        
+        //raw mouse position (i.e. Windows cursor position) is in range (0, 0) to (screen width, screen height),
+        //from bottom-left to top-right
+        rawMousePosition = value.Get<Vector2>();
+        
+        clampedRawMousePos = new Vector3(
+            Mathf.Clamp(rawMousePosition.x, 0f, Screen.width),
+            Mathf.Clamp(rawMousePosition.y, 0f, Screen.height));
 
-        mousePosition = value.Get<Vector2>();
-        clampedMousePos = new Vector3(
-            Mathf.Clamp(mousePosition.x, 0f, Screen.width),
-            Mathf.Clamp(mousePosition.y, 0f,Screen.height));
-
-        if(pixelPerfectCamera)
-        {
-            var worldPoint = cam.ScreenToWorldPoint(new Vector3(clampedMousePos.x, clampedMousePos.y, 0f));
-            transform.position = new Vector3(worldPoint.x, worldPoint.y, 0f);
-        }
+        var worldPoint = cam.ScreenToWorldPoint(new Vector3(clampedRawMousePos.x, clampedRawMousePos.y, 0f));
+        transform.position = new Vector3(worldPoint.x, worldPoint.y, 0f);
     }
 
     private void OnMouseLeftClick(InputValue value)

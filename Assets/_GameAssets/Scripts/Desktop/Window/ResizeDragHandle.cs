@@ -1,9 +1,10 @@
 using NUnit.Framework;
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 //TODO: all the drag-resizing code can probably be made much neater
-public class ResizeDragHandle : DragHandle
+public class ResizeDragHandle : DraggableUIElement
 {
     private enum Side
     {
@@ -18,9 +19,12 @@ public class ResizeDragHandle : DragHandle
     }
 
     [SerializeField] private Side side;
-    [SerializeField] private RectTransform windowCanvas;
-    [SerializeField] private RectTransform handleRect;
-    [SerializeField] private Sprite cursorSpriteOverride;
+    [SerializeField] private Window window;
+    [SerializeField, FormerlySerializedAs("cursorSpriteOverride")] private Sprite cursorOverride;
+
+    protected override Sprite OnHoverDragSprite => cursorOverride;
+
+    private RectTransform canvasRect;
 
     //drag resize pivots
     //(0, 0) == bottom left
@@ -32,7 +36,7 @@ public class ResizeDragHandle : DragHandle
     private readonly Vector2 resizePivot_TopLeft = new Vector2(1f, 0f);
     private readonly Vector2 resizePivot_TopRight = new Vector2(0f, 0f);
     private readonly Vector2 resizePivot_BottomLeft = new Vector2(1f, 1f);
-    private readonly Vector2 resizePivot_BottomRight = new Vector2(0f, 0f);
+    private readonly Vector2 resizePivot_BottomRight = new Vector2(0f, 1f);
     private Vector2[] resizePivots;
 
     private void Awake()
@@ -48,26 +52,22 @@ public class ResizeDragHandle : DragHandle
             resizePivot_BottomLeft,
             resizePivot_BottomRight
         };
+
+        if(canvas)
+        {
+            canvasRect = canvas.GetComponent<RectTransform>();
+        }
     }
 
     private void Update()
     {
-        if(cursorSpriteOverride && (isHovered || isDragging))
+        if(isDragging && canvasRect)
         {
-            Cursor.Inst.SetCursorSpriteOverride(cursorSpriteOverride);
-        }
-        else //TODO: reset cursor override - probably need a system in Cursor for this
-        {
-            //Cursor.Inst.SetCursorSpriteOverride(null);
-        }
-
-        if(isDragging && windowCanvas)
-        {
-            var canvasRect = windowCanvas.rect;
+            var canvasRect = this.canvasRect.rect;
             var mouseDelta = Cursor.Inst.PositionDelta_WS;
             var newWidth = canvasRect.width;
             var newHeight = canvasRect.height;
-            var prevPivot = windowCanvas.pivot;
+            var prevPivot = this.canvasRect.pivot;
 
             switch(side)
             {
@@ -103,36 +103,21 @@ public class ResizeDragHandle : DragHandle
                     break;
             }
 
-            windowCanvas.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, newWidth);
-            windowCanvas.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, newHeight);
+            newWidth = Mathf.Max(newWidth, window.MinSize.x);
+            newHeight = Mathf.Max(newHeight, window.MinSize.y);
+
+            this.canvasRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, newWidth);
+            this.canvasRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, newHeight);
         }
     }
 
     protected override void OnStartDrag()
     {
         //adjust pivot for each side and reposition window properly
-        var prevPivot = windowCanvas.pivot;
-        windowCanvas.pivot = resizePivots[(int)side];
-        var pivotDelta = windowCanvas.pivot - prevPivot;
-        var newPos = windowCanvas.position + (Vector3)(windowCanvas.rect.size * pivotDelta);
-        windowCanvas.position = newPos;
-    }
-
-    private void OnDrawGizmos()
-    {
-        if(!handleRect)
-        {
-            return;
-        }
-
-        Gizmos.matrix = Matrix4x4.identity;
-        Gizmos.color = Color.white;
-        var handleRectWorldCorners = new Vector3[4];
-        handleRect.GetWorldCorners(handleRectWorldCorners);
-        Gizmos.DrawLineStrip(new System.ReadOnlySpan<Vector3>(handleRectWorldCorners), looped: true);
-        var size = handleRectWorldCorners[2] - handleRectWorldCorners[0];
-
-        Gizmos.color = new Color(Color.cyan.r, Color.cyan.g, Color.cyan.b, 0.1f);
-        Gizmos.DrawCube(handleRectWorldCorners[0] + size / 2, size);
+        var prevPivot = canvasRect.pivot;
+        canvasRect.pivot = resizePivots[(int)side];
+        var pivotDelta = canvasRect.pivot - prevPivot;
+        var newPos = canvasRect.position + (Vector3)(canvasRect.rect.size * pivotDelta);
+        canvasRect.position = newPos;
     }
 }

@@ -1,32 +1,27 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class MoveDragHandle : DragHandle
+public class MoveDragHandle : DraggableUIElement
 {
-    [SerializeField] protected RectTransform windowCanvas;
-    [SerializeField] private RectTransform handleRect;
-    [SerializeField] protected Sprite cursorSpriteOverride;
+    [SerializeField] protected Sprite cursorOverride;
 
-    private RectTransform windowRectTransform;
-    
-    private void OnEnable()
+    protected override Sprite OnHoverDragSprite => cursorOverride;
+
+    private RectTransform canvasRect;
+
+    private void Awake()
     {
-        windowRectTransform = windowCanvas.GetComponent<RectTransform>();
+        if (canvas)
+        {
+            canvasRect = canvas.GetComponent<RectTransform>();
+        }
     }
 
     private void Update()
     {
-        if (cursorSpriteOverride && (isHovered || isDragging))
+        if(isDragging && canvasRect)
         {
-            Cursor.Inst.SetCursorSpriteOverride(cursorSpriteOverride);
-        }
-        else //TODO: reset cursor override - probably need a system in Cursor for this
-        {
-            //Cursor.Inst.SetCursorSpriteOverride(null);
-        }
-
-        if(isDragging && windowCanvas)
-        {
-            windowCanvas.position += (Vector3)Cursor.Inst.PositionDelta_WS;
+            canvasRect.position += (Vector3)Cursor.Inst.PositionDelta_WS;
         }
     }
 }
