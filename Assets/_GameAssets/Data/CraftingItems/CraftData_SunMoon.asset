@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: CraftData_SunMoon
   m_EditorClassIdentifier: 
   itemName: Sun and Moon
-  thumbnail: {fileID: 2800000, guid: 004d546f6e70f1744b5653b71aeb91ec, type: 3}
-  content: {fileID: 0}
-  size: {x: 100, y: 100}
-  useThumbnailSize: 1
-  thumbnailScale: 1
+  thumbnail: {fileID: 0}
+  thumbnailTex: {fileID: 2800000, guid: 004d546f6e70f1744b5653b71aeb91ec, type: 3}
+  contentPrefab: {fileID: 0}
+  prerequisites:
+  - {fileID: 11400000, guid: e0a993558f9f0c64394900eca72d7bfe, type: 2}
+  - {fileID: 11400000, guid: 51107d6ba6c38544d80378ae5e49aaf5, type: 2}
+  products: []

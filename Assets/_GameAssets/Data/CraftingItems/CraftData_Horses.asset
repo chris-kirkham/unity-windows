@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: CraftData_Horses
   m_EditorClassIdentifier: 
   itemName: Horses
-  thumbnail: {fileID: 2800000, guid: 5b3ccc7b83577b748b8769e3e71f98b0, type: 3}
-  content: {fileID: 0}
-  size: {x: 0, y: 0}
-  useThumbnailSize: 1
-  thumbnailScale: 0.5
+  thumbnail: {fileID: 0}
+  thumbnailTex: {fileID: 2800000, guid: 5b3ccc7b83577b748b8769e3e71f98b0, type: 3}
+  contentPrefab: {fileID: 0}
+  prerequisites:
+  - {fileID: 11400000, guid: f15214f3a6ad8f746857d80c58f22b2b, type: 2}
+  - {fileID: 11400000, guid: f15214f3a6ad8f746857d80c58f22b2b, type: 2}
+  products: []

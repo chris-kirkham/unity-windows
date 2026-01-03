@@ -4,24 +4,27 @@ using UnityEngine.Rendering.Universal;
 
 public class Window : MonoBehaviour
 {
-    [SerializeField] private PixelPerfectCamera pixelPerfectCam;
-    [SerializeField] private Vector2Int pixelSize;
-    [SerializeField] private Vector2 minSize;
     [SerializeField] private Canvas canvas;
+    //the root RectTransform under which all content displayed in the window should be added
+    [SerializeField] private RectTransform contentRoot;
+    [SerializeField] private PixelPerfectCamera pixelPerfectCam;
+    [SerializeField] private Vector2 size;
+    [SerializeField] private Vector2 minSize;
+    [SerializeField] private Vector2 maxSize;
     [SerializeField] private RectTransform canvasRect;
-    [SerializeField] private RectTransform background;
-    [SerializeField] private RectTransform border;
     [SerializeField] private WindowButton minimiseButton;
     [SerializeField] private WindowButton maximiseButton;
     [SerializeField] private WindowButton closeButton;
     [SerializeField] private Image icon;
-    [SerializeField] private RawImage contentHolder;
 
-    private WindowContent content;
+    private WindowContent currentContent;
 
     public Vector2 MinSize => minSize;
+    public Vector2 MaxSize => maxSize;
 
-    private void OnEnable()
+    public RectTransform ContentRoot => contentRoot;
+
+    protected virtual void OnEnable()
     {
         if(canvas && pixelPerfectCam)
         {
@@ -44,11 +47,11 @@ public class Window : MonoBehaviour
         }
     }
 
-    private void OnDisable()
+    protected virtual void OnDisable()
     {
-        if(content)
+        if(currentContent)
         {
-            content.UnloadContent();
+            currentContent.UnloadContent(this);
         }
 
         if (minimiseButton)
@@ -67,23 +70,40 @@ public class Window : MonoBehaviour
         }
     }
 
-    private void OnValidate()
+    protected virtual void OnValidate()
     {
-        if (canvasRect && pixelPerfectCam)
-        {
-            canvasRect.sizeDelta = pixelSize / pixelPerfectCam.assetsPPU;
-        }
+        RefreshWindowSize();
     }
 
-    public void SetContent(WindowContent content)
+    public virtual void SetWindowContent(WindowContent content)
     {
-        if(content != this.content)
+        if(content == this.currentContent)
         {
-            this.content.UnloadContent();
+            return;
+        }
 
-            this.content = content;
-            content.LoadContent();
-            contentHolder.texture = content.GetContentTexture();
+        if(currentContent)
+        {
+            currentContent.UnloadContent(this);
+        }
+
+        currentContent = content;
+        content.LoadContent(this);
+        SetSize(content.desiredWindowSize);
+    }
+
+    public void SetSize(Vector2 size)
+    {
+        this.size = size;
+        RefreshWindowSize();
+    }
+
+    private void RefreshWindowSize()
+    {
+        if (canvasRect)
+        {
+            var newSize = pixelPerfectCam ? size / pixelPerfectCam.assetsPPU : size;
+            canvasRect.sizeDelta = newSize;
         }
     }
 

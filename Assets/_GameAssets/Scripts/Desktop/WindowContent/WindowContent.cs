@@ -1,10 +1,10 @@
 using UnityEngine;
 
-public abstract class WindowContent : MonoBehaviour
+public class WindowContent : MonoBehaviour
 {
-    public abstract Texture GetContentTexture();
+    public Vector2 desiredWindowSize;
 
-    public abstract void LoadContent();
+    public virtual void LoadContent(Window window) {}
 
-    public abstract void UnloadContent();
+    public virtual void UnloadContent(Window window) {}
 }

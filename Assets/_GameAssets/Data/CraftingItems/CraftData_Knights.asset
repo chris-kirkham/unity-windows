@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: CraftData_Knights
   m_EditorClassIdentifier: 
   itemName: Knights
-  thumbnail: {fileID: 2800000, guid: 8a41c91688eae3945a2d65ebae814e0a, type: 3}
-  content: {fileID: 0}
-  size: {x: 0, y: 0}
-  useThumbnailSize: 1
-  thumbnailScale: 0.25
+  thumbnail: {fileID: 0}
+  thumbnailTex: {fileID: 2800000, guid: 8a41c91688eae3945a2d65ebae814e0a, type: 3}
+  contentPrefab: {fileID: 0}
+  prerequisites:
+  - {fileID: 11400000, guid: 51107d6ba6c38544d80378ae5e49aaf5, type: 2}
+  - {fileID: 11400000, guid: e331eac767456e942993938582ae9c3e, type: 2}
+  products:
+  - {fileID: 11400000, guid: edc0566db5321cf4c99fb8a5cd75db6d, type: 2}

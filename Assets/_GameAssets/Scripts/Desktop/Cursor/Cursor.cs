@@ -18,17 +18,15 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
     {
         None = 0,
         MouseMove = 1 << 0,
-        LeftClickDown = 1 << 1,
-        LeftClickDrag = 1 << 2,
-        LeftClickUp = 1 << 3,
-        /*
-        RightClickDown = 1 << 4,
-        RightClickDrag = 1 << 5,
+        EnterElement = 1 << 1,
+        ExitElement = 1 << 2,
+        LeftClickDown = 1 << 3,
+        LeftClickUp = 1 << 4,
+        RightClickDown = 1 << 5,
         RightClickUp = 1 << 6,
         MiddleClickDown = 1 << 7,
-        MiddleClickDrag = 1 << 8,
-        MiddleClickUp = 1 << 9 
-        */
+        MiddleClickUp = 1 << 8, 
+        MAX = 1 << 9
     }
 
     public struct SpriteOverride
@@ -50,53 +48,68 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
     private List<RaycastResult> raycastResults = new List<RaycastResult>();
     private const int MaxRaycastListenerHits = 50;
     private ICursorEventListener[] listenerRaycastHits = new ICursorEventListener[MaxRaycastListenerHits];
-    
+
     //input
-    private CursorEvent currentEvent;
-    private bool leftClickPressed;
+    private int currentEventFlags;
     private Vector2 rawMousePosition;
+    private Vector2 prevRawMousePosition;
     private Vector2 clampedRawMousePos;
     private Vector2 prevClampedMousePos_WS;
+    private bool isPositionFrozen;
+    private bool[] mouseButtonsPressed = new bool[3]; //0 = left, 1 = right, 2 = middle
+    //private bool[] mouseButtonsPressedLastTick = new bool[3]; //0 = left, 1 = right, 2 = middle
 
-    //event listeners
-    private HashSet<ICursorEventListener> trackedListeners = new HashSet<ICursorEventListener>();
-
-    //event listeners the cursor is currently on top of
-    private List<ICursorEventListener> hoveredListeners = new List<ICursorEventListener>();
-
+    private HashSet<ICursorEventListener> trackedListeners = new HashSet<ICursorEventListener>(); //event listeners
+    private List<ICursorEventListener> hoveredListeners = new List<ICursorEventListener>(); //event listeners the cursor is currently on top of
     private List<SpriteOverride> spriteOverrides = new List<SpriteOverride>();
 
-    public Vector2 ClampedMousePosition_WS => cam.ScreenToWorldPoint(clampedRawMousePos);
+    public Vector2 RawPosition => rawMousePosition;
+    public Vector2 RawPositionDelta => rawMousePosition - prevRawMousePosition;
+    public Vector2 ClampedPosition_WS => cam.ScreenToWorldPoint(clampedRawMousePos);
+    public Vector2 ClampedPositionDelta => ClampedPosition_WS - prevClampedMousePos_WS;
 
-    public Vector2 PositionDelta_WS => ClampedMousePosition_WS - prevClampedMousePos_WS;
+    public bool IsLeftClickPressed => mouseButtonsPressed[0];
+    public bool IsRightClickPressed => mouseButtonsPressed[1];
+    public bool IsMiddleClickPressed => mouseButtonsPressed[2];
 
+    //TODO: refactor into some kind of drag manager if drags get complex OR if we can have multiple simultaneous elements being dragged
+    //- don't just let anyone set the drag target?
+    public DraggableUIElement CurrentDragTarget { get; set; } 
+    
     private void OnEnable()
     {
         cam = pixelPerfectCamera.GetComponent<Camera>();
         eventSystem = FindFirstObjectByType<EventSystem>();
 
-        UnityEngine.Cursor.visible = false; //hide default cursor (TODO: look at using Cursor.SetCursor instead?)
+        //UnityEngine.Cursor.visible = false; //hide default cursor (TODO: look at using Cursor.SetCursor instead?)
     }
 
     private void Update()
     {
         DoRaycast();
 
-        if(currentEvent != CursorEvent.None)
+        //DEBUG
+        if(currentEventFlags > 0)
         {
-            Debug.Log(currentEvent);
-
-            foreach (var listener in trackedListeners)
+            var cursorEventsThisTickLog = "";
+            int e = 1;
+            int i = 0;
+            while(e < (int)CursorEvent.MAX)
             {
-                listener.OnCursorEvent(currentEvent);
+                cursorEventsThisTickLog += (CursorEvent)e + ", ";
+
+                e = 1 << i;
+                i++;
             }
         }
     }
 
     private void LateUpdate()
     {
-        currentEvent = CursorEvent.None;
-        prevClampedMousePos_WS = ClampedMousePosition_WS;
+        currentEventFlags = 0;
+
+        prevRawMousePosition = rawMousePosition;
+        prevClampedMousePos_WS = ClampedPosition_WS;
     }
 
     //TODO: make this more efficient!
@@ -113,23 +126,35 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
         foreach (var result in raycastResults)
         {
             //DEBUG
+            /*
             if(result.gameObject.TryGetComponent<DraggableUIElement>(out var draggable))
             {
                 Debug.Log($"Hit {draggable.name} at {pointerEventData.position}");
             }
-            
-            //var hitListener = result.gameObject.GetComponentInParent<ICursorEventListener>(); //TODO: should look in parents, children, or only on the GameObject itself?
-            //if(hitListener != null)
-            if(result.gameObject.TryGetComponent<ICursorEventListener>(out var hitListener))
+            */
+
+            //if(result.gameObject.TryGetComponent<ICursorEventListener>(out var hitListener))
+            //get all cursor event listeners in hierarchy of the hit component - TODO: think about best way
+            //- require listener is actually on component? Parent of the hit component? Allow children too? 
+            var hitListeners = result.gameObject.GetComponentsInParent<ICursorEventListener>();
+            foreach(var hitListener in hitListeners)
             {
-                listenerRaycastHits[listenerHitCount] = hitListener;
-                listenerHitCount++;
-                
-                //add to hovered elements
-                if(trackedListeners.Contains(hitListener) && !hoveredListeners.Contains(hitListener))
+                if (hitListener != null)
                 {
-                    hoveredListeners.Add(hitListener);
-                    hitListener.OnCursorEnter();
+                    listenerRaycastHits[listenerHitCount] = hitListener;
+
+                    //add to hovered elements
+                    if (trackedListeners.Contains(hitListener) && !hoveredListeners.Contains(hitListener))
+                    {
+                        hoveredListeners.Add(hitListener);
+                        hitListener.OnCursorEvent(CursorEvent.EnterElement);
+                    }
+
+                    listenerHitCount++;
+                    if (listenerHitCount == MaxRaycastListenerHits - 1)
+                    {
+                        break;
+                    }
                 }
             }
         }
@@ -138,6 +163,12 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
         for(int i = hoveredListeners.Count - 1; i >= 0; i--)
         {
             var listener = hoveredListeners[i];
+
+            if(listener == null)
+            {
+                hoveredListeners.RemoveAt(i);
+                continue;
+            }
 
             var hitByRaycast = false;
             for(int k = 0; k < listenerHitCount; k++)
@@ -153,11 +184,28 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
             {
                 if(trackedListeners.Contains(listener))
                 {
-                    listener.OnCursorExit();
+                    listener.OnCursorEvent(CursorEvent.ExitElement);
                 }
+
                 hoveredListeners.RemoveAt(i);
             }
         }
+    }
+
+    private void SetPosition(Vector2 rawMousePosition)
+    {
+        //N.B. raw mouse position (i.e. Windows cursor position) is in range (0, 0) to (screen width, screen height),
+        //from bottom-left to top-right
+
+        //var screenOffset = cam.transform.position - (new Vector3(Screen.width, Screen.height, 0f) / 2);
+
+        clampedRawMousePos = new Vector3(
+            Mathf.Clamp(rawMousePosition.x, 0f, Screen.width),
+            Mathf.Clamp(rawMousePosition.y, 0f, Screen.height));
+
+        //var worldPoint = cam.ScreenToWorldPoint(new Vector3(clampedRawMousePos.x, clampedRawMousePos.y, 0f) + screenOffset);
+        var worldPoint = cam.ScreenToWorldPoint(new Vector3(clampedRawMousePos.x, clampedRawMousePos.y, 0f));
+        transform.position = new Vector3(worldPoint.x, worldPoint.y, 0f);
     }
 
     //TODO: refactor!!!! Use IOverrideCursorSprite interface and let cursor decide when/what to override?
@@ -215,13 +263,39 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
         trackedListeners.Remove(listener);
     }
 
+    public bool IsCursorOverElement(ICursorEventListener element)
+    {
+        //TODO: inefficient list search (why isn't hoveredListeners a HashSet?)
+        return hoveredListeners.Contains(element);
+    }
+
+    public void FreezeCursorPos(bool frozen)
+    {
+        isPositionFrozen = frozen;
+    }
+    
+    public void AddEvent(CursorEvent e)
+    {
+        currentEventFlags += (int)e;
+
+        foreach (var listener in trackedListeners)
+        {
+            listener.OnCursorEvent(e);
+        }
+    }
+
+    public bool HasEvent(CursorEvent e)
+    {
+        return (currentEventFlags & 1 << (int)e) > 0;
+    }
+
     private void OnDrawGizmos()
     {
 #if UNITY_EDITOR
         if(cam)
         {
             Handles.Label(transform.position + (Vector3.right * 10f),
-                $"World: {ClampedMousePosition_WS.x.ToString("0000")}, {ClampedMousePosition_WS.y.ToString("0000")} \n"
+                $"World: {ClampedPosition_WS.x.ToString("0000")}, {ClampedPosition_WS.y.ToString("0000")} \n"
                 + $"Raw: {rawMousePosition.x.ToString("0000")}, {rawMousePosition.y.ToString("0000")}");
         }
 #endif
@@ -230,47 +304,77 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
     #region InputActions
     private void OnMouseMove(InputValue value)
     {
-        if(leftClickPressed)
-        {
-            currentEvent = CursorEvent.LeftClickDrag;
-        }
-        else
-        {
-            currentEvent = CursorEvent.MouseMove;
-        }
-        
-        var screenOffset = cam.transform.position - (new Vector3(Screen.width, Screen.height, 0f) / 2);
-        
-        //raw mouse position (i.e. Windows cursor position) is in range (0, 0) to (screen width, screen height),
-        //from bottom-left to top-right
         rawMousePosition = value.Get<Vector2>();
-        
-        clampedRawMousePos = new Vector3(
-            Mathf.Clamp(rawMousePosition.x, 0f, Screen.width),
-            Mathf.Clamp(rawMousePosition.y, 0f, Screen.height));
 
-        var worldPoint = cam.ScreenToWorldPoint(new Vector3(clampedRawMousePos.x, clampedRawMousePos.y, 0f));
-        transform.position = new Vector3(worldPoint.x, worldPoint.y, 0f);
+        if (!isPositionFrozen)
+        {
+            AddEvent(CursorEvent.MouseMove);
+            SetPosition(rawMousePosition);
+        }
     }
 
     private void OnMouseLeftClick(InputValue value)
     {
         var floatVal = value.Get<float>();
-
-        if(floatVal > 0f)
-        {
-            if(!leftClickPressed)
-            {
-                currentEvent = CursorEvent.LeftClickDown;
-                leftClickPressed = true;
-            }
-        }
-        else if(leftClickPressed)
-        {
-            currentEvent = CursorEvent.LeftClickUp;
-            leftClickPressed = false;
-        }
+        OnMouseButtonPressedOrUnpressed(0, floatVal > 0f);
     }
-    
-#endregion
+
+    private void OnMouseRightClick(InputValue value)
+    {
+        var floatVal = value.Get<float>();
+        OnMouseButtonPressedOrUnpressed(1, floatVal > 0f);
+    }
+
+    private void OnMouseMiddleClick(InputValue value)
+    {
+        var floatVal = value.Get<float>();
+        OnMouseButtonPressedOrUnpressed(2, floatVal > 0f);
+    }
+
+    private void OnMouseButtonPressedOrUnpressed(int button, bool pressed)
+    {
+        switch(button)
+        {
+            case 0:
+                if (pressed && !mouseButtonsPressed[button])
+                {
+                    AddEvent(CursorEvent.LeftClickDown);
+                }
+
+                if(!pressed && mouseButtonsPressed[button])
+                {
+                    AddEvent(CursorEvent.LeftClickUp);
+                }
+
+                break;
+            case 1:
+                if (pressed && !mouseButtonsPressed[button])
+                {
+                    AddEvent(CursorEvent.RightClickDown);
+                }
+
+                if (!pressed && mouseButtonsPressed[button])
+                {
+                    AddEvent(CursorEvent.RightClickUp);
+                }
+
+                break;
+            case 2:
+                if (pressed && !mouseButtonsPressed[button])
+                {
+                    AddEvent(CursorEvent.MiddleClickDown);
+                }
+
+                if (!pressed && mouseButtonsPressed[button])
+                {
+                    AddEvent(CursorEvent.MiddleClickUp);
+                }
+
+                break;
+        }
+
+        mouseButtonsPressed[button] = pressed;
+    }
+
+    #endregion
 }

@@ -1,22 +1,45 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "CraftingItemData", menuName = "Crafting/ItemData")]
 public class CraftingItemData : ScriptableObject
 {
     [SerializeField] private string itemName;
-    [SerializeField] private Texture2D thumbnail;
-    [SerializeField] private WindowContent content;
-    //TODO: PREREQUISITES/RECIPE FIELD
-    [SerializeField] private Vector2 size = new Vector2(100f, 100f);
-    [SerializeField] private bool useThumbnailSize = true;
-    [SerializeField] private float thumbnailScale = 0.25f;
+    [SerializeField] private CraftingItemThumbnail thumbnail;
+    [SerializeField] private Texture2D thumbnailTex;
+    [SerializeField] private CraftingItemWindowContent contentPrefab;
+    [SerializeField] private List<CraftingItemData> prerequisites;
+    [SerializeField] private List<CraftingItemData> products;
+
+    private HashSet<CraftingItemData> prerequisitesHash;
 
     public string ItemName => itemName;
-    public Texture2D Thumbnail => thumbnail;
-    public WindowContent Content => content;
-    //public Vector2 DefaultSize => defaultSize;
-    //public Vector2 Size => new Vector2(thumbnail.width, thumbnail.height) * scale;
-    public Vector2 Size => useThumbnailSize
-        ? new Vector2(thumbnail.width, thumbnail.height) * thumbnailScale
-        : size;
+    public CraftingItemThumbnail Thumbnail => thumbnail;
+    public Texture2D ThumbnailTex => thumbnailTex;
+    public CraftingItemWindowContent WindowContent => contentPrefab;
+    public List<CraftingItemData> ExtraProducts => products;
+    public List<CraftingItemData> Prerequisites => prerequisites;
+        /*
+    {
+        get
+        {
+            if(prerequisitesHash == null)
+            {
+                prerequisitesHash = new HashSet<CraftingItemData>(prerequisites.Count);
+                foreach(var prereq in prerequisites)
+                {
+                    prerequisitesHash.Add(prereq);
+                }
+            }
+
+            return prerequisitesHash;
+        }
+    }
+        */
+
+    public override string ToString()
+    {
+        return itemName;
+    }
 }

@@ -47,11 +47,10 @@ public class DraggableUIElement : MonoBehaviour, ICursorEventListener
                     Debug.Log($"Using {cam.name} as event camera for {nameof(DraggableUIElement)} {name}'s Canvas.");
                 }
 
-                /* this warning is for me because it took me too long to figure this out
+                //this warning is for me because it took me too long to figure this out
                 Debug.LogWarning($"No camera set for this element's canvas! " +
                     $"(if there is no camera set, graphic raycasts on this element will " +
                     $"use screen- rather than world-space and so will raycast in the wrong place.");
-                */
             }
         }
         else
@@ -72,6 +71,33 @@ public class DraggableUIElement : MonoBehaviour, ICursorEventListener
         }
     }
 
+    private void LateUpdate()
+    {
+        //only remove as drag target at end of frame to allow other scripts to use it before then
+        //TODO: messy, refactor
+        if(!isDragging && Cursor.Inst.CurrentDragTarget == this)
+        {
+            Cursor.Inst.CurrentDragTarget = null;
+        }
+    }
+
+    private void StartDrag()
+    {
+        isDragging = true;
+        Cursor.Inst.CurrentDragTarget = this;
+        OnStartDrag();
+    }
+
+    private void EndDrag()
+    {
+        isDragging = false;
+        OnEndDrag();
+        if (!isHovered)
+        {
+            Cursor.Inst.RemoveSpriteOverride(cursorSpriteOverride);
+        }
+    }
+
     protected virtual void OnStartDrag()
     {
     }
@@ -86,44 +112,30 @@ public class DraggableUIElement : MonoBehaviour, ICursorEventListener
     //ICursorEventListener
     public virtual void OnCursorEvent(Cursor.CursorEvent e)
     {
-        if (isHovered)
+        switch(e)
         {
-            if (e == Cursor.CursorEvent.LeftClickDown)
-            {
-                isDragging = true;
-                OnStartDrag();
-            }
-        }
-
-        if (e == Cursor.CursorEvent.LeftClickUp)
-        {
-            isDragging = false;
-            OnEndDrag();
-
-            if(!isHovered && OnHoverDragSprite)
-            {
-                Cursor.Inst.RemoveSpriteOverride(cursorSpriteOverride);
-            }
-        }
-    }
-
-    //ICursorEventListener
-    public virtual void OnCursorEnter()
-    {
-        isHovered = true;
-        if(OnHoverDragSprite)
-        {
-            Cursor.Inst.AddSpriteOverride(cursorSpriteOverride);
-        }
-    }
-
-    //ICursorEventListener
-    public virtual void OnCursorExit()
-    {
-        isHovered = false;
-        if(!isDragging && OnHoverDragSprite)
-        {
-            Cursor.Inst.RemoveSpriteOverride(cursorSpriteOverride);
+            case Cursor.CursorEvent.EnterElement:
+                isHovered = true;
+                Cursor.Inst.AddSpriteOverride(cursorSpriteOverride);
+                break;
+            case Cursor.CursorEvent.ExitElement:
+                isHovered = false;
+                if (!isDragging)
+                {
+                    Cursor.Inst.RemoveSpriteOverride(cursorSpriteOverride);
+                }
+                break;
+            case Cursor.CursorEvent.LeftClickDown:
+                if(isHovered && !Cursor.Inst.CurrentDragTarget) //if element hovered and not currently dragging something
+                {
+                    StartDrag();
+                }
+                break;
+            case Cursor.CursorEvent.LeftClickUp:
+                EndDrag();
+                break;
+            default:
+                break;
         }
     }
 

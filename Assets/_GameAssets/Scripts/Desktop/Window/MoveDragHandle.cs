@@ -21,7 +21,7 @@ public class MoveDragHandle : DraggableUIElement
     {
         if(isDragging && canvasRect)
         {
-            canvasRect.position += (Vector3)Cursor.Inst.PositionDelta_WS;
+            canvasRect.position += (Vector3)Cursor.Inst.ClampedPositionDelta;
         }
     }
 }
