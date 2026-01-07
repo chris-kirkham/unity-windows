@@ -5,5 +5,5 @@ public class CraftingInventory : MonoBehaviour
 {
     [SerializeField] private Transform itemListRoot;
     
-    private List<CraftingItemThumbnail> items;
+    private List<CraftingItem> items;
 }

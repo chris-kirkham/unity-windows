@@ -1,14 +1,22 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Rendering.Universal;
 
 public class CameraMovement : MonoBehaviour, ICursorEventListener
 {
     [SerializeField] private Camera cam;
+    [SerializeField] private float minZoom = 0.1f;
+    [SerializeField] private float maxZoom = 10f;
+    [SerializeField] private float defaultZoom = 1f;
+    [SerializeField] private float zoomSpeed = 10f;
     [SerializeField] private Vector2 viewCentre;
     [SerializeField] private Vector2 viewSize;
     [SerializeField] private float moveSpeed = 0.2f;
 
     private bool isDragging;
     private Vector2 mouseDelta;
+    private float initialCamSize;
+    private float zoomLevel;
 
     public Vector2 ViewCentre => viewCentre;
     private Vector2 ViewMin => viewCentre - (viewSize / 2f);
@@ -16,6 +24,9 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
 
     private void Start()
     {
+        initialCamSize = cam.orthographicSize;
+        zoomLevel = cam.orthographicSize;
+
         if(Cursor.InstExists())
         {
             Cursor.Inst.AddCursorEventListener(this);
@@ -83,6 +94,12 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
         Cursor.Inst.FreezeCursorPos(dragging);
     }
 
+    private void SetZoom(float zoom)
+    {
+        zoomLevel = zoom;
+        cam.orthographicSize = zoom;
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.matrix = Matrix4x4.identity;
@@ -98,4 +115,13 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
             SetDragging(true);
         }
     }
+
+    #region Input
+    private void OnMouseScrollWheel(InputValue value)
+    {
+        var scrollDelta = value.Get<float>() * -1f; // * -1 so scroll up zooms in - TODO: make an option?
+        var newZoom = Mathf.Clamp(zoomLevel + (scrollDelta * zoomSpeed), minZoom * initialCamSize, maxZoom * initialCamSize);
+        SetZoom(newZoom);
+    }
+    #endregion
 }

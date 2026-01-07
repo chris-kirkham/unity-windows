@@ -5,7 +5,7 @@ using UnityEngine;
 public class Crafter : MonoBehaviour
 {
     [SerializeField] private CraftingItemDatabase itemDatabase;
-    [SerializeField] private CraftingItemThumbnail thumbnailPrefab;
+    [SerializeField] private CraftingItem thumbnailPrefab;
     [SerializeField] private CraftingItemWindow windowPrefab;
     [SerializeField] private CraftingItemData DEBUG_defaultItemData;
     [SerializeField] private List<CrafterPlacementZone> placementZones;
@@ -34,37 +34,46 @@ public class Crafter : MonoBehaviour
         currentIngredients.Add(itemData);
     }
 
-    public bool TryCraft(List<CraftingItemData> ingredients)
+    public bool TryCraft(List<CraftingItem> ingredients)
     {
-        if(itemDatabase.TryGetCraftResult(ingredients, out var result))
+        var ingredientsData = new List<CraftingItemData>(ingredients.Count); //TODO: refactor
+        foreach(var ingredient in ingredients)
         {
+            ingredientsData.Add(ingredient.Data);
+        }
+
+        var successfulCraft = itemDatabase.TryGetCraftResult(ingredientsData, out var result);
+        if(successfulCraft)
+        {
+            //Instantiate new items
             InstantiateCraftingResult(result);
             foreach (var product in result.ExtraProducts)
             {
                 InstantiateCraftingResult(product);
             }
 
-            //TODO: on successful craft, remove ingredients (and do -something- with them) 
-
+            /* TODO: figure out if using placement zones 
             foreach (var placementZone in placementZones)
             {
                 placementZone.RemoveItem();
             }
-
-            return true;    
+            */
         }
 
-        return false;
+        foreach (var ingredient in ingredients)
+        {
+            ingredient.OnUsedInCraft(successfulCraft);
+        }
+
+        return successfulCraft;
     }
 
     private void InstantiateCraftingResult(CraftingItemData itemData)
     {
         var mousePos = Cursor.Inst.ClampedPosition_WS;
-        var item = Instantiate<CraftingItemThumbnail>(thumbnailPrefab, mousePos, Quaternion.identity);
+        var item = Instantiate<CraftingItem>(thumbnailPrefab, mousePos, Quaternion.identity);
         item.Data = itemData;
-
-        var targetPos = mousePos + (Vector2)Random.onUnitSphere * Random.Range(100f, 400f);
-        StartCoroutine(AnimateCraftResultCreation(item.Rect, targetPos));
+        item.OnCrafted();
 
         /*
         var window = Instantiate<CraftingItemWindow>(windowPrefab);
@@ -72,20 +81,7 @@ public class Crafter : MonoBehaviour
         */
     }
 
-    //TODO: prototype
-    private IEnumerator AnimateCraftResultCreation(RectTransform item, Vector2 targetPos)
-    {
-        var startPos = item.position;
-
-        var time = 0.2f;
-        var t = 0f;
-        while(t < 1f)
-        {
-            item.position = Vector3.Lerp(startPos, targetPos, t);
-            t += Time.deltaTime / time;
-            yield return null;
-        }
-    }
+    
 
     //DEBUG
     [ContextMenu("Instantiate default craft result")]

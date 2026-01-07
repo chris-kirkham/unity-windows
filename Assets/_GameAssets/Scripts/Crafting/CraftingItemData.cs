@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 public class CraftingItemData : ScriptableObject
 {
     [SerializeField] private string itemName;
-    [SerializeField] private CraftingItemThumbnail thumbnail;
+    [SerializeField] private CraftingItem thumbnail;
     [SerializeField] private Texture2D thumbnailTex;
     [SerializeField] private CraftingItemWindowContent contentPrefab;
     [SerializeField] private List<CraftingItemData> prerequisites;
@@ -15,7 +15,7 @@ public class CraftingItemData : ScriptableObject
     private HashSet<CraftingItemData> prerequisitesHash;
 
     public string ItemName => itemName;
-    public CraftingItemThumbnail Thumbnail => thumbnail;
+    public CraftingItem Thumbnail => thumbnail;
     public Texture2D ThumbnailTex => thumbnailTex;
     public CraftingItemWindowContent WindowContent => contentPrefab;
     public List<CraftingItemData> ExtraProducts => products;

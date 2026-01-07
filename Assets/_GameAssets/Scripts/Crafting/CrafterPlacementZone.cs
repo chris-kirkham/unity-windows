@@ -10,7 +10,7 @@ public class CrafterPlacementZone : MonoBehaviour, ICursorEventListener
     private bool isHovered;
     private bool itemPlaced;
 
-    private CraftingItemThumbnail currentItem;
+    private CraftingItem currentItem;
 
     private void Start()
     {
@@ -28,7 +28,7 @@ public class CrafterPlacementZone : MonoBehaviour, ICursorEventListener
         }
     }
 
-    private void PlaceItem(CraftingItemThumbnail item)
+    private void PlaceItem(CraftingItem item)
     {
         itemPlaced = true;
         ItemPlaced?.Invoke(item.Data);
@@ -56,7 +56,7 @@ public class CrafterPlacementZone : MonoBehaviour, ICursorEventListener
             isHovered = true;
             
             if (Cursor.Inst.CurrentDragTarget 
-                && Cursor.Inst.CurrentDragTarget.TryGetComponent<CraftingItemThumbnail>(out var item))
+                && Cursor.Inst.CurrentDragTarget.TryGetComponent<CraftingItem>(out var item))
             {
                 currentItem = item;
                 StartPlacementPreview();

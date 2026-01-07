@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 091182f5239b97841b6317cd043b5b91
+guid: cc786b5849ef0664281e6975c5daf793
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4562528540055206673
-    second: Reload MON_2501_0
+      213: 8996319400464371549
+    second: Hippo_at_dawn_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Reload MON_2501_0
+      name: Hippo_at_dawn_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 1392
-        height: 2048
+        width: 1600
+        height: 1200
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fe48d645774aea0c0800000000000000
-      internalID: -4562528540055206673
+      spriteID: d5f42a684d859dc70800000000000000
+      internalID: 8996319400464371549
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Reload MON_2501_0: -4562528540055206673
+      Hippo_at_dawn_0: 8996319400464371549
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
