@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: CraftData_Sunshine
   m_EditorClassIdentifier: 
   itemName: Sunshine
-  thumbnail: {fileID: 0}
   thumbnailTex: {fileID: 2800000, guid: 8f4c504c779d380428f872eacdb07835, type: 3}
   contentPrefab: {fileID: 4574353643460962208, guid: 75b52ba712c333143822b43d70ddd04d, type: 3}
   prerequisites: []
-  products: []
+  products:
+  - {fileID: 11400000, guid: c03eaadaeb521804ba15be4202e99e2a, type: 2}

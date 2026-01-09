@@ -1,9 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography;
+using TMPro;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 [System.Serializable]
@@ -16,6 +14,7 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
     [SerializeField] private RawImage thumbnailImage;
     [SerializeField] private Vector2Int itemSize = new Vector2Int(100, 100);
     [SerializeField] private RectTransform imageArea;
+    [SerializeField] private TextMeshProUGUI debugImageText; //debug text for when image is missing
 
     [Header("VFX")]
     [SerializeField] private GameObject onCraftedVFX;
@@ -86,29 +85,47 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
         }
     
         gameObject.name = "Item_" + itemData.ItemName;
-        thumbnailImage.texture = itemData.ThumbnailTex;
-        
+
+        if(itemData.ThumbnailTex)
+        {
+            thumbnailImage.gameObject.SetActive(true);
+            thumbnailImage.texture = itemData.ThumbnailTex;
+            if(debugImageText)
+            {
+                debugImageText.gameObject.SetActive(false);
+            }
+        }
+        else if(debugImageText) //if no image set, use debug text
+        {
+            debugImageText.text = itemData.ItemName;
+            debugImageText.gameObject.SetActive(true);
+            thumbnailImage.gameObject.SetActive(false);
+        }
+
         canvasRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, itemSize.x);
         canvasRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, itemSize.y);
 
-        //scale thumbnail image so its longest side matches canvas size, maintaining aspect ratio
-        var imageAreaWidth = imageArea.rect.width;
-        var imageAreaHeight = imageArea.rect.height;
-        var imageWidth = thumbnailImage.texture.width;
-        var imageHeight = thumbnailImage.texture.height;
-        var imageRect = thumbnailImage.rectTransform;
-        //if (imageWidth > imageHeight) //fit entire image in
-        if(imageHeight > imageWidth) //scale image up so smallest side fills image area (needs mask)
+        if(thumbnailImage.texture)
         {
-            var scale = imageAreaWidth / (float)imageWidth;
-            imageRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, imageAreaWidth);
-            imageRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, imageHeight * scale);
-        }
-        else 
-        {
-            var scale = imageAreaHeight / (float)imageHeight;
-            imageRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, imageWidth * scale);
-            imageRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, imageAreaHeight);
+            //scale thumbnail image so its longest side matches canvas size, maintaining aspect ratio
+            var imageAreaWidth = imageArea.rect.width;
+            var imageAreaHeight = imageArea.rect.height;
+            var imageWidth = thumbnailImage.texture.width;
+            var imageHeight = thumbnailImage.texture.height;
+            var imageRect = thumbnailImage.rectTransform;
+            //if (imageWidth > imageHeight) //fit entire image in
+            if (imageHeight > imageWidth) //scale image up so smallest side fills image area (needs mask)
+            {
+                var scale = imageAreaWidth / (float)imageWidth;
+                imageRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, imageAreaWidth);
+                imageRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, imageHeight * scale);
+            }
+            else
+            {
+                var scale = imageAreaHeight / (float)imageHeight;
+                imageRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, imageWidth * scale);
+                imageRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, imageAreaHeight);
+            }
         }
     }
 
@@ -134,6 +151,7 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
         }
     }
 
+
     public void OnCursorEvent(Cursor.CursorEvent e)
     {
         if(!acceptInput)
@@ -141,8 +159,7 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
             return;
         }
         
-        //PROTOTYPE: combine items by dragging thumbnails
-
+        //combine items by dragging them together. TODO: THIS IS ALL PROTOTYPE AND WILL NEED REFACTORING!
         if(e == Cursor.CursorEvent.EnterElement)
         {
             isHovered = true;
@@ -160,11 +177,24 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
                 var draggedItem = dragTarget.GetComponentInParent<CraftingItem>(); //TODO: parent/child/only on GameObject itself?
                 if (draggedItem)
                 {
-                    //TODO: make a singleton CraftingManager if doing this kind of crafting
+                    //TODO: refactor
+                    //EXTRA TODO: make a singleton CraftingManager if doing this kind of crafting
                     var crafter = FindFirstObjectByType<Crafter>();
                     if (crafter)
                     {
-                        crafter.TryCraft(new List<CraftingItem>() { this, draggedItem }); //TODO: refactor
+                        //get hovered items
+                        var hoveredListeners = Cursor.Inst.HoveredListeners;
+                        var hoveredCraftItems = new List<CraftingItem>(hoveredListeners.Count);
+                        foreach(var listener in hoveredListeners)
+                        {
+                            if(listener is CraftingItem)
+                            {
+                                hoveredCraftItems.Add((CraftingItem)listener);
+                            }
+                        }
+
+                        crafter.TryCraft(hoveredCraftItems); 
+                        //crafter.TryCraft(new List<CraftingItem>() { this, draggedItem }); 
                     }
                     else
                     {
@@ -209,7 +239,7 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
         SetAcceptInput(false);
         yield return OnCraftedAnim(Rect, Cursor.Inst.ClampedPosition_WS);
         yield return new WaitForSeconds(1f);
-        Destroy(gameObject);
+        //Destroy(gameObject);
     }
 
     //TODO: prototype/placeholder
@@ -219,7 +249,7 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
         var targetPos = mousePos + (Vector2)Random.onUnitSphere * Random.Range(200f, 400f);
 
         var startRot = item.rotation;
-        var targetRot = Quaternion.Euler(0f, 0f, Random.Range(-45f, 45f));
+        var targetRot = Quaternion.Euler(0f, 0f, Random.Range(-15f, 15f));
 
         var time = Random.Range(0.5f, 0.75f);
         var t = 0f;

@@ -63,6 +63,8 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
     private List<ICursorEventListener> hoveredListeners = new List<ICursorEventListener>(); //event listeners the cursor is currently on top of
     private List<SpriteOverride> spriteOverrides = new List<SpriteOverride>();
 
+    public List<ICursorEventListener> HoveredListeners => hoveredListeners;
+
     public Vector2 RawPosition => rawMousePosition;
     public Vector2 RawPositionDelta => rawMousePosition - prevRawMousePosition;
     public Vector2 ClampedPosition_WS => cam.ScreenToWorldPoint(clampedRawMousePos);
