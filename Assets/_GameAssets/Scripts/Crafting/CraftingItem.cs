@@ -151,7 +151,6 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
         }
     }
 
-
     public void OnCursorEvent(Cursor.CursorEvent e)
     {
         if(!acceptInput)
@@ -239,6 +238,7 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
         SetAcceptInput(false);
         yield return OnCraftedAnim(Rect, Cursor.Inst.ClampedPosition_WS);
         yield return new WaitForSeconds(1f);
+        SetAcceptInput(true); //ONLY IF NOT DESTROYING ON CRAFT
         //Destroy(gameObject);
     }
 
