@@ -35,6 +35,7 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
         public int priority;
     }
 
+    [SerializeField] private LayerMask cursorRaycastLayerMask;
     [SerializeField] private PixelPerfectCamera pixelPerfectCamera;
     [SerializeField] private Image cursorImage;
     [SerializeField, FormerlySerializedAs("defaultCursorSprite")] private Sprite defaultSprite;
@@ -43,18 +44,19 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
 
     //mouse raycasting
     private EventSystem eventSystem;
-    [SerializeField] private GraphicRaycaster raycaster;
     private PointerEventData pointerEventData;
     private List<RaycastResult> raycastResults = new List<RaycastResult>();
-    private const int MaxRaycastListenerHits = 50;
-    private ICursorEventListener[] listenerRaycastHits = new ICursorEventListener[MaxRaycastListenerHits];
+    private const int MaxRaycastHits = 50;
+    private const float MaxRaycastDist = 100f;
+    private RaycastHit[] raycastHits = new RaycastHit[MaxRaycastHits];
+    private ICursorEventListener[] listenerRaycastHits = new ICursorEventListener[MaxRaycastHits];
 
     //input
     private int currentEventFlags;
     private Vector2 rawMousePosition;
     private Vector2 prevRawMousePosition;
     private Vector2 clampedRawMousePos;
-    private Vector2 prevClampedMousePos_WS;
+    private Vector3 prevClampedMousePos_WS;
     private bool isPositionFrozen;
     private bool[] mouseButtonsPressed = new bool[3]; //0 = left, 1 = right, 2 = middle
     //private bool[] mouseButtonsPressedLastTick = new bool[3]; //0 = left, 1 = right, 2 = middle
@@ -67,28 +69,33 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
 
     public Vector2 RawPosition => rawMousePosition;
     public Vector2 RawPositionDelta => rawMousePosition - prevRawMousePosition;
-    public Vector2 ClampedPosition_WS => cam.ScreenToWorldPoint(clampedRawMousePos);
-    public Vector2 ClampedPositionDelta => ClampedPosition_WS - prevClampedMousePos_WS;
+    public Vector2 ClampedPosition_SS => clampedRawMousePos;
+    public Vector3 ClampedPosition_WS 
+        => cam.ScreenToWorldPoint(new Vector3(clampedRawMousePos.x, clampedRawMousePos.y, cursorImage.canvas.planeDistance));
+    public Vector3 ClampedPositionDelta_WS => ClampedPosition_WS - prevClampedMousePos_WS;
 
     public bool IsLeftClickPressed => mouseButtonsPressed[0];
     public bool IsRightClickPressed => mouseButtonsPressed[1];
     public bool IsMiddleClickPressed => mouseButtonsPressed[2];
 
+    //TODO: 
+    public Camera AssociatedCamera => cam;
+
     //TODO: refactor into some kind of drag manager if drags get complex OR if we can have multiple simultaneous elements being dragged
     //- don't just let anyone set the drag target?
-    public DraggableUIElement CurrentDragTarget { get; set; } 
+    public DraggableElement CurrentDragTarget { get; set; } 
     
     private void OnEnable()
     {
         cam = pixelPerfectCamera.GetComponent<Camera>();
         eventSystem = FindFirstObjectByType<EventSystem>();
 
-        //UnityEngine.Cursor.visible = false; //hide default cursor (TODO: look at using Cursor.SetCursor instead?)
+        UnityEngine.Cursor.visible = false; //hide default cursor (TODO: look at using Cursor.SetCursor instead?)
     }
 
     private void Update()
     {
-        DoRaycast();
+        DoCursorRaycasts();
 
         //DEBUG
         if(currentEventFlags > 0)
@@ -114,66 +121,53 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
         prevClampedMousePos_WS = ClampedPosition_WS;
     }
 
-    //TODO: make this more efficient!
-    private void DoRaycast()
+    //TODO: refactor and make more efficient!
+    //TODO: probably don't need both physics and UI (event system) raycasts?
+    private void DoCursorRaycasts()
     {
-        pointerEventData = new PointerEventData(eventSystem);
-        pointerEventData.position = clampedRawMousePos;
-
-        raycastResults.Clear();
-        //raycaster.Raycast(pointerEventData, raycastResults);
-        eventSystem.RaycastAll(pointerEventData, raycastResults);
-
         int listenerHitCount = 0;
-        foreach (var result in raycastResults)
+
+        //physics raycast
+        var raycastHitCount = Physics.RaycastNonAlloc(
+            cam.ScreenPointToRay(clampedRawMousePos), raycastHits, MaxRaycastDist, cursorRaycastLayerMask);
+
+        for(int i = 0; i < raycastHitCount; i++)
         {
-            //DEBUG
-            /*
-            if(result.gameObject.TryGetComponent<DraggableUIElement>(out var draggable))
+            if (listenerHitCount >= MaxRaycastHits - 1)
             {
-                Debug.Log($"Hit {draggable.name} at {pointerEventData.position}");
+                break;
             }
-            */
 
-            //if(result.gameObject.TryGetComponent<ICursorEventListener>(out var hitListener))
-            //get all cursor event listeners in hierarchy of the hit component - TODO: think about best way
-            //- require listener is actually on component? Parent of the hit component? Allow children too? 
-            var hitListeners = result.gameObject.GetComponentsInParent<ICursorEventListener>();
-            foreach(var hitListener in hitListeners)
+            listenerHitCount += FindHitListeners(raycastHits[i].collider.gameObject);
+
+            Debug.Log($"listeners hit by Physics raycasts: {listenerHitCount}");
+        }
+
+        //UI raycast
+        var uiRaycastResults = GetUIRaycastResults();
+        foreach(var result in uiRaycastResults)
+        {
+            if (listenerHitCount >= MaxRaycastHits - 1)
             {
-                if (hitListener != null)
-                {
-                    listenerRaycastHits[listenerHitCount] = hitListener;
-
-                    //add to hovered elements
-                    if (trackedListeners.Contains(hitListener) && !hoveredListeners.Contains(hitListener))
-                    {
-                        hoveredListeners.Add(hitListener);
-                        hitListener.OnCursorEvent(CursorEvent.EnterElement);
-                    }
-
-                    listenerHitCount++;
-                    if (listenerHitCount == MaxRaycastListenerHits - 1)
-                    {
-                        break;
-                    }
-                }
+                break;
             }
+
+            listenerHitCount += FindHitListeners(result.gameObject);
         }
 
         //check for elements the mouse is no longer hovering over
-        for(int i = hoveredListeners.Count - 1; i >= 0; i--)
+        for (int i = hoveredListeners.Count - 1; i >= 0; i--)
         {
             var listener = hoveredListeners[i];
 
-            if(listener == null)
+            if (listener == null)
             {
                 hoveredListeners.RemoveAt(i);
                 continue;
             }
 
             var hitByRaycast = false;
-            for(int k = 0; k < listenerHitCount; k++)
+            for (int k = 0; k < listenerHitCount; k++)
             {
                 if (listenerRaycastHits[k] == listener)
                 {
@@ -182,9 +176,9 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
                 }
             }
 
-            if(!hitByRaycast)
+            if (!hitByRaycast)
             {
-                if(trackedListeners.Contains(listener))
+                if (trackedListeners.Contains(listener))
                 {
                     listener.OnCursorEvent(CursorEvent.ExitElement);
                 }
@@ -192,6 +186,49 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
                 hoveredListeners.RemoveAt(i);
             }
         }
+
+        int FindHitListeners(GameObject hitObject)
+        {
+            int numListeners = 0;
+
+            //get all cursor event listeners in hierarchy of the hit component - TODO: think about best way
+            //- require listener is actually on component? Parent of the hit component? Allow children too? 
+            var hitListeners = hitObject.GetComponentsInParent<ICursorEventListener>();
+            foreach (var hitListener in hitListeners)
+            {
+                if (hitListener == null)
+                {
+                    continue;
+                }
+
+                listenerRaycastHits[numListeners] = hitListener;
+
+                //add to hovered elements
+                if (trackedListeners.Contains(hitListener) && !hoveredListeners.Contains(hitListener))
+                {
+                    hoveredListeners.Add(hitListener);
+                    hitListener.OnCursorEvent(CursorEvent.EnterElement);
+                }
+
+                numListeners++;
+            }
+
+            return numListeners;
+        }
+    }
+
+    
+
+    //TODO: make this more efficient!
+    private List<RaycastResult> GetUIRaycastResults()
+    {
+        pointerEventData = new PointerEventData(eventSystem);
+        pointerEventData.position = clampedRawMousePos;
+
+        raycastResults.Clear();
+        eventSystem.RaycastAll(pointerEventData, raycastResults);
+
+        return raycastResults;
     }
 
     private void SetPosition(Vector2 rawMousePosition)
@@ -199,15 +236,12 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
         //N.B. raw mouse position (i.e. Windows cursor position) is in range (0, 0) to (screen width, screen height),
         //from bottom-left to top-right
 
-        //var screenOffset = cam.transform.position - (new Vector3(Screen.width, Screen.height, 0f) / 2);
-
-        clampedRawMousePos = new Vector3(
+        clampedRawMousePos = new Vector2(
             Mathf.Clamp(rawMousePosition.x, 0f, Screen.width),
             Mathf.Clamp(rawMousePosition.y, 0f, Screen.height));
 
-        //var worldPoint = cam.ScreenToWorldPoint(new Vector3(clampedRawMousePos.x, clampedRawMousePos.y, 0f) + screenOffset);
-        var worldPoint = cam.ScreenToWorldPoint(new Vector3(clampedRawMousePos.x, clampedRawMousePos.y, 0f));
-        transform.position = new Vector3(worldPoint.x, worldPoint.y, 0f);
+        //N.B. image should be anchored to bottom-left, TODO: add validation for this?  
+        cursorImage.rectTransform.anchoredPosition = new Vector2(clampedRawMousePos.x, clampedRawMousePos.y);
     }
 
     //TODO: refactor!!!! Use IOverrideCursorSprite interface and let cursor decide when/what to override?

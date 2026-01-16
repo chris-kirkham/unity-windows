@@ -53,7 +53,7 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
     {
         if(isDragging)
         {
-            cam.transform.position = cam.transform.position + (Vector3)(mouseDelta * moveSpeed);
+            cam.transform.position += cam.transform.TransformDirection((Vector3)(mouseDelta * moveSpeed));
         }
 
         ClampCameraPos();
@@ -76,7 +76,8 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
             var minY = Mathf.Max(camMin.y, ViewMin.y);
 
             var centreOffset = camHalfSize;
-            cam.transform.position = new Vector3(minX + centreOffset.x, minY + centreOffset.y, cam.transform.position.z);
+            cam.transform.position = cam.transform.TransformPoint(
+                new Vector3(minX + centreOffset.x, minY + centreOffset.y, cam.transform.localPosition.z));
         }
         else if(camMax.x > ViewMax.x || camMax.y > ViewMax.y)
         {
@@ -84,7 +85,8 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
             var maxY = Mathf.Min(camMax.y, ViewMax.y);
 
             var centreOffset = camHalfSize;
-            cam.transform.position = new Vector3(maxX - centreOffset.x, maxY - centreOffset.y, cam.transform.position.z);
+            cam.transform.position = cam.transform.TransformPoint(
+                new Vector3(maxX - centreOffset.x, maxY - centreOffset.y, cam.transform.localPosition.z));
         }
     }
 
@@ -94,10 +96,20 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
         Cursor.Inst.FreezeCursorPos(dragging);
     }
 
-    private void SetZoom(float zoom)
+    private void SetZoom(float scrollDelta)
     {
-        zoomLevel = zoom;
-        cam.orthographicSize = zoom;
+        //var zoomLevel = zoom;
+        if (cam.orthographic)
+        {
+            throw new System.NotImplementedException();
+            //var zoom = Mathf.Clamp(zoomLevel + (scrollDelta * zoomSpeed), minZoom * initialCamSize, maxZoom * initialCamSize);
+            //cam.orthographicSize = zoom;
+        }
+        else //perspective camera - move camera forward and backward
+        {
+            //TODO: clamp cam forward position range
+            cam.transform.position += cam.transform.forward * scrollDelta * zoomSpeed;
+        }
     }
 
     private void OnDrawGizmos()
@@ -119,9 +131,9 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
     #region Input
     private void OnMouseScrollWheel(InputValue value)
     {
-        var scrollDelta = value.Get<float>() * -1f; // * -1 so scroll up zooms in - TODO: make an option?
-        var newZoom = Mathf.Clamp(zoomLevel + (scrollDelta * zoomSpeed), minZoom * initialCamSize, maxZoom * initialCamSize);
-        SetZoom(newZoom);
+        var scrollDelta = value.Get<float>();
+        //var scrollDelta = value.Get<float>() * -1f; // * -1 so scroll up zooms in in orthographpic mode - TODO: make an option?
+        SetZoom(scrollDelta);
     }
     #endregion
 }

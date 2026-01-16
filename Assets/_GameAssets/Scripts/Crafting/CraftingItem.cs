@@ -102,10 +102,13 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
             thumbnailImage.gameObject.SetActive(false);
         }
 
-        canvasRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, itemSize.x);
-        canvasRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, itemSize.y);
+        if(canvasRect)
+        {
+            canvasRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, itemSize.x);
+            canvasRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, itemSize.y);
+        }
 
-        if(thumbnailImage.texture)
+        if (thumbnailImage.texture)
         {
             //scale thumbnail image so its longest side matches canvas size, maintaining aspect ratio
             var imageAreaWidth = imageArea.rect.width;
@@ -168,7 +171,8 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
             isHovered = false;
         }
 
-        if(isHovered && e == Cursor.CursorEvent.LeftClickUp)
+        //TODO: refactor
+        if (isHovered && e == Cursor.CursorEvent.LeftClickUp)
         {
             var dragTarget = Cursor.Inst.CurrentDragTarget;
             if (dragTarget)
@@ -176,8 +180,7 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
                 var draggedItem = dragTarget.GetComponentInParent<CraftingItem>(); //TODO: parent/child/only on GameObject itself?
                 if (draggedItem)
                 {
-                    //TODO: refactor
-                    //EXTRA TODO: make a singleton CraftingManager if doing this kind of crafting
+                    //TODO: make a singleton CraftingManager if doing this kind of crafting
                     var crafter = FindFirstObjectByType<Crafter>();
                     if (crafter)
                     {
