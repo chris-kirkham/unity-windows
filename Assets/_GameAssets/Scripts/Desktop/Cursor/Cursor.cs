@@ -79,7 +79,7 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
     public bool IsMiddleClickPressed => mouseButtonsPressed[2];
 
     //TODO: 
-    public Camera AssociatedCamera => cam;
+    public Camera Cam => cam;
 
     //TODO: refactor into some kind of drag manager if drags get complex OR if we can have multiple simultaneous elements being dragged
     //- don't just let anyone set the drag target?
@@ -140,7 +140,7 @@ public class Cursor : SingletonMonoBehaviour<Cursor>
 
             listenerHitCount += FindHitListeners(raycastHits[i].collider.gameObject);
 
-            Debug.Log($"listeners hit by Physics raycasts: {listenerHitCount}");
+            //Debug.Log($"listeners hit by Physics raycasts: {listenerHitCount}");
         }
 
         //UI raycast

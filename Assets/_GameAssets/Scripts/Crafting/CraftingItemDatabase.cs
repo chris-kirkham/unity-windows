@@ -9,32 +9,49 @@ public class CraftingItemDatabase : ScriptableObject
     [SerializeField] private List<CraftingItemData> itemList; 
 
     //TODO: PROTOTYPE, optimise!!!!
-    public bool TryGetCraftResult(List<CraftingItemData> ingredients, out CraftingItemData result)
+    public Crafter.CraftingResultState TryGetCraftResult(HashSet<CraftingItem> ingredients, out CraftingItemData result)
     {
-        var validResults = new List<CraftingItemData>(itemList);
+        result = null;
 
-        for(int i = validResults.Count - 1; i >= 0; i--)
+        if (ingredients.Count < 2)
         {
-            if (!DoIngredientsMatchResult(validResults[i], ingredients))
+            Debug.LogError($"Crafting attempted with <2 ingredients! This shouldn't happen");
+            return Crafter.CraftingResultState.NoIngredientMatch;
+        }
+
+        //TODO: OPTIMISE!!!!!!!!
+        foreach (var item in itemList)
+        {
+            if (item.Prerequisites.Count < 2)
             {
-                validResults.RemoveAt(i);
+                continue;
+            }
+
+            int numMatching = 0;
+            foreach (var prereqData in item.Prerequisites)
+            {
+                foreach (var ingredient in ingredients)
+                {
+                    if (ingredient.Data == prereqData)
+                    {
+                        numMatching++;
+                    }
+                }
+            }
+
+            if(numMatching == item.Prerequisites.Count)
+            {
+                result = item;
+                return Crafter.CraftingResultState.SuccessfulCraft;
+            }
+
+            if (numMatching > 1)
+            {
+                return Crafter.CraftingResultState.PartialIngredientMatch;
             }
         }
 
-        if(validResults.Count == 0)
-        {
-            result = null;
-            return false;
-        }
-
-        if(validResults.Count > 1)
-        {
-            Debug.LogError($"More than one valid result for ingredients {string.Join(", ", ingredients)}! " +
-                $"Returning first result.");
-        }
-
-        result = validResults[0];
-        return true;
+        return Crafter.CraftingResultState.NoIngredientMatch;
     }
 
     private bool DoIngredientsMatchResult(CraftingItemData result, List<CraftingItemData> ingredients)
@@ -64,5 +81,43 @@ public class CraftingItemDatabase : ScriptableObject
         }
 
         return true;
+    }
+
+    //TODO: Optimise!!!! Integrate with other function? This whole crafting-dictionary thing should use something other than lists
+    public bool TryFindPartialIngredientMatch(HashSet<CraftingItem> ingredients)
+    {
+        if(ingredients.Count < 2)
+        {
+            return false;
+        }
+
+        //TODO: OPTIMISE!!!!!!!!
+        foreach(var item in itemList)
+        {
+            if(item.Prerequisites.Count < 2)
+            {
+                continue;
+            }
+
+            int numMatching = 0;
+            foreach(var prereqData in item.Prerequisites)
+            {
+                foreach(var ingredient in ingredients)
+                {
+                    if(ingredient.Data == prereqData)
+                    {
+                        numMatching++;
+                    }
+                }
+            }
+
+            //N.B. if we're checking for full matches anyhow this should be integrated into the other matching function
+            if(numMatching > 1 && numMatching < item.Prerequisites.Count)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

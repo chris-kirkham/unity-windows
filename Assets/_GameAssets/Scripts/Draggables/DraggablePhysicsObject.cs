@@ -62,26 +62,25 @@ public class DraggablePhysicsObject : DraggableElement
     {
         if(rb && isDragging)
         {
-            var cam = Cursor.Inst.AssociatedCamera;
+            var cam = Cursor.Inst.Cam;
             var cursorPos = Cursor.Inst.ClampedPosition_SS;
 
             //get distance above ground/other objects
             var distFromCamera = targetDistanceAboveGround;
             //var numHits = Physics.RaycastNonAlloc(cam.ScreenPointToRay(cursorPos), raycastHits, MaxRaycastDist, groundRaycastMask);
             if(Physics.Raycast(
-                cam.ScreenPointToRay(cursorPos),
-                out var hit,
-                MaxRaycastDist,
-                groundRaycastMask,
-                queryTriggerInteraction: QueryTriggerInteraction.Ignore))
+                cam.ScreenPointToRay(cursorPos), out var hit, MaxRaycastDist, groundRaycastMask, QueryTriggerInteraction.Ignore))
             {
-                distFromCamera = Mathf.Clamp(hit.distance - targetDistanceAboveGround, MinDistFromCamera, hit.distance);  
+                //distFromCamera = Mathf.Clamp(hit.distance - targetDistanceAboveGround, MinDistFromCamera, hit.distance);  
+                
+                var hitPointWithHeightOffset = hit.point + (Vector3.up * targetDistanceAboveGround);
+                distFromCamera = Mathf.Max(MinDistFromCamera, Vector3.Distance(cam.transform.position, hitPointWithHeightOffset));
+                //var targetPos_WS = cam.ScreenToWorldPoint(new Vector3(cursorPos.x, cursorPos.y, distFromCamera));
+                var targetPos_WS = hit.point + ((cam.transform.position - hit.point).normalized * targetDistanceAboveGround);
+
+                //rb.AddForce((targetPos_WS - rb.position) * moveSpeed, ForceMode.Acceleration); //TODO: use a PID controller or smth
+                rb.MovePosition(targetPos_WS);
             }
-            
-            var targetPos_WS = cam.ScreenToWorldPoint(new Vector3(cursorPos.x, cursorPos.y, distFromCamera));
-            //var targetPos_WS = (Vector3)Cursor.Inst.ClampedPosition_WS + (cam.transform.forward * distFromCursor);
-            //rb.AddForce((targetPos_WS - rb.position) * moveSpeed, ForceMode.Acceleration); //TODO: use a PID controller or smth
-            rb.MovePosition(targetPos_WS);
         }
     }
 }

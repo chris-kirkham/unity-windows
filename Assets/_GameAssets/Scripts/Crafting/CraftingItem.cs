@@ -8,7 +8,10 @@ using UnityEngine.UI;
 public class CraftingItem : MonoBehaviour, ICursorEventListener
 {
     [SerializeField] private CraftingItemData itemData;
-    
+    [SerializeField] private Rigidbody rb;
+    [SerializeField] private Collider coll;
+    [SerializeField] private float onCraftedCollisionEnableDelay = 0.5f;
+
     [Header("UI")]
     [SerializeField] private RectTransform canvasRect;
     [SerializeField] private RawImage thumbnailImage;
@@ -18,9 +21,14 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
 
     [Header("VFX")]
     [SerializeField] private GameObject onCraftedVFX;
+    [SerializeField] private GameObject craftingPotentialVFX;
 
     private bool acceptInput = true;
     private bool isHovered;
+
+    private HashSet<CraftingItem> touchingItems;
+
+    public HashSet<CraftingItem> TouchingItems => touchingItems;
 
     public CraftingItemData Data 
     {
@@ -32,8 +40,6 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
         } 
     } 
 
-    public RectTransform Rect => canvasRect;
-
     private void OnValidate()
     {
         UpdateData();
@@ -43,6 +49,15 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
     {
         SetAcceptInput(true);
         UpdateData();
+
+        touchingItems = new HashSet<CraftingItem>();
+        touchingItems.Add(this); //an item is always touching itself
+
+        if(craftingPotentialVFX)
+        {
+            //TODO: check for crafting potential on enable?
+            craftingPotentialVFX.SetActive(false);
+        }
     }
 
     private void Start()
@@ -67,6 +82,36 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
         {
             Debug.LogError($"Instance of {nameof(Cursor)} not found!");
         }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        var otherItem = other.GetComponentInParent<CraftingItem>();
+        if(otherItem && !touchingItems.Contains(otherItem))
+        {
+            touchingItems.Add(otherItem);
+            OnNewItemContact(otherItem);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        var otherItem = other.gameObject.GetComponentInParent<CraftingItem>();
+        if (otherItem && touchingItems.Contains(otherItem))
+        {
+            touchingItems.Remove(otherItem);
+            OnLostItemContact(otherItem);
+        }
+    }
+
+    private void OnNewItemContact(CraftingItem item)
+    {
+        Crafter.Inst.AddItemContact(this, item);
+    }
+
+    private void OnLostItemContact(CraftingItem item)
+    {
+        Crafter.Inst.RemoveItemContact(this, item);
     }
 
     private void UpdateData()
@@ -171,6 +216,7 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
             isHovered = false;
         }
 
+        /*
         //TODO: refactor
         if (isHovered && e == Cursor.CursorEvent.LeftClickUp)
         {
@@ -205,6 +251,7 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
                 }
             }
         }
+        */
 
         /*
         if(Cursor.Inst.IsCursorOverElement(this) && e == Cursor.CursorEvent.LeftClickDown)
@@ -219,57 +266,81 @@ public class CraftingItem : MonoBehaviour, ICursorEventListener
     {
         //TODO: other VFX
         OnCraftedVFX();
-        StartCoroutine(OnCraftedAnim(Rect, Cursor.Inst.ClampedPosition_WS));
+        //StartCoroutine(OnCraftedAnim(transform, Cursor.Inst.ClampedPosition_WS));
+
+        SetCollisionEnabled(false);
+        StartCoroutine(SetCollisionEnabledWithDelay(true, onCraftedCollisionEnableDelay));
     }
 
-    public void OnUsedInCraft(bool successful)
+    private void OnCraftedVFX()
     {
-        //TODO: behaviour on successful/unsuccessful craft attempt
-        if(successful)
+        if (onCraftedVFX)
         {
-            StartCoroutine(OnSuccessfulCraftAnim());
+            onCraftedVFX.SetActive(true);
+        }
+    }
+
+    //TODO: prototype/placeholder
+    private void OnCraftedPush()
+    {
+        var pushForce = Random.insideUnitCircle * 10f;
+        rb.AddForce(new Vector3(pushForce.x, 0f, pushForce.y), ForceMode.VelocityChange);
+        var pushTorque = new Vector3(0f, 0f, Random.Range(-15f, 15f));
+        rb.AddTorque(pushTorque, ForceMode.VelocityChange);
+    }
+
+    public void OnCraftAttempt(Crafter.CraftingResultState resultState)
+    {
+        if(resultState == Crafter.CraftingResultState.SuccessfulCraft)
+        {
+            OnSuccessfulCraft();
+        }
+        else if(resultState == Crafter.CraftingResultState.PartialIngredientMatch)
+        {
+            SetPartialCraftVFX(true);
         }
         else
         {
-            //TODO?
+            SetPartialCraftVFX(false);
         }
+    }
+
+    public void SetPartialCraftVFX(bool on)
+    {
+        craftingPotentialVFX.SetActive(on);
+    }
+
+    private void OnSuccessfulCraft()
+    {
+        SetCollisionEnabled(false);
+        StartCoroutine(OnSuccessfulCraftAnim());
     }
 
     private IEnumerator OnSuccessfulCraftAnim()
     {
         //TODO: other VFX
         SetAcceptInput(false);
-        yield return OnCraftedAnim(Rect, Cursor.Inst.ClampedPosition_WS);
+        OnCraftedPush();
         yield return new WaitForSeconds(1f);
         SetAcceptInput(true); //ONLY IF NOT DESTROYING ON CRAFT
-        //Destroy(gameObject);
+        Destroy(gameObject);
     }
 
-    //TODO: prototype/placeholder
-    private IEnumerator OnCraftedAnim(RectTransform item, Vector2 mousePos)
+    private void SetCollisionEnabled(bool enabled)
     {
-        var startPos = item.position;
-        var targetPos = mousePos + (Vector2)Random.onUnitSphere * Random.Range(200f, 400f);
-
-        var startRot = item.rotation;
-        var targetRot = Quaternion.Euler(0f, 0f, Random.Range(-15f, 15f));
-
-        var time = Random.Range(0.5f, 0.75f);
-        var t = 0f;
-        while (t < 1f)
+        if(coll)
         {
-            item.position = Vector3.Lerp(startPos, targetPos, t);
-            item.rotation = Quaternion.Lerp(startRot, targetRot, t);
-            t += Time.deltaTime / time;
-            yield return null;
+            coll.enabled = enabled;
+        }
+        else
+        {
+            Debug.LogError($"No Collider set to enable/disable collision on!");
         }
     }
 
-    private void OnCraftedVFX()
+    private IEnumerator SetCollisionEnabledWithDelay(bool enabled, float delay)
     {
-        if(onCraftedVFX)
-        {
-            onCraftedVFX.SetActive(true);
-        }
+        yield return new WaitForSeconds(delay);
+        SetCollisionEnabled(enabled);
     }
 }
