@@ -31,11 +31,13 @@ public class ItemTierGraphNode : VisualElement
         root = new VisualElement();
         root.style.minWidth = 128;
         root.style.minHeight = 128;
-        root.style.backgroundColor = new StyleColor(Color.cornflowerBlue);
+        root.style.backgroundColor = new StyleColor(Random.ColorHSV(0f, 1f, 1f, 1f, 1f, 1f));
+        /*
         root.style.borderLeftWidth = 10;
         root.style.borderRightWidth = 10;
         root.style.borderTopWidth = 10;
         root.style.borderBottomWidth = 10;
+        */
         Add(root);
 
         itemName = new Label(item.ItemName);
@@ -47,8 +49,8 @@ public class ItemTierGraphNode : VisualElement
         itemSprite = new Image();
         itemSprite.image = item.ThumbnailTex ? item.ThumbnailTex : Resources.Load<Texture2D>("TX_Error_Sprite");
         const float imgSize = 100;
-        itemSprite.style.minWidth = imgSize;
-        itemSprite.style.minHeight = imgSize;
+        //itemSprite.style.minWidth = imgSize;
+        //itemSprite.style.minHeight = imgSize;
         itemSprite.style.maxWidth = imgSize;
         itemSprite.style.maxHeight = imgSize;
         root.Add(itemSprite);

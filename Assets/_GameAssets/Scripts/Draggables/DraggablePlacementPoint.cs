@@ -71,7 +71,7 @@ public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListe
         }
     }
 
-    public virtual void OnCursorEvent(Cursor.EventID e)
+    public virtual void OnCursorEvent(Cursor.EventID e) 
     {
         var dragTarget = Cursor.Inst.CurrentDragTarget;
         if (dragTarget)

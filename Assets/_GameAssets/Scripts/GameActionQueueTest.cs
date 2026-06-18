@@ -1,0 +1,65 @@
+using System.Threading;
+using System.Threading.Tasks;
+using UnityEngine;
+
+public class GameActionQueueTest : MonoBehaviour, ICursorEventListener
+{
+    private class SpawnVFXAtPos : GameAction
+    {
+        private GameObject vfxPrefab;
+        private Vector3 pos;
+
+        public SpawnVFXAtPos(GameObject vfxPrefab, Vector3 cursorPos)
+        {
+            this.vfxPrefab = vfxPrefab;
+            this.pos = cursorPos;
+        }
+
+        public override async Task Execute()
+        {
+            GameObject.Instantiate(vfxPrefab, pos, vfxPrefab.transform.rotation);
+            await Task.Delay(1000);
+        }
+    }
+
+    [SerializeField] private GameObject testVFXprefab;
+
+    private Cursor cursor;
+    private GameActionQueue<SpawnVFXAtPos> spawnVFXActionQueue = new GameActionQueue<SpawnVFXAtPos>();
+
+    private void OnEnable()
+    {
+        if(!cursor)
+        {
+            cursor = Cursor.Inst;
+        }
+
+        if (cursor)
+        {
+            cursor.AddCursorEventListener(this);
+        }
+        else
+        {
+            Debug.LogError($"No instance of {nameof(Cursor)} found!");
+        }
+
+        spawnVFXActionQueue.doDebugLog = true;
+    }
+
+    private void OnDisable()
+    {
+        if(cursor)
+        {
+            cursor.RemoveCursorEventListener(this);
+        }
+    }
+
+    public void OnCursorEvent(Cursor.EventID e)
+    {
+        if(e == Cursor.EventID.LeftClickDown)
+        {
+            spawnVFXActionQueue.EnqeueAction(new SpawnVFXAtPos(testVFXprefab, cursor.ClampedPosition_WS + (cursor.Cam.transform.forward * 0.5f)));
+        }
+    }
+}
+

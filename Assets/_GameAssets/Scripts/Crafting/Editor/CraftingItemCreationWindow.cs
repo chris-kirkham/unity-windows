@@ -38,24 +38,24 @@ public class CraftingItemCreationWindow : EditorWindow
         graphRoot = new ScrollView();
         rootVisualElement.Add(graphRoot);
 
-        rootVisualElement.Add(GetCreateItemUI());
+        //rootVisualElement.Add(GetCreateItemUI());
 
-        var newItemDBName = new TextField("New item database name: Assets/_GameAssets/Data/");
-        rootVisualElement.Add(newItemDBName);
+        //var newItemDBName = new TextField("New item database name: Assets/_GameAssets/Data/");
+        //rootVisualElement.Add(newItemDBName);
 
-        var newItemDBButton = new Button();
-        newItemDBButton.text = "Create new item database";
-        newItemDBButton.clicked += () => CreateNewGraph(newDatabasePath, newItemDBName.text);
+        //var newItemDBButton = new Button();
+        //newItemDBButton.text = "Create new item database";
+        //newItemDBButton.clicked += () => CreateNewGraph(newDatabasePath, newItemDBName.text);
         //newItemDBButton.clicked += () => SaveScriptableObjectAsset(CreateInstance<CraftingItemDatabase>(), newDatabasePath, newItemDBName.text);
-        rootVisualElement.Add(newItemDBButton);
+        //rootVisualElement.Add(newItemDBButton);
 
         var checkForLoopsButton = new Button();
         checkForLoopsButton.text = "Check for prerequisite loops";
         checkForLoopsButton.clicked += () => CheckAllForPrerequisiteLoops((CraftingItemDatabase)itemDatabaseField.value);
         rootVisualElement.Add(checkForLoopsButton);
 
-        tierListScrollView = new ScrollView();
-        rootVisualElement.Add(tierListScrollView);
+        //tierListScrollView = new ScrollView();
+        //rootVisualElement.Add(tierListScrollView);
     }
 
     private void OnItemDatabaseChanged(CraftingItemDatabase database)
