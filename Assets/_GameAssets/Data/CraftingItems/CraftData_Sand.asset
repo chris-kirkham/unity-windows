@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: CraftData_Sand
   m_EditorClassIdentifier: 
   itemName: Sand
-  thumbnailTex: {fileID: 0}
+  craftingAliases: []
+  thumbnailTex: {fileID: 2800000, guid: 14d2bca93a3d8ab4e967da4c833c64b0, type: 3}
   contentPrefab: {fileID: 0}
   prerequisites:
   - {fileID: 11400000, guid: f6f13c1db963d044ba70bcfe5b050587, type: 2}

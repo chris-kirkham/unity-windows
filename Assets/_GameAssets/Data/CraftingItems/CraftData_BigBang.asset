@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Big Bang
   craftingAliases: []
-  thumbnailTex: {fileID: 0}
+  thumbnailTex: {fileID: 2800000, guid: ab9fde4325c98c74584ef0b57a796041, type: 3}
   contentPrefab: {fileID: 0}
   prerequisites: []
   products: []

@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: CraftData_Glassworking
   m_EditorClassIdentifier: 
   itemName: Glassworking
-  thumbnailTex: {fileID: 0}
+  craftingAliases: []
+  thumbnailTex: {fileID: 2800000, guid: 9d6cfb73936d0254db3d9004056fd20b, type: 3}
   contentPrefab: {fileID: 0}
   prerequisites:
   - {fileID: 11400000, guid: d8789cdfd59674d4bb1216d9b19106d6, type: 2}

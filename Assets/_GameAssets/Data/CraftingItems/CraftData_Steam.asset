@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Steam
   craftingAliases: []
-  thumbnailTex: {fileID: 0}
+  thumbnailTex: {fileID: 2800000, guid: 083b2d3daffe30f4aa6267cd5391c572, type: 3}
   contentPrefab: {fileID: 0}
   prerequisites:
   - {fileID: 11400000, guid: 299c2723918579e43af015a05132e2e1, type: 2}

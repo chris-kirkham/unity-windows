@@ -69,6 +69,7 @@ public class CraftingItemCreationWindow : EditorWindow
 
         UpdateTierGraph(itemDatabase);
 
+        /*
         var itemsSortedByTier = new List<CraftingItemData>(database.ItemList);
         itemsSortedByTier.Sort((a, b) => a.Tier.CompareTo(b.Tier));
         foreach(var itemData in itemsSortedByTier)
@@ -76,13 +77,14 @@ public class CraftingItemCreationWindow : EditorWindow
             var node = CreateGraphNode(itemData);
             tierListScrollView.Add(node);
         }
+        */
     }
 
     private VisualElement UpdateTierGraph(CraftingItemDatabase itemDatabase)
     {
         itemDatabase.UpdateItemTiers();
 
-        var rows = new List<VisualElement>();
+        var rows = new List<ScrollView>();
         foreach(var itemData in itemDatabase.ItemList)
         {
             if(!itemData)
@@ -93,14 +95,14 @@ public class CraftingItemCreationWindow : EditorWindow
             //add extra rows to match item tier if necessary
             while(rows.Count <= itemData.Tier)
             {
-                var row = new VisualElement();
-                row.style.flexDirection = FlexDirection.Row;
+                var row = new ScrollView();
+                row.mode = ScrollViewMode.Horizontal;
                 row.style.paddingTop = 10;
                 rows.Add(row);
             }
 
             var itemField = new ItemTierGraphNode(itemData);
-            rows[itemData.Tier].Add(itemField);
+            rows[itemData.Tier].contentContainer.Add(itemField);
         }
 
         graphRoot.Clear();

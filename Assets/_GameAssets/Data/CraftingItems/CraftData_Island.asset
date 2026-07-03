@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Island
   craftingAliases: []
-  thumbnailTex: {fileID: 0}
+  thumbnailTex: {fileID: 2800000, guid: ab33d24025e74e14dafdb8113517c8c4, type: 3}
   contentPrefab: {fileID: 0}
   prerequisites:
   - {fileID: 11400000, guid: 6dd3f214bb196c342811d59d378b6c76, type: 2}
