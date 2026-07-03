@@ -87,3 +87,7 @@ public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListe
         }
     }
 }
+
+public abstract class DraggablePlacementPoint<T> : DraggablePlacementPoint where T : DraggableObject
+{
+}

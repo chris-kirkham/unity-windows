@@ -32,6 +32,8 @@ namespace Crafting
         private HashSet<CraftingItem> activeItems = new HashSet<CraftingItem>(); //all enabled crafting items
         public HashSet<CraftingItem> ActiveItems => activeItems;
 
+        public CraftingItemDatabase ItemDatabase => itemDatabase;
+
         //cached lists of stuff
         private List<CraftingItem> unusedIngredients = new List<CraftingItem>(); //unused ingredients during each craft attempt
         private const int MaxResultsPerCraft = 10; //increase this if we need more
