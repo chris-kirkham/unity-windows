@@ -8,6 +8,7 @@ using Crafting;
 
 public class IntroSequence : MonoBehaviour
 {
+    [SerializeField] private CraftingManager craftingManager;
     [SerializeField] private PlayableDirector playableDirector;
     [SerializeField] private float preChooseItemPauseTime;
     [SerializeField] private CameraMovement playerCam;
@@ -121,7 +122,7 @@ public class IntroSequence : MonoBehaviour
 
                 //spawn chosen item at same position and rotation so it looks seamless (hopefully!)
                 //var spawnedItem = CraftingManager.Inst.SpawnItem(chosenItemData, startingItemTform.position, startingItemTform.rotation);
-                var spawnedItem = CraftingManager.Inst.SpawnItem(startingItem.Item.Data, startingItemTform.position, startingItemTform.rotation); //TEST: one of each starter
+                var spawnedItem = craftingManager.SpawnItem(startingItem.Item.Data, startingItemTform.position, startingItemTform.rotation); //TEST: one of each starter
                 spawnedItem.SetState(CraftingItem.State.Animatable);
                 spawnedItems.Add(spawnedItem);    
 

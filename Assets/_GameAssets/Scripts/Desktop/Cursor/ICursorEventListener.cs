@@ -3,23 +3,19 @@ using UnityEngine;
 
 public interface ICursorEventListener
 { 
-    /*
-    //TODO: ???
-    [Flags]
-    public enum EventsToListenFor
+
+    protected Cursor ActiveCursor { get; set; }
+
+    public void SetCursor(Cursor cursor)
     {
-        OnlyOnThisObject = 1,
-        InParents = 1 << 1,
-        InChildren = 1 << 2,
-        MAX = 1 << 3
+        ActiveCursor = cursor;
     }
-    */
 
     public void RegisterListener()
     {
-        if(Cursor.InstExists())
+        if(ActiveCursor)
         {
-            Cursor.Inst.AddCursorEventListener(this);
+            ActiveCursor.AddCursorEventListener(this);
         }
         else
         {
@@ -29,9 +25,9 @@ public interface ICursorEventListener
 
     public void DeregisterListener()
     {
-        if(Cursor.InstExists())
+        if(ActiveCursor)
         {
-            Cursor.Inst.RemoveCursorEventListener(this);
+            ActiveCursor.RemoveCursorEventListener(this);
         }
     }
 

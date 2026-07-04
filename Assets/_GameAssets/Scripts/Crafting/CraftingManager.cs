@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Crafting
 {
-    public class CraftingManager : SingletonMonoBehaviour<CraftingManager>
+    public class CraftingManager : MonoBehaviour
     {
         public enum CraftingResultState
         {
@@ -12,6 +12,8 @@ namespace Crafting
             PartialIngredientMatch,
             SuccessfulCraft
         }
+
+        [SerializeField] private Player player;
 
         [SerializeField] private CraftingItemDatabase itemDatabase;
         [SerializeField] private CraftingItem thumbnailPrefab;
@@ -31,8 +33,8 @@ namespace Crafting
         //TODO: move this to a more generic ItemManager if keeping functionality
         private HashSet<CraftingItem> activeItems = new HashSet<CraftingItem>(); //all enabled crafting items
         public HashSet<CraftingItem> ActiveItems => activeItems;
-
         public CraftingItemDatabase ItemDatabase => itemDatabase;
+        public Player AssociatedPlayer => player;
 
         //cached lists of stuff
         private List<CraftingItem> unusedIngredients = new List<CraftingItem>(); //unused ingredients during each craft attempt
@@ -278,16 +280,13 @@ namespace Crafting
             craftSequence.DoCraftSequence(ingredients, successfulCrafts);
         }
 
-        public CraftingItem SpawnItem(CraftingItemData itemData, Vector3 position, Quaternion rotation, bool doItemOnCraftedCallback = true)
+        public CraftingItem SpawnItem(CraftingItemData itemData, Vector3 position, Quaternion rotation)
         {
             var item = Instantiate<CraftingItem>(thumbnailPrefab, position, rotation);
             item.Data = itemData;
 
-            if (doItemOnCraftedCallback)
-            {
-                craftedTracker.OnItemCrafted(itemData);
-                item.OnCrafted();
-            }
+            item.OnSpawned(this);
+            craftedTracker.OnItemCrafted(itemData);
 
             return item;
         }

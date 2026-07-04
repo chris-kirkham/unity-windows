@@ -38,15 +38,15 @@ public class CrafterPlacementZone : DraggablePlacementPoint, ICursorEventListene
         if(Cursor.InstExists())
         {
             cursor = Cursor.Inst;
-            Cursor.Inst.AddCursorEventListener(this);
+            cursor.AddCursorEventListener(this);
         }
     }
 
     private void OnDisable()
     {
-        if(Cursor.InstExists())
+        if(cursor)
         {
-            Cursor.Inst.RemoveCursorEventListener(this);
+            cursor.RemoveCursorEventListener(this);
         }
     }
 
@@ -187,9 +187,9 @@ public class CrafterPlacementZone : DraggablePlacementPoint, ICursorEventListene
     {
         base.OnDraggableEnterPlacementArea(obj);
 
-        if (!currentItem && Cursor.Inst.CurrentDragTarget is CraftingItem)
+        if (!currentItem && cursor.CurrentDragTarget is CraftingItem)
         {
-            SetItem((CraftingItem)Cursor.Inst.CurrentDragTarget);
+            SetItem((CraftingItem)cursor.CurrentDragTarget);
             SetState(State.PlacementPreview);
         }
     }
@@ -209,7 +209,7 @@ public class CrafterPlacementZone : DraggablePlacementPoint, ICursorEventListene
     {
         base.OnCursorEvent(e);
 
-        if(e == Cursor.EventID.LeftClickDown && state == State.ItemPlaced && Cursor.Inst.IsHovered(this))
+        if(e == Cursor.EventID.LeftClickDown && state == State.ItemPlaced && cursor.IsHovered(this))
         {
             //pick up placed item
             GrabCurrentItem();

@@ -10,6 +10,7 @@ namespace Crafting
     [System.Serializable]
     public class OnCraftSpawnItemSequence
     {
+        [SerializeField] private CraftingManager craftingManager;
         [SerializeField] private CrafterBoard craftingBoard;
         [SerializeField] private PlayableDirector playableDirector;
         [SerializeField] private TimelineAsset onItemSpawnSequence;
@@ -50,8 +51,6 @@ namespace Crafting
 
             Debug.Log($"Successfully crafted {item.ItemName} from ingredients " + string.Join(", ", Ingredients) + "!");
             
-            var craftingManager = CraftingManager.Inst;
-
             var SpawnPos = Vector3.zero;
             if (spawnPoint)
             {
@@ -91,8 +90,6 @@ namespace Crafting
 
         public IEnumerator SpawnItemToGridRoutine(CraftingItemData itemData, Vector3 startPos_WS, Quaternion startRotation_WS)
         {
-            var craftingManager = CraftingManager.Inst;
-
             if(!craftingManager)
             {
                 Debug.Assert(craftingManager);
@@ -106,8 +103,7 @@ namespace Crafting
             }
 
             var wasCraftedPreviously = craftingManager.WasItemCraftedPreviously(itemData);
-            var item = craftingManager.SpawnItem(itemData, startPos_WS, startRotation_WS, doItemOnCraftedCallback: true);
-
+            var item = craftingManager.SpawnItem(itemData, startPos_WS, startRotation_WS);
             
             if (!wasCraftedPreviously && inspectItemOnFirstCraft)
             {

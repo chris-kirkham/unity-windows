@@ -30,10 +30,14 @@ public class CraftingDevWindow : EditorWindow
         searchBox.RegisterValueChangedCallback(evt => DoItemSearch(evt.newValue));
         rootVisualElement.Add(searchBox);
 
-        var showPossibleCraftsButton = new Button();
-        showPossibleCraftsButton.clicked += ShowPossibleCrafts;
-        showPossibleCraftsButton.Add(new Label("Show possible crafts"));
-        rootVisualElement.Add(showPossibleCraftsButton);
+
+        foreach(var craftingManager in FindObjectsByType<CraftingManager>(FindObjectsInactive.Exclude, FindObjectsSortMode.InstanceID))
+        {
+            var showPossibleCraftsButton = new Button();
+            showPossibleCraftsButton.clicked += () => { ShowPossibleCrafts(craftingManager); };
+            showPossibleCraftsButton.Add(new Label($"Show possible crafts ({craftingManager.AssociatedPlayer.name})"));
+            rootVisualElement.Add(showPossibleCraftsButton);
+        }
 
         searchResultsRoot = new ScrollView();
         rootVisualElement.Add(searchResultsRoot);
@@ -111,23 +115,21 @@ public class CraftingDevWindow : EditorWindow
         }
     }
 
-    private void ShowPossibleCrafts()
+    private void ShowPossibleCrafts(CraftingManager craftingManager)
     {
+        if(!craftingManager)
+        {
+            return; 
+        }
+
         possibleCraftsRoot.Clear();
 
-        if (CraftingManager.InstExists())
+        var possibleCrafts = craftingManager.FindPossibleCrafts(includeAlreadyCraftedItems: !GameplaySettings.InfiniteDecks); 
+        foreach(var itemData in possibleCrafts)
         {
-            var possibleCrafts = CraftingManager.Inst.FindPossibleCrafts(includeAlreadyCraftedItems: !GameplaySettings.InfiniteDecks); 
-            foreach(var itemData in possibleCrafts)
-            {
-                var assetLink = new ObjectField();
-                assetLink.SetValueWithoutNotify(itemData);
-                possibleCraftsRoot.Add(assetLink);
-            }
-        }
-        else
-        {
-            possibleCraftsRoot.Add(new Label("Game must be in progress to display possible crafts!"));
+            var assetLink = new ObjectField();
+            assetLink.SetValueWithoutNotify(itemData);
+            possibleCraftsRoot.Add(assetLink);
         }
     }
     

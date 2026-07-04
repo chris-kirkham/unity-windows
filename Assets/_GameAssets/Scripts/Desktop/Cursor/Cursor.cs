@@ -11,7 +11,7 @@ using UnityEngine.UI;
 using UnityEditor;
 #endif
 
-public class Cursor : SingletonMonoBehaviour<Cursor>
+public class Cursor : MonoBehaviour
 {
     public struct CursorEvent
     {

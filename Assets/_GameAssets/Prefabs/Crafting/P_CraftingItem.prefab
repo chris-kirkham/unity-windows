@@ -550,7 +550,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dragEnabled: 1
-  requiresPlacementPoint: 1
+  requiresPlacementPoint: 0
   DragStarted:
     m_PersistentCalls:
       m_Calls:

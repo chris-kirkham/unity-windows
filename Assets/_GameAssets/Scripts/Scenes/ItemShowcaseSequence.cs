@@ -6,6 +6,7 @@ using Crafting;
 
 public class ItemShowcaseSequence : MonoBehaviour
 {
+    [SerializeField] private CraftingManager craftingManager;
     [SerializeField] private PlayableDirector playableDirector;
     [SerializeField] private Transform itemSpawnInPos;
     [SerializeField] private Transform itemShowcasePos;
@@ -14,11 +15,8 @@ public class ItemShowcaseSequence : MonoBehaviour
     [SerializeField] private float itemShowcaseTime = 1f;
     [SerializeField] private float itemAnimateOutTime = 1f;
 
-    private CraftingManager craftingManager;
-
     private void Start()
     {
-        craftingManager = CraftingManager.Inst;
         StartCoroutine(CraftedItemShowcaseRoutine());
     }
 
@@ -51,7 +49,7 @@ public class ItemShowcaseSequence : MonoBehaviour
 
     private IEnumerator ShowcaseItemRoutine(CraftingItemData itemData)
     {
-        var item = craftingManager.SpawnItem(itemData, itemSpawnInPos.position, itemSpawnInPos.rotation, doItemOnCraftedCallback: false);
+        var item = craftingManager.SpawnItem(itemData, itemSpawnInPos.position, itemSpawnInPos.rotation);
         item.SetState(CraftingItem.State.Animatable);
         yield return Tweening.DoTransform(item.transform, itemShowcasePos.position, itemShowcasePos.rotation, item.transform.localScale, itemAnimateInTime);
         item.SetOnInspectVFX(true);

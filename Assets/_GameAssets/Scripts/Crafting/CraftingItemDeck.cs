@@ -12,6 +12,7 @@ namespace Crafting
         //That way would make it easier to do animations/coroutine stuff since it would stop being the deck's responsibility
         //as soon as the item is added or removed, but that may not be necessary
 
+        [SerializeField] private CraftingManager craftingManager;
         [SerializeField] private CraftingItemDatabase startingDeck;
         [SerializeField] private float itemHeight = 0.1f;
         [SerializeField] private float itemZOffset = 0.05f;
@@ -118,7 +119,7 @@ namespace Crafting
             for (int i = 0; i < deckItems.ItemList.Count; i++)
             {
                 var itemData = deckItems.ItemList[i];
-                var item = CraftingManager.Inst.SpawnItem(itemData, transform.position, Quaternion.identity);
+                var item = craftingManager.SpawnItem(itemData, transform.position, Quaternion.identity);
                 if(!TryPlaceObject(item))
                 {
                     Debug.LogError($"Unable to place item when populating deck for some reason!");
@@ -174,8 +175,8 @@ namespace Crafting
             //TODO: prototype - infinite deck - spawn new item to replace removed one
             if (GameplaySettings.InfiniteDecks && deck.Count < 1)
             {
-                var newItem = CraftingManager.Inst.SpawnItem(
-                    itemData, GetTopDeckPos(), Quaternion.identity, doItemOnCraftedCallback: false);
+                var newItem = craftingManager.SpawnItem(
+                    itemData, GetTopDeckPos(), Quaternion.identity);
                 if(!TryPlaceObject(newItem))
                 {
                     Debug.LogError("Unable to replace item in deck for some reason!");

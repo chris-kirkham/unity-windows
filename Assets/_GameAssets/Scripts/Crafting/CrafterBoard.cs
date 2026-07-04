@@ -3,8 +3,10 @@ using UnityEngine;
 
 namespace Crafting
 {
-    public class CrafterBoard : SingletonMonoBehaviour<CrafterBoard>
+    public class CrafterBoard : MonoBehaviour
     {
+        [SerializeField] private CraftingManager craftingManager;
+
         [SerializeField] private Vector3 centre;
         [SerializeField] private Vector2 size;
         [SerializeField] private List<CrafterPlacementZone> placementPoints;
@@ -30,9 +32,13 @@ namespace Crafting
 
         private void Start()
         {
-            if(CraftingManager.InstExists())
+            if(craftingManager)
             {
-                CraftingManager.Inst.SetBoard(this);
+                craftingManager.SetBoard(this);
+            }
+            else
+            {
+                Debug.LogError($"No {nameof(CraftingManager)} set!");
             }
         }
 

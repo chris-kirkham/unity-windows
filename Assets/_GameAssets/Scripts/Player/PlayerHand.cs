@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class PlayerHand : DraggablePlacementPoint
 {
+    [SerializeField] private CraftingManager craftingManager;
     [SerializeField] private int maxCards;
     [SerializeField] private Vector3 cardOffset;
     [SerializeField] private float cardRoll;
@@ -50,14 +51,8 @@ public class PlayerHand : DraggablePlacementPoint
     [ContextMenu("Add Test Card")]
     private void TEST_AddTestCard()
     {
-        var crafter = CraftingManager.Inst;
-        if (!crafter)
-        {
-            return;
-        }
-     
-        var itemList = crafter.ItemDatabase.ItemList;
-        var card = crafter.SpawnItem(itemList[Random.Range(0, itemList.Count)], Vector3.zero, Quaternion.identity, doItemOnCraftedCallback: false);
+        var itemList = craftingManager.ItemDatabase.ItemList;
+        var card = craftingManager.SpawnItem(itemList[Random.Range(0, itemList.Count)], Vector3.zero, Quaternion.identity);
         PlaceObject(card);
     }
 

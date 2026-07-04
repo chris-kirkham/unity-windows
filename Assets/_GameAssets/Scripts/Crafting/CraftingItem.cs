@@ -41,12 +41,14 @@ public class CraftingItem : DraggablePhysicsObject
     [SerializeField] private EventReference onGrabSFX;
     [SerializeField] private EventReference onDropSFX;
 
+    private CraftingManager craftingManager;
+    private Cursor cursor;
+
     private Material imageMat;
     private GameObject mirroredArtInstance;
     private bool acceptInput = true;
     private bool canBeUsedInCraft = true;
     private bool isTouchingOtherItems;
-    private Cursor cursor;
     private State state;
 
     public CraftingItemData Data
@@ -65,9 +67,9 @@ public class CraftingItem : DraggablePhysicsObject
     {
         base.OnEnable();
 
-        if (CraftingManager.InstExists())
+        if (craftingManager)
         {
-            CraftingManager.Inst.RegisterCraftingItem(this);
+            craftingManager.RegisterCraftingItem(this);
         }
 
         if (Cursor.InstExists())
@@ -98,9 +100,9 @@ public class CraftingItem : DraggablePhysicsObject
             cursor.RemoveCursorEventListener(this);
         }
 
-        if (CraftingManager.InstExists())
+        if (craftingManager)
         {
-            CraftingManager.Inst.OnItemDisabledOrDestroyed(this);
+            craftingManager.OnItemDisabledOrDestroyed(this);
         }
 
         RemoveAllItemContacts();
@@ -131,17 +133,17 @@ public class CraftingItem : DraggablePhysicsObject
 
     private void AddItemContact(CraftingItem item)
     {
-        if (CraftingManager.InstExists())
+        if (craftingManager)
         {
-            CraftingManager.Inst.AddItemContact(this, item);
+            craftingManager.AddItemContact(this, item);
         }
     }
 
     private void RemoveItemContact(CraftingItem item)
     {
-        if (CraftingManager.InstExists())
+        if (craftingManager)
         {
-            CraftingManager.Inst.RemoveItemContact(this, item);
+            craftingManager.RemoveItemContact(this, item);
         }
 
         if (!isTouchingOtherItems) //TODO: add this functionality back in
@@ -152,9 +154,9 @@ public class CraftingItem : DraggablePhysicsObject
 
     private void RemoveAllItemContacts()
     {
-        if (CraftingManager.InstExists())
+        if (craftingManager)
         {
-            CraftingManager.Inst.RemoveAllItemContactsForItem(this);
+            craftingManager.RemoveAllItemContactsForItem(this);
         }
     }
 
@@ -184,9 +186,9 @@ public class CraftingItem : DraggablePhysicsObject
 
         gameObject.name = "Item_" + itemData.ItemName;
 
-        if (CraftingManager.InstExists())
+        if (craftingManager)
         {
-            var itemsInPlay = CraftingManager.Inst.ActiveItems;
+            var itemsInPlay = craftingManager.ActiveItems;
             int sameItemCount = 0;
             foreach (var item in itemsInPlay)
             {
@@ -254,8 +256,9 @@ public class CraftingItem : DraggablePhysicsObject
     }
 
     //called when this item is first crafted
-    public void OnCrafted()
+    public void OnSpawned(CraftingManager craftingManager)
     {
+        this.craftingManager = craftingManager;
         OnCraftedVFX();
     }
 
