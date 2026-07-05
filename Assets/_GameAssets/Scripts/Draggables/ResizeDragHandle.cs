@@ -61,7 +61,7 @@ public class ResizeDragHandle : DraggableUIElement
         if(isDragging && canvasRect)
         {
             var canvasRect = this.canvasRect.rect;
-            var mouseDelta = Cursor.Inst.ClampedPositionDelta_WS;
+            var mouseDelta = cursor.ClampedPositionDelta_WS;
             var newWidth = canvasRect.width;
             var newHeight = canvasRect.height;
             var prevPivot = this.canvasRect.pivot;

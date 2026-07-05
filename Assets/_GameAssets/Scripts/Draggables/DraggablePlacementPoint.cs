@@ -2,7 +2,18 @@ using UnityEngine;
 
 public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListener
 {
-    [SerializeField] private bool returnable = true;
+    [SerializeField] protected Cursor cursor;
+    [SerializeField] protected bool returnable = true;
+
+    protected virtual void OnEnable()
+    {
+        ((ICursorEventListener)this).RegisterListener(cursor);
+    }
+
+    protected virtual void OnDisable()
+    {
+        ((ICursorEventListener)this).DeregisterListener(cursor);
+    }
 
     public bool TryPlaceObject(DraggableObject obj)
     {
@@ -73,7 +84,7 @@ public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListe
 
     public virtual void OnCursorEvent(Cursor.EventID e) 
     {
-        var dragTarget = Cursor.Inst.CurrentDragTarget;
+        var dragTarget = cursor.CurrentDragTarget;
         if (dragTarget)
         {
             if (e == Cursor.EventID.EnterElement)
@@ -86,8 +97,4 @@ public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListe
             }
         }
     }
-}
-
-public abstract class DraggablePlacementPoint<T> : DraggablePlacementPoint where T : DraggableObject
-{
 }

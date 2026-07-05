@@ -72,4 +72,11 @@ public class PlayerHand : DraggablePlacementPoint
     {
         throw new System.NotImplementedException();
     }
+
+    public override void OnCursorEvent(Cursor.EventID e)
+    {
+        base.OnCursorEvent(e);
+
+
+    }
 }

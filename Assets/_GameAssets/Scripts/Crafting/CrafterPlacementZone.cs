@@ -19,7 +19,6 @@ public class CrafterPlacementZone : DraggablePlacementPoint, ICursorEventListene
     [Header("VFX")]
     [SerializeField] private GameObject placementPreviewVFX;
 
-    private Cursor cursor;
     private CraftingItem currentItem;
     private State state;
 
@@ -34,23 +33,9 @@ public class CrafterPlacementZone : DraggablePlacementPoint, ICursorEventListene
         {
             zonePivot = transform;
         }
-     
-        if(Cursor.InstExists())
-        {
-            cursor = Cursor.Inst;
-            cursor.AddCursorEventListener(this);
-        }
     }
 
-    private void OnDisable()
-    {
-        if(cursor)
-        {
-            cursor.RemoveCursorEventListener(this);
-        }
-    }
-
-    private void LateUpdate()
+	private void LateUpdate()
     {
         if(!currentItem)
         {

@@ -7,12 +7,13 @@ public class ItemInspectSequence
 {
     [SerializeField] private float lerpToInspectPosTime = 1f;
     [SerializeField] private float inspectHoldTime = 1f;
+    [SerializeField] private Cursor cursor;
 
     public IEnumerator InspectItem(CraftingItem item)
     {
         item.SetState(CraftingItem.State.Animatable);
 
-        var cam = Cursor.Inst.Cam;
+        var cam = cursor.Cam;
         item.transform.localScale = Vector3.zero;
         yield return Tweening.DoTransform(
             item.transform,

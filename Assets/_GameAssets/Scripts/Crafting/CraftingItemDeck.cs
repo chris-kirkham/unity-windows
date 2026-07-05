@@ -14,7 +14,7 @@ namespace Crafting
 
         [SerializeField] private CraftingManager craftingManager;
         [SerializeField] private CraftingItemDatabase startingDeck;
-        [SerializeField] private float itemHeight = 0.1f;
+		[SerializeField] private float itemHeight = 0.1f;
         [SerializeField] private float itemZOffset = 0.05f;
         [SerializeField] private bool populateOnEnable;
         [SerializeField] private bool singleItemType = true;
@@ -27,36 +27,15 @@ namespace Crafting
 
         private LinkedList<CraftingItem> deck = new LinkedList<CraftingItem>();
 
-        private Cursor cursor;
-
         public CraftingItemData ItemType { get; set; }
     
-        public event Action<CraftingItem> OnItemPlaced;
-        public event Action<CraftingItem> OnItemRemoved;
-
-        private void Start()
+        protected override void OnEnable()
         {
-            if (Cursor.InstExists())
-            {
-                cursor = Cursor.Inst;
-                Cursor.Inst.AddCursorEventListener(this);
-            }
-            else
-            {
-                Debug.LogError($"No instance of {nameof(Cursor)} found! Cannot register listener.");
-            }
+            base.OnEnable();
 
             if (populateOnEnable)
             {
                 PopulateDeck(startingDeck);
-            }
-        }
-
-        private void OnDisable()
-        {
-            if (Cursor.InstExists())
-            {
-                Cursor.Inst.RemoveCursorEventListener(this);
             }
         }
 
@@ -175,8 +154,7 @@ namespace Crafting
             //TODO: prototype - infinite deck - spawn new item to replace removed one
             if (GameplaySettings.InfiniteDecks && deck.Count < 1)
             {
-                var newItem = craftingManager.SpawnItem(
-                    itemData, GetTopDeckPos(), Quaternion.identity);
+                var newItem = craftingManager.SpawnItem(itemData, GetTopDeckPos(), Quaternion.identity);
                 if(!TryPlaceObject(newItem))
                 {
                     Debug.LogError("Unable to replace item in deck for some reason!");
@@ -302,14 +280,14 @@ namespace Crafting
             base.OnCursorEvent(e);
 
             //slightly jank but w/e
-            if(!Cursor.Inst.CurrentDragTarget)
+            if(!cursor.CurrentDragTarget)
             {
                 SetPlacementPreviewVFXEnabled(false);
             }
 
             if (e == Cursor.EventID.LeftClickDown)
             {
-                if (Cursor.Inst.IsHovered(this))
+                if (cursor.IsHovered(this))
                 {
                     GrabTopDeckItem();
                 }
@@ -319,7 +297,7 @@ namespace Crafting
         private void OnDrawGizmos()
         {
             Gizmos.matrix = Matrix4x4.identity;
-            if (Cursor.InstExists() && Cursor.Inst.IsHovered(this))
+            if (cursor && cursor.IsHovered(this))
             {
                 Gizmos.color = Color.green;
             }

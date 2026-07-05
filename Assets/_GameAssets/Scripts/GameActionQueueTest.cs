@@ -23,24 +23,15 @@ public class GameActionQueueTest : MonoBehaviour, ICursorEventListener
     }
 
     [SerializeField] private GameObject testVFXprefab;
+    [SerializeField] private Cursor cursor;
 
-    private Cursor cursor;
     private GameActionQueue<SpawnVFXAtPos> spawnVFXActionQueue = new GameActionQueue<SpawnVFXAtPos>();
 
     private void OnEnable()
     {
-        if(!cursor)
-        {
-            cursor = Cursor.Inst;
-        }
-
-        if (cursor)
+        if(cursor)
         {
             cursor.AddCursorEventListener(this);
-        }
-        else
-        {
-            Debug.LogError($"No instance of {nameof(Cursor)} found!");
         }
 
         spawnVFXActionQueue.doDebugLog = true;

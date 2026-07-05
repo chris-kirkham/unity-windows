@@ -6,8 +6,9 @@ using UnityEngine.Events;
 //base class for click-and-draggable items
 public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
 {
-    [SerializeField] private bool dragEnabled = true;
-    [SerializeField] private bool requiresPlacementPoint;
+    [SerializeField] protected Cursor cursor;
+    [SerializeField] protected bool dragEnabled = true;
+    [SerializeField] protected bool requiresPlacementPoint;
     
     protected bool isDragging;
 
@@ -29,22 +30,12 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
             sprite = OnHoverDragSprite
         };
 
-        if (Cursor.InstExists())
-        {
-            Cursor.Inst.AddCursorEventListener(this);
-        }
-        else
-        {
-            Debug.LogError($"Instance of {nameof(Cursor)} not found!");
-        }    
+        ((ICursorEventListener)this).RegisterListener(cursor);
     }
 
     protected virtual void OnDisable()
     {
-        if (Cursor.InstExists())
-        {
-            Cursor.Inst.RemoveCursorEventListener(this);
-        }
+        ((ICursorEventListener)this).DeregisterListener(cursor);
 
         EndDrag();
         DragStarted.RemoveAllListeners();
@@ -55,9 +46,9 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
     //the cursor decides which is the best option (why does the cursor do this? maybe move it to a different class)
     public void RequestDrag()
     {
-        if (dragEnabled && Cursor.InstExists())
+        if (dragEnabled && cursor)
         {
-            Cursor.Inst.RequestDrag(this);
+            cursor.RequestDrag(this);
         }
     }
 
@@ -109,7 +100,6 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
 
     private void CancelDragRequest()
     {
-        var cursor = Cursor.Inst;
         if (cursor)
         {
             cursor.RemoveDragRequest(this);
@@ -213,17 +203,17 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
         switch(e)
         {
             case Cursor.EventID.EnterElement:
-                Cursor.Inst.AddSpriteOverride(dragPreviewCursorSprite);
+                cursor.AddSpriteOverride(dragPreviewCursorSprite);
                 break;
             case Cursor.EventID.ExitElement:
                 if (!isDragging)
                 {
-                    Cursor.Inst.RemoveSpriteOverride(dragPreviewCursorSprite);
+                    cursor.RemoveSpriteOverride(dragPreviewCursorSprite);
                     EndDrag();
                 }
                 break;
             case Cursor.EventID.LeftClickDown:
-                if(Cursor.Inst.IsHovered(this))
+                if(cursor.IsHovered(this))
                 {
                     RequestDrag();
                 }

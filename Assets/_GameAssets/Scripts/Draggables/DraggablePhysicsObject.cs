@@ -81,8 +81,8 @@ public class DraggablePhysicsObject : DraggableObject
 
     private Vector3 GetTargetPosition()
     {
-        var cam = Cursor.Inst.Cam;
-        var cursorPos = Cursor.Inst.ClampedPosition_SS;
+        var cam = cursor.Cam;
+        var cursorPos = cursor.ClampedPosition_SS;
 
         //get distance above ground/other objects
         var distFromCamera = targetDistanceAboveGround;

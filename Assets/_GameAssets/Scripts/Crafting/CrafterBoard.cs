@@ -5,6 +5,7 @@ namespace Crafting
 {
     public class CrafterBoard : MonoBehaviour
     {
+        [SerializeField] private Cursor cursor;
         [SerializeField] private CraftingManager craftingManager;
 
         [SerializeField] private Vector3 centre;

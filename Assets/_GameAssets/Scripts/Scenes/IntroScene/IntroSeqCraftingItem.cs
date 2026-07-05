@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class IntroSeqCraftingItem : MonoBehaviour, ICursorEventListener
 {
+    [SerializeField] private Cursor cursor;
     [SerializeField] private CraftingItem item;
     [SerializeField] private CraftingItemData itemData;
     [SerializeField] private IntroSequence introSequence;
@@ -19,9 +20,9 @@ public class IntroSeqCraftingItem : MonoBehaviour, ICursorEventListener
             item.enabled = false;
         }
 
-        if (Cursor.InstExists())
+        if (cursor)
         {
-            Cursor.Inst.AddCursorEventListener(this);
+            cursor.AddCursorEventListener(this);
         }
 
         if (onHoverText)
@@ -32,17 +33,17 @@ public class IntroSeqCraftingItem : MonoBehaviour, ICursorEventListener
 
     private void Start()
     {
-        if (Cursor.InstExists())
+        if (cursor)
         {
-            Cursor.Inst.AddCursorEventListener(this);
+            cursor.AddCursorEventListener(this);
         }
     }
 
     private void OnDisable()
     {
-        if(Cursor.InstExists())
+        if(cursor)
         {
-            Cursor.Inst.RemoveCursorEventListener(this);
+            cursor.RemoveCursorEventListener(this);
         }
 
         if(onHoverText.gameObject.activeSelf)

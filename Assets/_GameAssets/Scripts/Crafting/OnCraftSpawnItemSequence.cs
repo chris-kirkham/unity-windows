@@ -10,6 +10,7 @@ namespace Crafting
     [System.Serializable]
     public class OnCraftSpawnItemSequence
     {
+        [SerializeField] private Cursor cursor;
         [SerializeField] private CraftingManager craftingManager;
         [SerializeField] private CrafterBoard craftingBoard;
         [SerializeField] private PlayableDirector playableDirector;
@@ -38,7 +39,7 @@ namespace Crafting
                 yield return new WaitForSeconds(multiItemSpawnDelay);
             }
 
-            Cursor.Inst.SetAllowInput(true);
+            cursor.SetAllowInput(true);
         }
 
         private IEnumerator SpawnItem(CraftingItemData item)

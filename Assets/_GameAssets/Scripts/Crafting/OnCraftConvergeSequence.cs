@@ -10,6 +10,7 @@ namespace Crafting
     [System.Serializable]
     public class OnCraftConvergeSequence
     {
+        [SerializeField] private Cursor cursor;
         [SerializeField] private Transform convergePoint;
         [SerializeField] private PlayableDirector playableDirector;
         [SerializeField] private TimelineAsset postMoveToOuterSequence;
@@ -38,7 +39,7 @@ namespace Crafting
                 Debug.LogWarning($"{nameof(convergePoint)} not set - converge position will be (0,0,0)!");
             }
 
-            Cursor.Inst.SetAllowInput(false);
+            cursor.SetAllowInput(false);
 
             var ingredientsList = new List<CraftingItem>(Ingredients);
             var numIngredients = Ingredients.Count;

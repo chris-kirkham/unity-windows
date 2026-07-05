@@ -55,7 +55,6 @@ public class IntroSequence : MonoBehaviour
 
     private void Start()
     {
-        cursor = Cursor.Inst;
         if(cursor)
         {
             cursor.SetAllowInput(false);
@@ -112,7 +111,7 @@ public class IntroSequence : MonoBehaviour
             */
             {
                 //roll starting item card so its item type isn't visible by the camera
-                var cam = Cursor.Inst.Cam;
+                var cam = cursor.Cam;
                 var itemToCam = cam.transform.position - startingItem.transform.position;
                 var itemToCamYFlat = Vector3.ProjectOnPlane(itemToCam, Vector3.forward);
                 var angle = Vector3.Angle(Vector3.right, itemToCamYFlat.normalized);

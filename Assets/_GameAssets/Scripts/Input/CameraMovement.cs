@@ -5,6 +5,7 @@ using UnityEngine.Rendering.Universal;
 
 public class CameraMovement : MonoBehaviour, ICursorEventListener
 {
+    [SerializeField] private Cursor cursor;
     [SerializeField] private Camera cam;
     [SerializeField] private bool allowMovement = true;
     [SerializeField] private float moveSpeed = 0.2f;
@@ -37,17 +38,17 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
         initialOrthoCamSize = cam.orthographicSize;
         orthoZoomLevel = cam.orthographicSize;
 
-        if(Cursor.InstExists())
+        if(cursor)
         {
-            Cursor.Inst.AddCursorEventListener(this);
+            cursor.AddCursorEventListener(this);
         }
     }
 
     private void OnDisable()
     {
-        if (Cursor.InstExists())
+        if (cursor)
         {
-            Cursor.Inst.RemoveCursorEventListener(this);
+            cursor.RemoveCursorEventListener(this);
         }
     }
 
@@ -55,7 +56,7 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
     {
         if(isDragging)
         {
-            mouseDelta = Cursor.Inst.RawPositionDelta;
+            mouseDelta = cursor.RawPositionDelta;
         }
     }
 
@@ -73,7 +74,7 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
 
         ClampCameraPos();
         
-        if(!Cursor.InstExists() || !Cursor.Inst.IsRightClickPressed)
+        if(!cursor || !cursor.IsRightClickPressed)
         {
             SetDragging(false);
         }
@@ -94,9 +95,9 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
     private void SetDragging(bool dragging)
     {
         isDragging = dragging;
-        if(Cursor.InstExists())
+        if(cursor)
         {
-            Cursor.Inst.FreezeCursorPos(dragging);
+            cursor.FreezeCursorPos(dragging);
         }
     }
 
@@ -182,7 +183,7 @@ public class CameraMovement : MonoBehaviour, ICursorEventListener
 
         if(e == Cursor.EventID.MouseMove)
         {
-            cursorPos_SS = Cursor.Inst.ClampedPosition_SS;
+            cursorPos_SS = cursor.ClampedPosition_SS;
         }
     }
 

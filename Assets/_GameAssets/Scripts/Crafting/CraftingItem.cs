@@ -42,7 +42,6 @@ public class CraftingItem : DraggablePhysicsObject
     [SerializeField] private EventReference onDropSFX;
 
     private CraftingManager craftingManager;
-    private Cursor cursor;
 
     private Material imageMat;
     private GameObject mirroredArtInstance;
@@ -72,18 +71,7 @@ public class CraftingItem : DraggablePhysicsObject
             craftingManager.RegisterCraftingItem(this);
         }
 
-        if (Cursor.InstExists())
-        {
-            cursor = Cursor.Inst;
-            cursor.AddCursorEventListener(this);
-        }
-        else
-        {
-            Debug.LogError($"Instance of {nameof(Cursor)} not found!");
-        }
-
         SetState(State.Active);
-        UpdateData();
 
         if (craftingPotentialVFX)
         {
@@ -94,11 +82,6 @@ public class CraftingItem : DraggablePhysicsObject
     protected override void OnDisable()
     {
         base.OnDisable();
-
-        if (cursor)
-        {
-            cursor.RemoveCursorEventListener(this);
-        }
 
         if (craftingManager)
         {

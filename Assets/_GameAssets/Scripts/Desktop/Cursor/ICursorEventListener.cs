@@ -2,32 +2,28 @@ using System;
 using UnityEngine;
 
 public interface ICursorEventListener
-{ 
-
-    protected Cursor ActiveCursor { get; set; }
-
-    public void SetCursor(Cursor cursor)
+{
+    public void RegisterListener(Cursor cursor)
     {
-        ActiveCursor = cursor;
-    }
-
-    public void RegisterListener()
-    {
-        if(ActiveCursor)
+        if(cursor)
         {
-            ActiveCursor.AddCursorEventListener(this);
+            cursor.AddCursorEventListener(this);
         }
         else
         {
-            Debug.LogError($"No instance of {nameof(Cursor)} found! Cannot register listener.");
+            Debug.LogError($"{nameof(Cursor)} is null! Cannot register listener.");
         }
     }
 
-    public void DeregisterListener()
+    public void DeregisterListener(Cursor cursor)
     {
-        if(ActiveCursor)
+        if(cursor)
         {
-            ActiveCursor.RemoveCursorEventListener(this);
+            cursor.RemoveCursorEventListener(this);
+        }
+        else
+        {
+            Debug.LogError($"{nameof(Cursor)} is null! Cannot deregister listener.");
         }
     }
 
