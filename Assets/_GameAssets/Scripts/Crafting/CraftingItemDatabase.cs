@@ -7,16 +7,16 @@ using UnityEngine;
 public class CraftingItemDatabase : ScriptableObject
 {
     //list of all craftable items
-    [SerializeField] private List<CraftingItemData> itemList;
+    [SerializeField] private List<CardData> itemList;
 
-    public List<CraftingItemData> ItemList => itemList;
+    public List<CardData> ItemList => itemList;
 
     [ContextMenu("Update Item Tiers")]
     public void UpdateItemTiers()
     {
-        var uncheckedItems = new List<CraftingItemData>(ItemList);
-        var checkedItems = new HashSet<CraftingItemData>();
-        var itemsWithPrereqLoop = new HashSet<CraftingItemData>();
+        var uncheckedItems = new List<CardData>(ItemList);
+        var checkedItems = new HashSet<CardData>();
+        var itemsWithPrereqLoop = new HashSet<CardData>();
 
         int tier = 0;
         while(uncheckedItems.Count > 0)
@@ -30,7 +30,7 @@ public class CraftingItemDatabase : ScriptableObject
                     if (itemData.HasPrerequisiteLoop)
                     {
                         Debug.LogError($"{itemData} contains a prerequisite loop! Cannot update its tier.");
-                        itemData.Tier = -1;
+                        itemData.CraftingTier = -1;
                         uncheckedItems.RemoveAt(i);
                         itemsWithPrereqLoop.Add(itemData);
                         continue;
@@ -41,7 +41,7 @@ public class CraftingItemDatabase : ScriptableObject
                         if(itemsWithPrereqLoop.Contains(prereq))
                         {
                             Debug.LogError($"{itemData} has a prerequisite which forms a loop ({prereq})! Cannot update its tier.");
-                            itemData.Tier = -1;
+                            itemData.CraftingTier = -1;
                             itemsWithPrereqLoop.Add(itemData);
                             uncheckedItems.RemoveAt(i);
                             break;
@@ -57,7 +57,7 @@ public class CraftingItemDatabase : ScriptableObject
 
                 if (allPrereqsInPrevTier)
                 {
-                    itemData.Tier = tier;
+                    itemData.CraftingTier = tier;
                     Debug.Log($"{itemData.ItemName} is tier {tier}");
                     checkedItems.Add(itemData);
                     uncheckedItems.RemoveAt(i);

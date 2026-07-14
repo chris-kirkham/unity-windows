@@ -47,7 +47,7 @@ public class ItemShowcaseSequence : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    private IEnumerator ShowcaseItemRoutine(CraftingItemData itemData)
+    private IEnumerator ShowcaseItemRoutine(CardData itemData)
     {
         var item = craftingManager.SpawnItem(itemData, itemSpawnInPos.position, itemSpawnInPos.rotation);
         item.SetState(CraftingItem.State.Animatable);

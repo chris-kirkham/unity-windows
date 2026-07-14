@@ -24,7 +24,7 @@ namespace Crafting
 
         public ICollection<CraftingItem> Ingredients { private get; set; }
 
-        public List<CraftingItemData> ItemsToSpawn { private get; set; }
+        public List<CardData> ItemsToSpawn { private get; set; }
 
         public IEnumerator SpawnItems()
         {
@@ -42,7 +42,7 @@ namespace Crafting
             cursor.SetAllowInput(true);
         }
 
-        private IEnumerator SpawnItem(CraftingItemData item)
+        private IEnumerator SpawnItem(CardData item)
         {
             if(!item)
             {
@@ -89,7 +89,7 @@ namespace Crafting
             }
         }
 
-        public IEnumerator SpawnItemToGridRoutine(CraftingItemData itemData, Vector3 startPos_WS, Quaternion startRotation_WS)
+        public IEnumerator SpawnItemToGridRoutine(CardData itemData, Vector3 startPos_WS, Quaternion startRotation_WS)
         {
             if(!craftingManager)
             {

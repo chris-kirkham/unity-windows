@@ -20,11 +20,11 @@ namespace Crafting
 
         private CraftingItemDeck[,] grid;
 
-        private Dictionary<CraftingItemData, int> activeItemCounts = new Dictionary<CraftingItemData, int>(); //{ itemData, number active on board }
+        private Dictionary<CardData, int> activeItemCounts = new Dictionary<CardData, int>(); //{ itemData, number active on board }
 
         public List<CrafterPlacementZone> PlacementPoints => placementPoints;
 
-        public Dictionary<CraftingItemData, int> ActiveItemCounts => activeItemCounts;
+        public Dictionary<CardData, int> ActiveItemCounts => activeItemCounts;
 
         private void OnEnable()
         {
@@ -59,8 +59,10 @@ namespace Crafting
             {
                 for(int y = 0; y < grid.GetLength(1); y++)
                 {
-                    grid[x, y] = Instantiate<CraftingItemDeck>(
+                    var deck = Instantiate<CraftingItemDeck>(
                         gridCellDeckPrefab, GetGridCellPosition(x, y), Quaternion.identity, transform);
+                    deck.Initialise(cursor);
+                    grid[x, y] = deck;
                 }
             }
         }

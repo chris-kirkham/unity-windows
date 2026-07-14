@@ -234,7 +234,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7044508773933823233, guid: 6d457d275a0868943a3ecd7a06235147, type: 3}
       propertyPath: m_Name
-      value: P_CraftingItemDeck
+      value: PlayerDeckDeck
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

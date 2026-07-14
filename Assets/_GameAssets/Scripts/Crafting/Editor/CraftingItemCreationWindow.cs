@@ -93,7 +93,7 @@ public class CraftingItemCreationWindow : EditorWindow
             }
 
             //add extra rows to match item tier if necessary
-            while(rows.Count <= itemData.Tier)
+            while(rows.Count <= itemData.CraftingTier)
             {
                 var row = new ScrollView();
                 row.mode = ScrollViewMode.Horizontal;
@@ -102,7 +102,7 @@ public class CraftingItemCreationWindow : EditorWindow
             }
 
             var itemField = new ItemTierGraphNode(itemData);
-            rows[itemData.Tier].contentContainer.Add(itemField);
+            rows[itemData.CraftingTier].contentContainer.Add(itemField);
         }
 
         graphRoot.Clear();
@@ -129,7 +129,7 @@ public class CraftingItemCreationWindow : EditorWindow
 
     private VisualElement GetCreateItemUI()
     {
-        var itemData = CraftingItemData.CreateInstance<CraftingItemData>();
+        var itemData = CardData.CreateInstance<CardData>();
         var idSO = new SerializedObject(itemData);
 
         var rootElement = new Box();
@@ -171,15 +171,15 @@ public class CraftingItemCreationWindow : EditorWindow
     }
 
 
-    private bool HasPrerequisiteLoop(List<CraftingItemData> itemList)
+    private bool HasPrerequisiteLoop(List<CardData> itemList)
     {
         if(itemList == null || itemList.Count == 0)
         {
             return false;
         }
 
-        var visited = new HashSet<CraftingItemData>(itemList.Count);
-        var recursion = new HashSet<CraftingItemData>(itemList.Count);
+        var visited = new HashSet<CardData>(itemList.Count);
+        var recursion = new HashSet<CardData>(itemList.Count);
 
         foreach(var itemData in itemList)
         {
@@ -191,7 +191,7 @@ public class CraftingItemCreationWindow : EditorWindow
 
         return false;
 
-        bool NodeHasLoop(CraftingItemData itemData)
+        bool NodeHasLoop(CardData itemData)
         {
             //node already visited - loop detected!
             if (recursion.Contains(itemData))
@@ -223,10 +223,10 @@ public class CraftingItemCreationWindow : EditorWindow
         }
     }
 
-    private VisualElement CreateGraphNode(CraftingItemData itemData)
+    private VisualElement CreateGraphNode(CardData itemData)
     {
         var root = new VisualElement();
-        var label = new Label(itemData.name + ", " + itemData.Tier);
+        var label = new Label(itemData.name + ", " + itemData.CraftingTier);
         root.Add(label);
 
         return root;

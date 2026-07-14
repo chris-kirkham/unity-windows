@@ -3,26 +3,28 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "CraftingItemData", menuName = "Crafting/ItemData")]
-public class CraftingItemData : ScriptableObject
+public class CardData : ScriptableObject
 {
     [SerializeField] private string itemName;
     //items with a crafting alias can be treated as that item during crafting (I'm sure this won't break anything)
-    [SerializeField] private List<CraftingItemData> craftingAliases; 
+    [SerializeField] private List<CardData> craftingAliases; 
     [SerializeField] private Texture2D thumbnailTex;
     [SerializeField] private CraftingItemWindowContent contentPrefab;
-    [SerializeField] private List<CraftingItemData> prerequisites;
-    [SerializeField] private List<CraftingItemData> products;
+    [SerializeField] private List<CardData> prerequisites;
+    [SerializeField] private List<CardData> products;
+    [Header("Card Actions")]
+    [SerializeField] private List<CardAction> actions;
 
-    public int Tier { get; set; }
+    public int CraftingTier { get; set; }
 
     public bool HasPrerequisiteLoop { get; private set; }
 
     public string ItemName => itemName;
-    public List<CraftingItemData> Aliases => craftingAliases;
+    public List<CardData> Aliases => craftingAliases;
     public Texture2D ThumbnailTex => thumbnailTex;
     public CraftingItemWindowContent WindowContent => contentPrefab;
-    public List<CraftingItemData> ExtraProducts => products;
-    public List<CraftingItemData> Prerequisites => prerequisites;
+    public List<CardData> ExtraProducts => products;
+    public List<CardData> Prerequisites => prerequisites;
 
     public override string ToString()
     {
@@ -38,9 +40,9 @@ public class CraftingItemData : ScriptableObject
     //TODO: inefficient to calculate each time - maybe this should be the format the crafting manager
     //uses anyway, in which case it should be cached or the inspector changed so prerequisites can be defined
     //in this format to begin with
-    public Dictionary<CraftingItemData, int> GetPrereqCounts()
+    public Dictionary<CardData, int> GetPrereqCounts()
     {
-        var counts = new Dictionary<CraftingItemData, int>();
+        var counts = new Dictionary<CardData, int>();
         foreach(var prereq in prerequisites)
         {
             if(counts.TryGetValue(prereq, out var count))
@@ -58,12 +60,12 @@ public class CraftingItemData : ScriptableObject
 
     public bool CheckForPrerequisiteLoops()
     {
-        var visited = new HashSet<CraftingItemData>(prerequisites.Count);
-        var recursion = new HashSet<CraftingItemData>(prerequisites.Count);
+        var visited = new HashSet<CardData>(prerequisites.Count);
+        var recursion = new HashSet<CardData>(prerequisites.Count);
 
         return NodeHasLoop(this);
 
-        bool NodeHasLoop(CraftingItemData itemData)
+        bool NodeHasLoop(CardData itemData)
         {
             if(!itemData)
             {

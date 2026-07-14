@@ -83,7 +83,7 @@ public class IntroSequence : MonoBehaviour
         StartCoroutine(SpawnChosenItemsRoutine(item.Data));
     }
 
-    private IEnumerator SpawnChosenItemsRoutine(CraftingItemData chosenItemData)
+    private IEnumerator SpawnChosenItemsRoutine(CardData chosenItemData)
     {
         cursor.SetAllowInput(false);
 

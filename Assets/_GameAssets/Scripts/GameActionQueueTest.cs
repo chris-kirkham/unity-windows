@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameActionQueueTest : MonoBehaviour, ICursorEventListener
 {
-    private class SpawnVFXAtPos : GameAction
+    private class SpawnVFXAtPos : IGameAction
     {
         private GameObject vfxPrefab;
         private Vector3 pos;
@@ -15,7 +15,7 @@ public class GameActionQueueTest : MonoBehaviour, ICursorEventListener
             this.pos = cursorPos;
         }
 
-        public override async Task Execute()
+        public async Task Execute()
         {
             GameObject.Instantiate(vfxPrefab, pos, vfxPrefab.transform.rotation);
             await Task.Delay(1000);

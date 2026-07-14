@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class DraggablesManager
 {
     private HashSet<DraggableObject> dragRequests = new HashSet<DraggableObject>();
@@ -11,9 +12,8 @@ public class DraggablesManager
 
     private Cursor cursor;
 
-    public DraggablesManager(Cursor cursor)
+    public void SetCursor(Cursor cursor)
     {
-        Debug.Assert(cursor);
         this.cursor = cursor;
     }
 

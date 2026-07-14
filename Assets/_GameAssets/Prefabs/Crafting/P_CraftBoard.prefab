@@ -80,6 +80,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5821499f8fec2744e9124dce07000488, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cursor: {fileID: 0}
   craftingManager: {fileID: 0}
   centre: {x: 0, y: -2, z: 0}
   size: {x: 21, y: 16}
@@ -88,7 +89,7 @@ MonoBehaviour:
   - {fileID: 1758898064980167450}
   - {fileID: 849387341088071626}
   gridCentre: {fileID: 4873575646185274123}
-  gridCells: {x: 8, y: 5}
+  gridCells: {x: 0, y: 0}
   gridCellSize: {x: 1.1, y: -1.4}
   gridCellDeckPrefab: {fileID: 6312110462525338186, guid: 6d457d275a0868943a3ecd7a06235147, type: 3}
 --- !u!1 &7739891255268870289

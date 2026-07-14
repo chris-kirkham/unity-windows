@@ -88,7 +88,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8845029467559671349, guid: f636810ac1eeb494ab89b24e0f4ab153, type: 3}
       propertyPath: m_Name
-      value: P_PlayerDeck_1
+      value: P_PlayerDeck
       objectReference: {fileID: 0}
     - target: {fileID: 8962851299458621393, guid: f636810ac1eeb494ab89b24e0f4ab153, type: 3}
       propertyPath: cursor
@@ -211,6 +211,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5982251267114674928}
     m_Modifications:
+    - target: {fileID: -559291666634834028, guid: ddf03641f2caa114abc195c67ef5abcd, type: 3}
+      propertyPath: cursor
+      value: 
+      objectReference: {fileID: 1798419480490641931}
     - target: {fileID: -559291666634834028, guid: ddf03641f2caa114abc195c67ef5abcd, type: 3}
       propertyPath: player
       value: 

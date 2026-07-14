@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class ItemTierGraphNode : VisualElement
 {
-    private CraftingItemData item;
+    private CardData item;
 
     private VisualElement root;
     private Label itemName;
@@ -16,7 +16,7 @@ public class ItemTierGraphNode : VisualElement
     private PropertyField prereqsProp;
     private PropertyField extraProductsProp;
 
-    public ItemTierGraphNode(CraftingItemData itemData)
+    public ItemTierGraphNode(CardData itemData)
     {
         this.item = itemData;
 
@@ -43,7 +43,7 @@ public class ItemTierGraphNode : VisualElement
         itemName = new Label(item.ItemName);
         root.Add(itemName);
 
-        itemTier = new Label(item.Tier.ToString());
+        itemTier = new Label(item.CraftingTier.ToString());
         root.Add(itemTier);
 
         itemSprite = new Image();

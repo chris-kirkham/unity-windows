@@ -3,310 +3,304 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Crafting;
 
-namespace Crafting
+public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
 {
-    public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
+    [SerializeField] private CraftingManager craftingManager;
+    [SerializeField] private CraftingItemDatabase startingDeck;
+	[SerializeField] private float itemHeight = 0.1f;
+    [SerializeField] private float itemZOffset = 0.05f;
+    [SerializeField] private bool populateOnEnable;
+    [SerializeField] private bool singleItemType = true;
+    //allow any item type to be placed when the deck is empty, even if it's a single-item-type deck.
+    //If it is and this is false, the deck's ItemType must be set in code in order to place an item on an empty deck
+    [SerializeField] private bool allowAnyItemTypeWhenEmpty = false; 
+    [SerializeField] private float animateItemToDeckTime = 0.4f;
+    [Header("VFX")]
+    [SerializeField] private FadeInOut onHoverPreviewVFX;
+
+    private LinkedList<CraftingItem> deck = new LinkedList<CraftingItem>();
+
+    public CardData ItemType { get; set; }
+
+    protected override void OnEnable()
     {
-        //ADDING/REMOVING ITEMS: should the item be told when it's added/removed and handle toggling physics/input itself?
-        //That way would make it easier to do animations/coroutine stuff since it would stop being the deck's responsibility
-        //as soon as the item is added or removed, but that may not be necessary
+        base.OnEnable();
 
-        [SerializeField] private CraftingManager craftingManager;
-        [SerializeField] private CraftingItemDatabase startingDeck;
-		[SerializeField] private float itemHeight = 0.1f;
-        [SerializeField] private float itemZOffset = 0.05f;
-        [SerializeField] private bool populateOnEnable;
-        [SerializeField] private bool singleItemType = true;
-        //allow any item type to be placed when the deck is empty, even if it's a single-item-type deck.
-        //If it is and this is false, the deck's ItemType must be set in code in order to place an item on an empty deck
-        [SerializeField] private bool allowAnyItemTypeWhenEmpty = false; 
-        [SerializeField] private float animateItemToDeckTime = 0.4f;
-        [Header("VFX")]
-        [SerializeField] private FadeInOut onHoverPreviewVFX;
-
-        private LinkedList<CraftingItem> deck = new LinkedList<CraftingItem>();
-
-        public CraftingItemData ItemType { get; set; }
-    
-        protected override void OnEnable()
+        if (populateOnEnable)
         {
-            base.OnEnable();
+            PopulateDeck(startingDeck);
+        }
+    }
 
-            if (populateOnEnable)
+    public CraftingItem PeekTopItem()
+    {
+        return deck.Count > 0 ? deck.Last.Value : null;
+    }
+
+    public bool IsEmpty()
+    {
+        return deck.Count == 0;
+    }
+
+    private Vector3 GetTopDeckPos()
+    {
+        return transform.position
+            + (deck.Count * itemHeight * Vector3.up)
+            + (deck.Count * itemZOffset * Vector3.forward);
+    }
+
+    private Vector3 GetBottomDeckPos()
+    {
+        return transform.position;
+    }
+
+    private IEnumerator TweenItemToDeck(CraftingItem item)
+    {
+        //for infinite decks, items tweening to the deck should look like they're merging/being absorbed into the deck,
+        //as infinite decks should only ever contain one item which represents that item type
+        //TODO: WE NEED TO ACTUALLY NOT ADD MORE ITEMS TO INFINITE DECKS, THIS IS JUST A VFX HACK
+        if(GameplaySettings.InfiniteDecks && deck.Count > 1)
+        {
+            //TODO: scaling cards to 0 and not scaling them back when dragging makes them invisible LOL
+            //Fix infinite decks properly!
+            yield return Tweening.DoTransform(
+                item.transform, GetBottomDeckPos(), transform.rotation, Vector3.zero, animateItemToDeckTime).WaitForCompletion();
+
+            var topItem = deck.Last.Value;
+            if (TryRemovePlacedObj(topItem))
             {
-                PopulateDeck(startingDeck);
+                Destroy(topItem.gameObject);
             }
         }
-
-        public CraftingItem PeekTopItem()
+        else //non-infinite decks should visually stack items
         {
-            return deck.Count > 0 ? deck.Last.Value : null;
+            yield return Tweening.DoTransform(
+                item.transform, GetTopDeckPos(), transform.rotation, animateItemToDeckTime).WaitForCompletion();
+        }
+    }
+
+    private void PopulateDeck(CraftingItemDatabase deckItems)
+    {
+        ClearDeck();
+
+        if (deckItems == null)
+        {
+            return;
         }
 
-        public bool IsEmpty()
+        for (int i = 0; i < deckItems.ItemList.Count; i++)
         {
-            return deck.Count == 0;
-        }
-
-        private Vector3 GetTopDeckPos()
-        {
-            return transform.position
-                + (deck.Count * itemHeight * Vector3.up)
-                + (deck.Count * itemZOffset * Vector3.forward);
-        }
-
-        private Vector3 GetBottomDeckPos()
-        {
-            return transform.position;
-        }
-
-        private IEnumerator TweenItemToDeck(CraftingItem item)
-        {
-            //for infinite decks, items tweening to the deck should look like they're merging/being absorbed into the deck,
-            //as infinite decks should only ever contain one item which represents that item type
-            //TODO: WE NEED TO ACTUALLY NOT ADD MORE ITEMS TO INFINITE DECKS, THIS IS JUST A VFX HACK
-            if(GameplaySettings.InfiniteDecks && deck.Count > 1)
+            var itemData = deckItems.ItemList[i];
+            var item = craftingManager.SpawnItem(itemData, transform.position, Quaternion.identity);
+            if(!TryPlaceObject(item))
             {
-                //TODO: scaling cards to 0 and not scaling them back when dragging makes them invisible LOL
-                //Fix infinite decks properly!
-                yield return Tweening.DoTransform(
-                    item.transform, GetBottomDeckPos(), transform.rotation, Vector3.zero, animateItemToDeckTime).WaitForCompletion();
-
-                var topItem = deck.Last.Value;
-                if (TryRemovePlacedObj(topItem))
-                {
-                    Destroy(topItem.gameObject);
-                }
-            }
-            else //non-infinite decks should visually stack items
-            {
-                yield return Tweening.DoTransform(
-                    item.transform, GetTopDeckPos(), transform.rotation, animateItemToDeckTime).WaitForCompletion();
+                Debug.LogError($"Unable to place item when populating deck for some reason!");
             }
         }
+    }
 
-        private void PopulateDeck(CraftingItemDatabase deckItems)
+    private void ClearDeck()
+    {
+        foreach (var item in deck)
         {
-            ClearDeck();
-
-            if (deckItems == null)
-            {
-                return;
-            }
-
-            for (int i = 0; i < deckItems.ItemList.Count; i++)
-            {
-                var itemData = deckItems.ItemList[i];
-                var item = craftingManager.SpawnItem(itemData, transform.position, Quaternion.identity);
-                if(!TryPlaceObject(item))
-                {
-                    Debug.LogError($"Unable to place item when populating deck for some reason!");
-                }
-            }
+            GameObject.Destroy(item.gameObject);
         }
 
-        private void ClearDeck()
-        {
-            foreach (var item in deck)
-            {
-                GameObject.Destroy(item.gameObject);
-            }
+        deck.Clear();
+    }
 
-            deck.Clear();
+    private void GrabTopDeckItem()
+    {
+        if (IsEmpty())
+        {
+            return;
         }
 
-        private void GrabTopDeckItem()
+        var item = deck.Last.Value;
+        if (item)
         {
-            if (IsEmpty())
-            {
-                return;
-            }
+            item.SetState(CraftingItem.State.Draggable);
+            item.RequestDrag();
+        }
+    }
 
-            var item = deck.Last.Value;
-            if (item)
-            {
-                item.SetState(CraftingItem.State.Draggable);
-                item.RequestDrag();
-            }
+    private void RemoveTopItem()
+    {
+        if (deck.Count == 0)
+        {
+            return;
         }
 
-        private void RemoveTopItem()
+        var item = deck.Last.Value;
+        deck.RemoveLast();
+
+        if (!item)
         {
-            if (deck.Count == 0)
-            {
-                return;
-            }
-
-            var item = deck.Last.Value;
-            deck.RemoveLast();
-
-            if (!item)
-            {
-                Debug.LogError($"Removed a null item from the deck! Why did the deck contain a null item?");
-                return;
-            }
-
-            var itemData = item.Data;
-            item.transform.parent = null;
-            item.SetState(CraftingItem.State.Active);
-
-            //TODO: prototype - infinite deck - spawn new item to replace removed one
-            if (GameplaySettings.InfiniteDecks && deck.Count < 1)
-            {
-                var newItem = craftingManager.SpawnItem(itemData, GetTopDeckPos(), Quaternion.identity);
-                if(!TryPlaceObject(newItem))
-                {
-                    Debug.LogError("Unable to replace item in deck for some reason!");
-                }
-            }
+            Debug.LogError($"Removed a null item from the deck! Why did the deck contain a null item?");
+            return;
         }
 
-        protected override bool CanPlace(DraggableObject obj)
-        {
-            if(!(obj is CraftingItem))
-            {
-                return false;
-            }
+        var itemData = item.Data;
+        item.transform.parent = null;
+        item.SetState(CraftingItem.State.Active);
 
-            if(!singleItemType || (IsEmpty() && allowAnyItemTypeWhenEmpty))
+        //TODO: prototype - infinite deck - spawn new item to replace removed one
+        if (GameplaySettings.InfiniteDecks && deck.Count < 1)
+        {
+            var newItem = craftingManager.SpawnItem(itemData, GetTopDeckPos(), Quaternion.identity);
+            if(!TryPlaceObject(newItem))
             {
-                return true;
-            }
-            else
-            {
-                return ((CraftingItem)obj).Data == ItemType;
+                Debug.LogError("Unable to replace item in deck for some reason!");
             }
         }
+    }
 
-        protected override void PlaceObject(DraggableObject obj)
+    protected override bool CanPlace(DraggableObject obj)
+    {
+        if(!(obj is CraftingItem))
         {
-            if(obj is CraftingItem)
-            {
-                var item = (CraftingItem)obj;
-                if (singleItemType)
-                {
-                    ItemType = item.Data;
-                }
-                AddItemToTopDeck(item);
-            }
-            else
-            {
-                Debug.Log($"Tried to place a non-crafting item object on this deck! This should have been caught earlier.");
-            }
+            return false;
         }
 
-        private void AddItemToTopDeck(CraftingItem item, bool animateToDeck = true)
+        if(!singleItemType || (IsEmpty() && allowAnyItemTypeWhenEmpty))
         {
-            if(!item)
-            {
-                Debug.LogError($"Tried to add null item to deck!");
-                return;
-            }
+            return true;
+        }
+        else
+        {
+            return ((CraftingItem)obj).Data == ItemType;
+        }
+    }
 
-            if (singleItemType && !IsEmpty() && item.Data != deck.Last.Value.Data)
+    protected override void PlaceObject(DraggableObject obj)
+    {
+        if(obj is CraftingItem)
+        {
+            var item = (CraftingItem)obj;
+            if (singleItemType)
             {
-                Debug.LogError("Added a different item type to a single-item deck! This should be dealt with earlier in code.");
+                ItemType = item.Data;
             }
+            AddItemToTopDeck(item);
+        }
+        else
+        {
+            Debug.Log($"Tried to place a non-crafting item object on this deck! This should have been caught earlier.");
+        }
+    }
 
-            if(GameplaySettings.InfiniteDecks && !IsEmpty())
-            {
-                //TODO: for infinite decks, still tween item to the deck but make it look like it's merging with the first item or something
-                //infinite decks should basically look like one card which represents that item type - cards should be able to be placed/returned
-                //to the deck but it shouldn't stack as if there are multiple (but finite) cards
-                //maybe make cards added to infinite decks scale down to zero as they move to the deck?
-            }
-
-            item.transform.parent = transform;
-            item.SetState(CraftingItem.State.Animatable);
-
-            deck.AddLast(item);
-
-            if (animateToDeck)
-            {
-                StartCoroutine(TweenItemToDeck(item));
-            }
-            else
-            {
-                item.transform.position = GetTopDeckPos();
-            }
+    private void AddItemToTopDeck(CraftingItem item, bool animateToDeck = true)
+    {
+        if(!item)
+        {
+            Debug.LogError($"Tried to add null item to deck!");
+            return;
         }
 
-        protected override bool CanRemovePlacedObj(DraggableObject obj)
+        if (singleItemType && !IsEmpty() && item.Data != deck.Last.Value.Data)
         {
-            return !IsEmpty() && PeekTopItem() == obj;
+            Debug.LogError("Added a different item type to a single-item deck! This should be dealt with earlier in code.");
         }
 
-        protected override void OnPlacedObjRemoved(DraggableObject obj)
+        if(GameplaySettings.InfiniteDecks && !IsEmpty())
         {
-            if(PeekTopItem() == obj)
-            {
-                RemoveTopItem();
-            }
-            else
-            {
-                Debug.LogError($"Object {obj} removed from deck, but it isn't the top item in this deck! This shouldn't happen.");
-            }
+            //TODO: for infinite decks, still tween item to the deck but make it look like it's merging with the first item or something
+            //infinite decks should basically look like one card which represents that item type - cards should be able to be placed/returned
+            //to the deck but it shouldn't stack as if there are multiple (but finite) cards
+            //maybe make cards added to infinite decks scale down to zero as they move to the deck?
         }
 
-        protected override void OnDraggableEnterPlacementArea(DraggableObject obj)
-        {
-            base.OnDraggableEnterPlacementArea(obj);
+        item.transform.parent = transform;
+        item.SetState(CraftingItem.State.Animatable);
 
-            if(CanPlace(obj))
-            {
-                SetPlacementPreviewVFXEnabled(true);
-            }
+        deck.AddLast(item);
+
+        if (animateToDeck)
+        {
+            StartCoroutine(TweenItemToDeck(item));
         }
-
-        private void SetPlacementPreviewVFXEnabled(bool enabled)
+        else
         {
-            if (cursor && onHoverPreviewVFX)
-            {
-                onHoverPreviewVFX.gameObject.SetActive(enabled);
-            }
+            item.transform.position = GetTopDeckPos();
         }
+    }
 
-        protected override void OnDraggableExitPlacementArea(DraggableObject obj)
+    protected override bool CanRemovePlacedObj(DraggableObject obj)
+    {
+        return !IsEmpty() && PeekTopItem() == obj;
+    }
+
+    protected override void OnPlacedObjRemoved(DraggableObject obj)
+    {
+        if(PeekTopItem() == obj)
         {
-            base.OnDraggableExitPlacementArea(obj);
+            RemoveTopItem();
+        }
+        else
+        {
+            Debug.LogError($"Object {obj} removed from deck, but it isn't the top item in this deck! This shouldn't happen.");
+        }
+    }
 
+    protected override void OnDraggableEnterPlacementArea(DraggableObject obj)
+    {
+        base.OnDraggableEnterPlacementArea(obj);
+
+        if(CanPlace(obj))
+        {
+            SetPlacementPreviewVFXEnabled(true);
+        }
+    }
+
+    private void SetPlacementPreviewVFXEnabled(bool enabled)
+    {
+        if (cursor && onHoverPreviewVFX)
+        {
+            onHoverPreviewVFX.gameObject.SetActive(enabled);
+        }
+    }
+
+    protected override void OnDraggableExitPlacementArea(DraggableObject obj)
+    {
+        base.OnDraggableExitPlacementArea(obj);
+
+        SetPlacementPreviewVFXEnabled(false);
+    }
+
+    //ICursorEventListener
+    public override void OnCursorEvent(Cursor.EventID e)
+    {
+        base.OnCursorEvent(e);
+
+        //slightly jank but w/e
+        if(!cursor.CurrentDragTarget)
+        {
             SetPlacementPreviewVFXEnabled(false);
         }
 
-        //ICursorEventListener
-        public override void OnCursorEvent(Cursor.EventID e)
+        if (e == Cursor.EventID.LeftClickDown)
         {
-            base.OnCursorEvent(e);
-
-            //slightly jank but w/e
-            if(!cursor.CurrentDragTarget)
+            if (cursor.IsHovered(this))
             {
-                SetPlacementPreviewVFXEnabled(false);
-            }
-
-            if (e == Cursor.EventID.LeftClickDown)
-            {
-                if (cursor.IsHovered(this))
-                {
-                    GrabTopDeckItem();
-                }
+                GrabTopDeckItem();
             }
         }
+    }
 
-        private void OnDrawGizmos()
+    private void OnDrawGizmos()
+    {
+        Gizmos.matrix = Matrix4x4.identity;
+        if (cursor && cursor.IsHovered(this))
         {
-            Gizmos.matrix = Matrix4x4.identity;
-            if (cursor && cursor.IsHovered(this))
-            {
-                Gizmos.color = Color.green;
-            }
-            else
-            {
-                Gizmos.color = Color.white;
-            }
-            Gizmos.DrawSphere(transform.position, 0.1f);
-            Gizmos.DrawWireCube(transform.position, new Vector3(1f, 0f, 1f));
+            Gizmos.color = Color.green;
         }
+        else
+        {
+            Gizmos.color = Color.white;
+        }
+        Gizmos.DrawSphere(transform.position, 0.1f);
+        Gizmos.DrawWireCube(transform.position, new Vector3(1f, 0f, 1f));
     }
 }

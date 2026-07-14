@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -9,7 +8,8 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
     [SerializeField] protected Cursor cursor;
     [SerializeField] protected bool dragEnabled = true;
     [SerializeField] protected bool requiresPlacementPoint;
-    
+    [SerializeField] protected bool initialiseOnEnable;
+
     protected bool isDragging;
 
     protected virtual Sprite OnHoverDragSprite { get; set; }
@@ -19,9 +19,11 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
     public UnityEvent DragStarted;
     public UnityEvent DragEnded;
 
-    private HashSet<DraggablePlacementPoint> hoveredPlacementPoints = new HashSet<DraggablePlacementPoint>();
-    private DraggablePlacementPoint returnPoint;
-    private DraggablePlacementPoint placedPoint;
+    protected HashSet<DraggablePlacementPoint> hoveredPlacementPoints = new HashSet<DraggablePlacementPoint>();
+    protected DraggablePlacementPoint returnPoint;
+    protected DraggablePlacementPoint placedPoint;
+
+    protected bool IsPlaced => placedPoint;
 
     protected virtual void OnEnable()
     {
@@ -30,7 +32,10 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
             sprite = OnHoverDragSprite
         };
 
-        ((ICursorEventListener)this).RegisterListener(cursor);
+        if(initialiseOnEnable)
+        {
+            Initialise(cursor);
+        }
     }
 
     protected virtual void OnDisable()
@@ -40,6 +45,11 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
         EndDrag();
         DragStarted.RemoveAllListeners();
         DragEnded.RemoveAllListeners();
+    }
+
+    public virtual void Initialise(Cursor cursor)
+    {
+        ((ICursorEventListener)this).RegisterListener(cursor);
     }
 
     //"Try" because if multiple draggables want to start dragging on the same tick,
@@ -167,6 +177,21 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
         if(placedPoint == point)
         {
             placedPoint = null;
+        }
+    }
+
+    public void SetCursor(Cursor cursor)
+    {
+        if(this.cursor && cursor != this.cursor)
+        {
+            ((ICursorEventListener)this).DeregisterListener(cursor);
+        }
+
+        this.cursor = cursor;
+
+        if(cursor)
+        {
+            ((ICursorEventListener)this).RegisterListener(cursor);
         }
     }
 

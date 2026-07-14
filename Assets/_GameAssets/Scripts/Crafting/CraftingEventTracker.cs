@@ -4,19 +4,19 @@ using UnityEngine;
 
 public class CraftingEventTracker
 {
-    private HashSet<CraftingItemData> uniqueItemsCrafted;
-    private List<CraftingItemData> uniqueItemsCraftedInCraftOrder;
+    private HashSet<CardData> uniqueItemsCrafted;
+    private List<CardData> uniqueItemsCraftedInCraftOrder;
 
-    public event Action<CraftingItemData> itemFirstCrafted;
-    public event Action<CraftingItemData> onItemCrafted;
+    public event Action<CardData> itemFirstCrafted;
+    public event Action<CardData> onItemCrafted;
 
     public CraftingEventTracker()
     {
-        uniqueItemsCrafted = new HashSet<CraftingItemData>();
-        uniqueItemsCraftedInCraftOrder = new List<CraftingItemData>();
+        uniqueItemsCrafted = new HashSet<CardData>();
+        uniqueItemsCraftedInCraftOrder = new List<CardData>();
     }
 
-    public void OnItemCrafted(CraftingItemData itemData)
+    public void OnItemCrafted(CardData itemData)
     {
         if(!uniqueItemsCrafted.Contains(itemData))
         {
@@ -28,12 +28,12 @@ public class CraftingEventTracker
         onItemCrafted?.Invoke(itemData);
     }
 
-    public List<CraftingItemData> GetUniqueItemsCrafted()
+    public List<CardData> GetUniqueItemsCrafted()
     {
         return uniqueItemsCraftedInCraftOrder;
     }
 
-    public bool WasItemCraftedPreviously(CraftingItemData itemData)
+    public bool WasItemCraftedPreviously(CardData itemData)
     {
         return uniqueItemsCrafted.Contains(itemData);
     }

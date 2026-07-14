@@ -15,7 +15,7 @@ namespace Crafting
         [SerializeField] private OnCraftSpawnItemSequence spawnItemSequence;
         [SerializeField] private TimelineAsset finishSequence;
 
-        public void DoCraftSequence(ICollection<CraftingItem> ingredients, List<CraftingItemData> itemsToSpawn)
+        public void DoCraftSequence(ICollection<CraftingItem> ingredients, List<CardData> itemsToSpawn)
         {
             convergeSequence.Ingredients = ingredients;
             spawnItemSequence.Ingredients = ingredients;

@@ -22,7 +22,7 @@ public class CraftingItem : DraggablePhysicsObject
     }
 
     [Header("Item data")]
-    [SerializeField] private CraftingItemData itemData;
+    [SerializeField] private CardData itemData;
 
     [Header("Art")]
     [SerializeField] private RectTransform canvasRect;
@@ -50,7 +50,7 @@ public class CraftingItem : DraggablePhysicsObject
     private bool isTouchingOtherItems;
     private State state;
 
-    public CraftingItemData Data
+    public CardData Data
     {
         get => itemData;
         set
@@ -66,17 +66,7 @@ public class CraftingItem : DraggablePhysicsObject
     {
         base.OnEnable();
 
-        if (craftingManager)
-        {
-            craftingManager.RegisterCraftingItem(this);
-        }
-
-        SetState(State.Active);
-
-        if (craftingPotentialVFX)
-        {
-            craftingPotentialVFX.SetActive(false);
-        }
+        
     }
 
     protected override void OnDisable()
@@ -234,22 +224,31 @@ public class CraftingItem : DraggablePhysicsObject
 
     protected override void OnEndDrag()
     {
+        base.OnEndDrag();
+
         SetCollisionEnabled(true);
         FMODX.PlayOneShotAttached(onDropSFX, gameObject);
     }
 
     //called when this item is first crafted
-    public void OnSpawned(CraftingManager craftingManager)
+    public void Initialise(CraftingManager craftingManager, CardData itemData, Cursor cursor)
     {
-        this.craftingManager = craftingManager;
-        OnCraftedVFX();
-    }
-
-    private void OnCraftedVFX()
-    {
-        if (onCraftedVFX)
+        if(craftingManager)
         {
-            onCraftedVFX.SetActive(true);
+            this.craftingManager = craftingManager;
+            craftingManager.RegisterCraftingItem(this);
+        }
+
+        SetCursor(cursor);
+        base.Initialise(cursor);
+        
+        Data = itemData;
+
+        SetState(State.Active);
+
+        if (craftingPotentialVFX)
+        {
+            craftingPotentialVFX.SetActive(false);
         }
     }
 
@@ -257,7 +256,16 @@ public class CraftingItem : DraggablePhysicsObject
     {
         if (resultState == CraftingManager.CraftingResultState.SuccessfulCraft)
         {
-            OnSuccessfulCraft();
+            SetPartialCraftVFX(false);
+
+            if (onCraftedVFX)
+            {
+                onCraftedVFX.SetActive(true);
+            }
+
+            SetCollisionEnabled(false);
+            OnUsedInSuccessfulCraft?.Invoke();
+            Destroy(gameObject);
         }
         else if (resultState == CraftingManager.CraftingResultState.PartialIngredientMatch)
         {
@@ -279,14 +287,6 @@ public class CraftingItem : DraggablePhysicsObject
         {
             craftingPotentialVFX.SetActive(on);
         }
-    }
-
-    private void OnSuccessfulCraft()
-    {
-        SetPartialCraftVFX(false);
-        SetCollisionEnabled(false);
-        OnUsedInSuccessfulCraft?.Invoke();
-        Destroy(gameObject);
     }
 
     public void SetState(State state)

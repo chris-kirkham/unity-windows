@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering.Universal;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 #if UNITY_EDITOR
@@ -57,15 +55,16 @@ public class Cursor : MonoBehaviour
     [SerializeField] private LayerMask cursorRaycastLayerMask;
     [SerializeField] private Camera cam;
     [SerializeField] private Image cursorImage;
-    [SerializeField, FormerlySerializedAs("defaultCursorSprite")] private Sprite defaultSprite;
+    [SerializeField] private Sprite defaultSprite;
     [Space]
     [SerializeField] private DebugDisplay debugDisplay;
+    [SerializeField] private DraggablesManager draggablesManager;
 
     //mouse raycasting
     private EventSystem eventSystem;
     private PointerEventData pointerEventData;
     private List<RaycastResult> raycastResults = new List<RaycastResult>();
-    private const int MaxRaycastHits = 100;
+    private const int MaxRaycastHits = 200;
     private const float MaxRaycastDist = 100f;
     private RaycastHit[] raycastHits = new RaycastHit[MaxRaycastHits];
     private ICursorEventListener[] listenerRaycastHits = new ICursorEventListener[MaxRaycastHits];
@@ -88,8 +87,6 @@ public class Cursor : MonoBehaviour
     private List<ICursorEventListener> hoveredListeners = new List<ICursorEventListener>(); //event listeners the cursor is currently on top of
     private List<SpriteOverride> spriteOverrides = new List<SpriteOverride>();
 
-    private DraggablesManager draggablesManager;
-
     public Vector2 RawPosition => rawMousePosition;
     public Vector2 RawPositionDelta => rawMousePosition - prevRawMousePosition;
     public Vector2 ClampedPosition_SS => clampedRawMousePos;
@@ -105,9 +102,9 @@ public class Cursor : MonoBehaviour
 
     public DraggableObject CurrentDragTarget => draggablesManager.CurrentDragTarget;
 
-    private void OnEnable()
+    private void Awake()
     {
-        draggablesManager = new DraggablesManager(this);
+        draggablesManager.SetCursor(this);
         eventSystem = FindFirstObjectByType<EventSystem>();
         UnityEngine.Cursor.visible = false; //hide default cursor (TODO: look at using Cursor.SetCursor instead?)
     }
@@ -203,7 +200,7 @@ public class Cursor : MonoBehaviour
 
                 if (listenerHitCount >= MaxRaycastHits - 1)
                 {
-                    Debug.LogError($"Hit listener count exceeds size of raycast hit buffer! Some hits will not be registered.");
+                    Debug.LogError($"Hit listener count ({listenerHitCount}) exceeds size of raycast hit buffer ({MaxRaycastHits})! Some hits will not be registered.");
                     listenerHitCount = MaxRaycastHits - 1;
                     return;
                 }

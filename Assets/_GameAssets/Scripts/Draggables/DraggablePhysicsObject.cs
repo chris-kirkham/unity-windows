@@ -12,7 +12,7 @@ public class DraggablePhysicsObject : DraggableObject
     private const float MaxRaycastDist = 100f;
 
     //hack to prevent... this re-enabling physics when it shouldn't
-    public bool ReEnablePhysicsOnEndDrag { get; set; } = false;
+    private const bool ReEnablePhysicsOnEndDrag = true;
 
     private Vector3? overrideDragPosition = null;
 
@@ -50,11 +50,12 @@ public class DraggablePhysicsObject : DraggableObject
     {
         base.OnEndDrag();
 
-        if(ReEnablePhysicsOnEndDrag)
+        if(!IsPlaced && ReEnablePhysicsOnEndDrag) //let object fall/move with physics if not placed at a point
         {
             if (rb)
             {
                 rb.isKinematic = false;
+                rb.linearVelocity = Vector3.zero;
             }
 
             if (coll)

@@ -15,6 +15,7 @@ namespace Crafting
 
         [SerializeField] private Player player;
 
+        [SerializeField] private Cursor cursor;
         [SerializeField] private CraftingItemDatabase itemDatabase;
         [SerializeField] private CraftingItem thumbnailPrefab;
         [SerializeField] private CraftingItemWindow windowPrefab;
@@ -23,7 +24,7 @@ namespace Crafting
         [SerializeField] private OnCraftSequence craftSequence;
         [Header("Crafting zones")]
         [SerializeField] private CrafterBoard crafterBoard;
-        [SerializeField] private List<CraftingItemData> randomProducts;
+        [SerializeField] private List<CardData> randomProducts;
         [SerializeField] private bool SpawnHelperIngredientsIfNoCraftPossible = true;
         [SerializeField] private float helperSpawnMinTime = 1f;
         [SerializeField] private float helperSpawnMaxTime = 10f;
@@ -39,7 +40,7 @@ namespace Crafting
         //cached lists of stuff
         private List<CraftingItem> unusedIngredients = new List<CraftingItem>(); //unused ingredients during each craft attempt
         private const int MaxResultsPerCraft = 10; //increase this if we need more
-        private CraftingItemData[] craftResults = new CraftingItemData[MaxResultsPerCraft];
+        private CardData[] craftResults = new CardData[MaxResultsPerCraft];
         private CraftingResultState[] craftResultStates = new CraftingResultState[MaxResultsPerCraft];
 
         private CraftingEventTracker craftedTracker = new CraftingEventTracker();
@@ -142,7 +143,7 @@ namespace Crafting
             //TODO: allocation
             var anySuccessfulCraft = false;
             var anyPartialMatch = false;
-            var successfulCrafts = new List<CraftingItemData>();
+            var successfulCrafts = new List<CardData>();
             for (int i = 0; i < numResults; i++)
             {
                 if (craftResultStates[i] == CraftingResultState.SuccessfulCraft)
@@ -183,7 +184,7 @@ namespace Crafting
         }
 
 
-        private int GetCraftResultsAllItems(ICollection<CraftingItem> ingredients, CraftingItemData[] results, CraftingResultState[] resultStates)
+        private int GetCraftResultsAllItems(ICollection<CraftingItem> ingredients, CardData[] results, CraftingResultState[] resultStates)
         {
             if (ingredients.Count < 2)
             {
@@ -191,7 +192,7 @@ namespace Crafting
             }
 
             int numResults = 0;
-            CraftingItemData currentResult = null;
+            CardData currentResult = null;
             CraftingResultState currentResultState;
             foreach (var result in itemDatabase.ItemList)
             {
@@ -246,7 +247,7 @@ namespace Crafting
             return numResults;
         }
 
-        private int GetNumMatchingIngredientsToItemPrereqs(CraftingItemData item, ICollection<CraftingItem> ingredients)
+        private int GetNumMatchingIngredientsToItemPrereqs(CardData item, ICollection<CraftingItem> ingredients)
         {
             unusedIngredients.Clear();
             unusedIngredients.AddRange(ingredients);
@@ -268,7 +269,7 @@ namespace Crafting
             return numMatching;
         }
 
-        private void DoSuccessfulCrafts(ICollection<CraftingItem> ingredients, List<CraftingItemData> successfulCrafts)
+        private void DoSuccessfulCrafts(ICollection<CraftingItem> ingredients, List<CardData> successfulCrafts)
         {
             if (!craftSequence)
             {
@@ -280,12 +281,10 @@ namespace Crafting
             craftSequence.DoCraftSequence(ingredients, successfulCrafts);
         }
 
-        public CraftingItem SpawnItem(CraftingItemData itemData, Vector3 position, Quaternion rotation)
+        public CraftingItem SpawnItem(CardData itemData, Vector3 position, Quaternion rotation)
         {
             var item = Instantiate<CraftingItem>(thumbnailPrefab, position, rotation);
-            item.Data = itemData;
-
-            item.OnSpawned(this);
+            item.Initialise(this, itemData, cursor);
             craftedTracker.OnItemCrafted(itemData);
 
             return item;
@@ -338,9 +337,9 @@ namespace Crafting
             return anyPossibleCraft;
         }
 
-        public List<CraftingItemData> FindPossibleCrafts(bool includeAlreadyCraftedItems = true)
+        public List<CardData> FindPossibleCrafts(bool includeAlreadyCraftedItems = true)
         {
-            var possibleCrafts = new List<CraftingItemData>();
+            var possibleCrafts = new List<CardData>();
             foreach(var itemData in itemDatabase.ItemList)
             {
                 if(itemData.Prerequisites.Count == 0)
@@ -393,12 +392,12 @@ namespace Crafting
             }
         }
 
-        public bool WasItemCraftedPreviously(CraftingItemData itemData)
+        public bool WasItemCraftedPreviously(CardData itemData)
         {
             return craftedTracker.WasItemCraftedPreviously(itemData);
         }
 
-        public List<CraftingItemData> GetUniqueItemsCrafted()
+        public List<CardData> GetUniqueItemsCrafted()
         {
             return craftedTracker.GetUniqueItemsCrafted();
         }

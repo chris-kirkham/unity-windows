@@ -4,7 +4,7 @@ public class IntroSeqCraftingItem : MonoBehaviour, ICursorEventListener
 {
     [SerializeField] private Cursor cursor;
     [SerializeField] private CraftingItem item;
-    [SerializeField] private CraftingItemData itemData;
+    [SerializeField] private CardData itemData;
     [SerializeField] private IntroSequence introSequence;
     [SerializeField] private FadeInOutText onHoverText;
 

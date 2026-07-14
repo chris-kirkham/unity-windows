@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 //https://docs.unity3d.com/6000.2/Documentation/Manual/async-awaitable-continuations.html
-public class GameActionQueue<T> where T : GameAction
+public class GameActionQueue<T> where T : IGameAction
 {
     private Queue<T> queue;
     private T currentAction;

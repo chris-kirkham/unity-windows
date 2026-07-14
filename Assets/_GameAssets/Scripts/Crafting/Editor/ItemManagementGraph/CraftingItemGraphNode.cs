@@ -9,7 +9,7 @@ public class CraftingItemGraphNode : Node
 
     protected override void OnDefinePorts(IPortDefinitionContext context)
     {
-        context.AddInputPort<CraftingItemData>(PrerequisitePortName)
+        context.AddInputPort<CardData>(PrerequisitePortName)
             .WithConnectorUI(PortConnectorUI.Arrowhead)
             .Build();
     }

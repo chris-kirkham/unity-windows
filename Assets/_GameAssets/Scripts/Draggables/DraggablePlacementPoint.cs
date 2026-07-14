@@ -7,7 +7,10 @@ public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListe
 
     protected virtual void OnEnable()
     {
-        ((ICursorEventListener)this).RegisterListener(cursor);
+        if(cursor)
+        {
+            Initialise(cursor);
+        }
     }
 
     protected virtual void OnDisable()
@@ -80,6 +83,15 @@ public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListe
         {
             obj.RemoveHoveredPoint(this);
         }
+    }
+
+    public void Initialise(Cursor cursor)
+    {
+        this.cursor = cursor;
+        ((ICursorEventListener)this).RegisterListener(cursor);
+#if UNITY_EDITOR
+        Debug.Log($"Registered {nameof(ICursorEventListener)} {name}");
+#endif
     }
 
     public virtual void OnCursorEvent(Cursor.EventID e) 
