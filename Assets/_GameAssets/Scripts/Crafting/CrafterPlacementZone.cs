@@ -87,7 +87,7 @@ public class CrafterPlacementZone : DraggablePlacementPoint, ICursorEventListene
             yield break;
         }
 
-        if(CanPlace(currentItem))
+        if(CanPlace(currentItem, PlacementSource.Default))
         {
             yield return Tweening.DoTransform(
                 currentItem.transform, zonePivot.position, zonePivot.rotation, animateItemToPlacementPointTime).WaitForCompletion();
@@ -141,7 +141,7 @@ public class CrafterPlacementZone : DraggablePlacementPoint, ICursorEventListene
     {
     }
 
-    protected override bool CanPlace(DraggableObject obj)
+    protected override bool CanPlace(DraggableObject obj, PlacementSource _)
     {
         return state != State.ItemPlaced;
     }

@@ -104,14 +104,14 @@ namespace Crafting
             }
         }
 
-        void PlaceItemInBoardDeck(CraftingItem item, CraftingItemDeck deck)
+        private void PlaceItemInBoardDeck(CraftingItem item, CraftingItemDeck deck)
         {
             if(deck.IsEmpty())
             {
                 deck.ItemType = item.Data;
             }
 
-            if (deck.TryPlaceObject(item))
+            if (deck.TryPlaceObject(item, DraggablePlacementPoint.PlacementSource.Script))
             {
                 AddToActiveItems(item);
             }

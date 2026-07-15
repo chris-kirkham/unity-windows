@@ -1,7 +1,17 @@
+using System;
 using UnityEngine;
 
 public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListener
 {
+    [Flags]
+    public enum PlacementSource
+    { 
+        Default = 1 << 0,
+        PlayerDragAndDrop = 1 << 1,
+        PlacementPointReturn = 1 << 2,
+        Script = 1 << 3
+    }
+
     [SerializeField] protected Cursor cursor;
     [SerializeField] protected bool returnable = true;
 
@@ -22,9 +32,9 @@ public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListe
         }
     }
 
-    public bool TryPlaceObject(DraggableObject obj)
+    public bool TryPlaceObject(DraggableObject obj, PlacementSource placementSource)
     {
-        if (CanPlace(obj))
+        if (CanPlace(obj, placementSource))
         {
             //try remove object from its current placement, if any
             if(!obj.TryRemoveFromCurrentPlacementPoint())
@@ -47,7 +57,7 @@ public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListe
     }
 
     //Can the given object be placed on this placement point?
-    protected abstract bool CanPlace(DraggableObject obj);
+    protected abstract bool CanPlace(DraggableObject obj, PlacementSource placementSource);
 
     //place the object on this placement point
     protected virtual void PlaceObject(DraggableObject obj)

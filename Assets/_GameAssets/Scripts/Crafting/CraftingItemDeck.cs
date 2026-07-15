@@ -11,6 +11,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
     [SerializeField] private CraftingItemDatabase startingDeck;
 	[SerializeField] private float itemHeight = 0.1f;
     [SerializeField] private float itemZOffset = 0.05f;
+    [SerializeField] private bool playerCanPlaceCards = true;
     [SerializeField] private bool populateOnEnable;
     [SerializeField] private bool singleItemType = true;
     //allow any item type to be placed when the deck is empty, even if it's a single-item-type deck.
@@ -94,7 +95,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         {
             var itemData = deckItems.ItemList[i];
             var item = craftingManager.SpawnItem(itemData, transform.position, Quaternion.identity);
-            if(!TryPlaceObject(item))
+            if(!TryPlaceObject(item, PlacementSource.Script))
             {
                 Debug.LogError($"Unable to place item when populating deck for some reason!");
             }
@@ -150,16 +151,21 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         if (GameplaySettings.InfiniteDecks && deck.Count < 1)
         {
             var newItem = craftingManager.SpawnItem(itemData, GetTopDeckPos(), Quaternion.identity);
-            if(!TryPlaceObject(newItem))
+            if(!TryPlaceObject(newItem, PlacementSource.Script))
             {
                 Debug.LogError("Unable to replace item in deck for some reason!");
             }
         }
     }
 
-    protected override bool CanPlace(DraggableObject obj)
+    protected override bool CanPlace(DraggableObject obj, PlacementSource placementSource)
     {
         if(!(obj is CraftingItem))
+        {
+            return false;
+        }
+
+        if(!playerCanPlaceCards && placementSource == PlacementSource.PlayerDragAndDrop)
         {
             return false;
         }
@@ -248,7 +254,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
     {
         base.OnDraggableEnterPlacementArea(obj);
 
-        if(CanPlace(obj))
+        if(CanPlace(obj, PlacementSource.PlayerDragAndDrop)) //TODO: will this always be player-placed?
         {
             SetPlacementPreviewVFXEnabled(true);
         }
@@ -260,9 +266,11 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
 
         SetPlacementPreviewVFXEnabled(false);
     }
+
     protected override void OnDragTargetChanged()
     {
         base.OnDragTargetChanged();
+
         if (!cursor.CurrentDragTarget || !cursor.IsHovered(this))
         {
             SetPlacementPreviewVFXEnabled(false);

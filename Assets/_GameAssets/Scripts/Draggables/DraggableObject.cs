@@ -93,7 +93,7 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
         isDragging = false;
 
         var bestPlacementPoint = GetBestAvailablePlacementPoint();
-        var placed = bestPlacementPoint && bestPlacementPoint.TryPlaceObject(this);
+        var placed = bestPlacementPoint && bestPlacementPoint.TryPlaceObject(this, DraggablePlacementPoint.PlacementSource.PlayerDragAndDrop);
         if(!placed && requiresPlacementPoint)
         {
             if (!TryReturn())
@@ -154,7 +154,7 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
 
     public bool TryReturn()
     {
-        return returnPoint && returnPoint.TryPlaceObject(this);
+        return returnPoint && returnPoint.TryPlaceObject(this, DraggablePlacementPoint.PlacementSource.PlacementPointReturn);
     }
 
     public bool TryRemoveFromCurrentPlacementPoint()

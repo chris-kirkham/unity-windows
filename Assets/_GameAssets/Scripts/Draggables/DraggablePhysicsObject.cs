@@ -11,9 +11,6 @@ public class DraggablePhysicsObject : DraggableObject
     private const float MinDistFromCamera = 1f;
     private const float MaxRaycastDist = 100f;
 
-    //hack to prevent... this re-enabling physics when it shouldn't
-    private const bool ReEnablePhysicsOnEndDrag = true;
-
     private Vector3? overrideDragPosition = null;
 
     protected override void OnEnable()
@@ -25,7 +22,7 @@ public class DraggablePhysicsObject : DraggableObject
             Debug.LogError($"No Rigidbody set for this {nameof(DraggablePhysicsObject)}!");
         }
 
-        if(!coll)
+        if (!coll)
         {
             Debug.LogError($"No Collider set for this {nameof(DraggablePhysicsObject)}");
         }
@@ -38,6 +35,7 @@ public class DraggablePhysicsObject : DraggableObject
         if(rb)
         {
             rb.isKinematic = true;
+            rb.useGravity = false;
         }
 
         if(coll)
@@ -50,11 +48,12 @@ public class DraggablePhysicsObject : DraggableObject
     {
         base.OnEndDrag();
 
-        if(!IsPlaced && ReEnablePhysicsOnEndDrag) //let object fall/move with physics if not placed at a point
+        if(!IsPlaced) //let object fall/move with physics if not placed at a point
         {
             if (rb)
             {
                 rb.isKinematic = false;
+                rb.useGravity = true;
                 rb.linearVelocity = Vector3.zero;
             }
 
@@ -66,17 +65,13 @@ public class DraggablePhysicsObject : DraggableObject
     }
 
     protected virtual void Update()
+    //protected virtual void FixedUpdate()
     {
         if(rb && isDragging)
         {
-            if(overrideDragPosition.HasValue)
-            {
-                transform.position = overrideDragPosition.Value;
-            }
-            else
-            {
-                transform.position = GetTargetPosition();
-            }
+            var targetPos = overrideDragPosition.HasValue ? overrideDragPosition.Value : GetTargetPosition();
+            transform.position = targetPos;
+            //rb.MovePosition(targetPos)
         }
     }
 

@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using UnityEngine;
 
+[CreateAssetMenu(fileName = "CardAction_DealDamage", menuName = "Card Actions/Deal Damage")]
 public class DealDamageCardAction : CardAction
 {
     public enum DamageTarget
@@ -12,8 +13,27 @@ public class DealDamageCardAction : CardAction
     [SerializeField] private DamageTarget damageTarget;
     [SerializeField] private int damage;
 
-    public override Task Execute()
+    private Player targetPlayer;
+
+    public override async Task Execute()
     {
-        throw new System.NotImplementedException();       
+        await DoDamageFX();
+        DealDamage();
+    }
+
+    private async Task DoDamageFX()
+    {
+        await Task.Delay(1000);
+    }
+
+    private void DealDamage()
+    {
+        if(!targetPlayer)
+        {
+            Debug.LogError("Target player is null!");
+            return;
+        }
+
+        targetPlayer.DealDamage(damage);
     }
 }

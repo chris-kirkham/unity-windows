@@ -12,7 +12,7 @@ public class PlayerHand : DraggablePlacementPoint
     [SerializeField] private float cardRoll;
     [SerializeField] private Transform cardParent;
 
-    private List<CraftingItem> cards = new List<CraftingItem>();
+    private List<CraftingItem> hand = new List<CraftingItem>();
 
     protected override void PlaceObject(DraggableObject obj)
     {
@@ -25,24 +25,24 @@ public class PlayerHand : DraggablePlacementPoint
         }
 
         card.transform.SetParent(cardParent);
-        cards.Add(card);
+        hand.Add(card);
         SpreadCards();
     }
 
     private void SpreadCards()
     {
-        if(cards == null || cards.Count == 0)
+        if(hand == null || hand.Count == 0)
         {
             return;
         }
 
-        var leftmostPos = -cardOffset * (cards.Count / 2f);
+        var leftmostPos = -cardOffset * (hand.Count / 2f);
         var cardRotation = Quaternion.Euler(0f, 0f, cardRoll);
         
-        for(int i = 0; i < cards.Count; i++)
+        for(int i = 0; i < hand.Count; i++)
         {
             var pos = leftmostPos + (cardOffset * i);
-            var tForm = cards[i].transform;
+            var tForm = hand[i].transform;
             tForm.DOBlendableLocalMoveBy(pos - tForm.localPosition, 0.5f);
             tForm.DOBlendableLocalRotateBy(new Vector3(0f, 0f, cardRoll), 0.5f);
         }
@@ -56,7 +56,7 @@ public class PlayerHand : DraggablePlacementPoint
         PlaceObject(card);
     }
 
-    protected override bool CanPlace(DraggableObject obj)
+    protected override bool CanPlace(DraggableObject obj, PlacementSource _)
     {
         var item = (CraftingItem)obj;   
         
@@ -70,13 +70,11 @@ public class PlayerHand : DraggablePlacementPoint
 
     protected override bool CanRemovePlacedObj(DraggableObject obj)
     {
-        throw new System.NotImplementedException();
+        return hand.Contains(obj as CraftingItem);
     }
 
     public override void OnCursorEvent(Cursor.EventID e)
     {
         base.OnCursorEvent(e);
-
-
     }
 }

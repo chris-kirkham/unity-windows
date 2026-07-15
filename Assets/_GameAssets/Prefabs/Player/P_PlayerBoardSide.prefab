@@ -98,6 +98,10 @@ PrefabInstance:
       propertyPath: craftingManager
       value: 
       objectReference: {fileID: 105591207235928635}
+    - target: {fileID: 8962851299458621393, guid: f636810ac1eeb494ab89b24e0f4ab153, type: 3}
+      propertyPath: playerCanPlaceCards
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -120,17 +124,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: P_Player
       objectReference: {fileID: 0}
+    - target: {fileID: 8597685863066880409, guid: 07bd4332b345c7143b9baaef492ccf4c, type: 3}
+      propertyPath: field of view
+      value: 70
+      objectReference: {fileID: 0}
     - target: {fileID: 8881636720033572642, guid: 07bd4332b345c7143b9baaef492ccf4c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8881636720033572642, guid: 07bd4332b345c7143b9baaef492ccf4c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 8
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8881636720033572642, guid: 07bd4332b345c7143b9baaef492ccf4c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -6
+      value: -5
       objectReference: {fileID: 0}
     - target: {fileID: 8881636720033572642, guid: 07bd4332b345c7143b9baaef492ccf4c, type: 3}
       propertyPath: m_LocalRotation.w
@@ -280,6 +288,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1798419480490641931}
     - target: {fileID: 5835052037880426058, guid: ddf03641f2caa114abc195c67ef5abcd, type: 3}
+      propertyPath: gridCells.x
+      value: 16
+      objectReference: {fileID: 0}
+    - target: {fileID: 5835052037880426058, guid: ddf03641f2caa114abc195c67ef5abcd, type: 3}
+      propertyPath: gridCells.y
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5835052037880426058, guid: ddf03641f2caa114abc195c67ef5abcd, type: 3}
       propertyPath: craftingManager
       value: 
       objectReference: {fileID: 105591207235928635}
@@ -287,6 +303,10 @@ PrefabInstance:
       propertyPath: cursor
       value: 
       objectReference: {fileID: 1798419480490641931}
+    - target: {fileID: 7514859048449822884, guid: ddf03641f2caa114abc195c67ef5abcd, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
