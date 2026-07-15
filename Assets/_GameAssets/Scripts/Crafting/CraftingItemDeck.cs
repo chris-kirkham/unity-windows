@@ -254,6 +254,21 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         }
     }
 
+    protected override void OnDraggableExitPlacementArea(DraggableObject obj)
+    {
+        base.OnDraggableExitPlacementArea(obj);
+
+        SetPlacementPreviewVFXEnabled(false);
+    }
+    protected override void OnDragTargetChanged()
+    {
+        base.OnDragTargetChanged();
+        if (!cursor.CurrentDragTarget || !cursor.IsHovered(this))
+        {
+            SetPlacementPreviewVFXEnabled(false);
+        }
+    }
+
     private void SetPlacementPreviewVFXEnabled(bool enabled)
     {
         if (cursor && onHoverPreviewVFX)
@@ -262,23 +277,10 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         }
     }
 
-    protected override void OnDraggableExitPlacementArea(DraggableObject obj)
-    {
-        base.OnDraggableExitPlacementArea(obj);
-
-        SetPlacementPreviewVFXEnabled(false);
-    }
-
     //ICursorEventListener
     public override void OnCursorEvent(Cursor.EventID e)
     {
         base.OnCursorEvent(e);
-
-        //slightly jank but w/e
-        if(!cursor.CurrentDragTarget)
-        {
-            SetPlacementPreviewVFXEnabled(false);
-        }
 
         if (e == Cursor.EventID.LeftClickDown)
         {

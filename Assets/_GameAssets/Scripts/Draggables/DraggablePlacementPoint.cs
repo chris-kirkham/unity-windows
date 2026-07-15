@@ -15,7 +15,11 @@ public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListe
 
     protected virtual void OnDisable()
     {
-        ((ICursorEventListener)this).DeregisterListener(cursor);
+        if(cursor)
+        {
+            ((ICursorEventListener)this).DeregisterListener(cursor);
+            cursor.DraggablesMgr.DragTargetChanged -= OnDragTargetChanged;
+        }
     }
 
     public bool TryPlaceObject(DraggableObject obj)
@@ -92,6 +96,17 @@ public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListe
 #if UNITY_EDITOR
         Debug.Log($"Registered {nameof(ICursorEventListener)} {name}");
 #endif
+        cursor.DraggablesMgr.DragTargetChanged += OnDragTargetChanged;
+    }
+
+    protected virtual void OnDragTargetChanged()
+    {
+        //if we just picked up a new drag target and are hovering over this element, treat it as if it just entered the placement area
+        var dragTarget = cursor.CurrentDragTarget;
+        if(dragTarget && cursor.IsHovered(this))
+        {
+            OnDraggableEnterPlacementArea(dragTarget);
+        }
     }
 
     public virtual void OnCursorEvent(Cursor.EventID e) 

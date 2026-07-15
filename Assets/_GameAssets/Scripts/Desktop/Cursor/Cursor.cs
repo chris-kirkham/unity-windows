@@ -100,6 +100,8 @@ public class Cursor : MonoBehaviour
 
     public Camera Cam => cam;
 
+    public DraggablesManager DraggablesMgr => draggablesManager;
+
     public DraggableObject CurrentDragTarget => draggablesManager.CurrentDragTarget;
 
     private void Awake()

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,11 +7,28 @@ public class DraggablesManager
 {
     private HashSet<DraggableObject> dragRequests = new HashSet<DraggableObject>();
 
-    public DraggableObject CurrentDragTarget { get; set; }
+    public DraggableObject CurrentDragTarget 
+    {
+        get => currentDragTarget;
+        private set
+        {
+            prevDragTarget = CurrentDragTarget;
+            currentDragTarget = value;
+
+            if(prevDragTarget != currentDragTarget)
+            {
+                DragTargetChanged?.Invoke();
+            }
+        }
+    }
 
     public HashSet<DraggableObject> DragRequests => dragRequests;
 
     private Cursor cursor;
+    private DraggableObject currentDragTarget;
+    private DraggableObject prevDragTarget;
+
+    public event Action DragTargetChanged;
 
     public void SetCursor(Cursor cursor)
     {
@@ -57,7 +75,15 @@ public class DraggablesManager
             else
             {
                 dragRequests.Remove(bestDraggable);
-                UpdateDragTarget(); //TODO: this will silently fail if there are no valid drag targets... potentially confusing
+
+                if(dragRequests.Count == 0)
+                {
+                    Debug.LogError("There were drag requests, but no valid drag target found among them!");
+                }
+                else
+                {
+                    UpdateDragTarget(); //try find a drag target among the remaining drag requests
+                }
             }
         }
     }

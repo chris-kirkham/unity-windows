@@ -103,7 +103,7 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
             }
         }
 
-        hoveredPlacementPoints.Clear(); //TODO: shouldn't be necessary if the hover events worked properly!!
+        hoveredPlacementPoints.Clear(); 
         OnEndDrag();
         DragEnded?.Invoke();
     }
