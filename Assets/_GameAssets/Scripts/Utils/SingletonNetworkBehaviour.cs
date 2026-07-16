@@ -1,6 +1,7 @@
 using UnityEngine;
+using Fusion;
 
-public abstract class SingletonMonoBehaviour<T> : MonoBehaviour, ISingleton<T> where T : MonoBehaviour
+public abstract class SingletonNetworkBehaviour<T> : NetworkBehaviour, ISingleton<T> where T : NetworkBehaviour
 {
     public static T Inst => ISingleton<T>.Inst;
 

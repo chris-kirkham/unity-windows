@@ -25,6 +25,7 @@ public class CardData : ScriptableObject
     public CraftingItemWindowContent WindowContent => contentPrefab;
     public List<CardData> ExtraProducts => products;
     public List<CardData> Prerequisites => prerequisites;
+    public List<CardAction> Actions => actions;
 
     public override string ToString()
     {

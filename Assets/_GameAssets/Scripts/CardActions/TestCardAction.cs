@@ -8,4 +8,9 @@ public class TestCardAction : CardAction, IGameAction
     {
         return new Task(() => { Debug.Log("Test action executed!"); });
     }
+
+    public override void Cancel()
+    {
+        throw new System.NotImplementedException();
+    }
 }

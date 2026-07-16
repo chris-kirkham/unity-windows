@@ -189,6 +189,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
             {
                 ItemType = item.Data;
             }
+
             AddItemToTopDeck(item);
         }
         else

@@ -20,6 +20,11 @@ public class GameActionQueueTest : MonoBehaviour, ICursorEventListener
             GameObject.Instantiate(vfxPrefab, pos, vfxPrefab.transform.rotation);
             await Task.Delay(1000);
         }
+
+        public void Cancel()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
     [SerializeField] private GameObject testVFXprefab;

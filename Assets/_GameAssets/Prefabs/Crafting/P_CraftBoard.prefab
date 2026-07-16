@@ -40,7 +40,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 145744188243229057}
-  - component: {fileID: 8868163458549237221}
+  - component: {fileID: 1735005858592772060}
   m_Layer: 0
   m_Name: P_CraftBoard
   m_TagString: Untagged
@@ -68,7 +68,7 @@ Transform:
   - {fileID: 960211814818971593}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8868163458549237221
+--- !u!114 &1735005858592772060
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -77,20 +77,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 5071856759666083489}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5821499f8fec2744e9124dce07000488, type: 3}
+  m_Script: {fileID: 11500000, guid: e16a30cd947cd9a499d0d30ed91891f1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::Crafting.PlayerBoard
   cursor: {fileID: 0}
   craftingManager: {fileID: 0}
-  centre: {x: 0, y: -2, z: 0}
-  size: {x: 21, y: 16}
+  centre: {x: 0, y: 0, z: 0}
+  size: {x: 0, y: 0}
   placementPoints:
-  - {fileID: 7654383954740973760}
   - {fileID: 1758898064980167450}
+  - {fileID: 7654383954740973760}
   - {fileID: 849387341088071626}
   gridCentre: {fileID: 4873575646185274123}
-  gridCells: {x: 8, y: 5}
-  gridCellSize: {x: 1.1, y: -1.4}
+  gridCells: {x: 12, y: 3}
+  gridCellSize: {x: 1.1, y: 1.4}
   gridCellDeckPrefab: {fileID: 6312110462525338186, guid: 6d457d275a0868943a3ecd7a06235147, type: 3}
 --- !u!1 &7739891255268870289
 GameObject:
@@ -734,7 +734,7 @@ PrefabInstance:
     - target: {fileID: 5362927751409417758, guid: ba1b8cb5ff60ca845a568cc4a3687c21, type: 3}
       propertyPath: crafterBoard
       value: 
-      objectReference: {fileID: 8868163458549237221}
+      objectReference: {fileID: 1735005858592772060}
     - target: {fileID: 8206090419114522716, guid: ba1b8cb5ff60ca845a568cc4a3687c21, type: 3}
       propertyPath: m_SceneBindings.Array.size
       value: 16

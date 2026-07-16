@@ -13,3 +13,5 @@ MonoBehaviour:
   m_Name: CardAction_Test
   m_EditorClassIdentifier: Assembly-CSharp::CardActionTest
   <ActionName>k__BackingField: Test
+  <ActionDesc>k__BackingField: Test card action! If you see this in a build, it's
+    a bug

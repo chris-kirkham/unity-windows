@@ -14,7 +14,6 @@ namespace Crafting
         }
 
         [SerializeField] private Player player;
-
         [SerializeField] private Cursor cursor;
         [SerializeField] private CraftingItemDatabase itemDatabase;
         [SerializeField] private CraftingItem thumbnailPrefab;
@@ -23,7 +22,7 @@ namespace Crafting
         [Header("Crafting sequence")]
         [SerializeField] private OnCraftSequence craftSequence;
         [Header("Crafting zones")]
-        [SerializeField] private CrafterBoard crafterBoard;
+        [SerializeField] private PlayerBoard crafterBoard;
         [SerializeField] private List<CardData> randomProducts;
         [SerializeField] private bool SpawnHelperIngredientsIfNoCraftPossible = true;
         [SerializeField] private float helperSpawnMinTime = 1f;
@@ -281,10 +280,10 @@ namespace Crafting
             craftSequence.DoCraftSequence(ingredients, successfulCrafts);
         }
 
-        public CraftingItem SpawnItem(CardData itemData, Vector3 position, Quaternion rotation)
+        public CraftingItem SpawnItem(CardData itemData, Vector3 position, Quaternion rotation, bool wasCrafted = false)
         {
             var item = Instantiate<CraftingItem>(thumbnailPrefab, position, rotation);
-            item.Initialise(this, itemData, cursor);
+            item.Initialise(player, this, itemData, cursor, wasCrafted);
             craftedTracker.OnItemCrafted(itemData);
 
             return item;
@@ -402,7 +401,7 @@ namespace Crafting
             return craftedTracker.GetUniqueItemsCrafted();
         }
 
-        public void SetBoard(CrafterBoard board)
+        public void SetBoard(PlayerBoard board)
         {
             crafterBoard = board;
             foreach (var placementPoint in crafterBoard.PlacementPoints)

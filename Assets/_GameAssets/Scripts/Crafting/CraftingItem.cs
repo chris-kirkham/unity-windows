@@ -7,7 +7,7 @@ using FMODUnity;
 using Crafting;
 
 [System.Serializable]
-public class CraftingItem : DraggablePhysicsObject
+public class CraftingItem : DraggablePhysicsObject, ICardActionTarget
 {
     /// <summary>
     /// Animatable = crafting OFF, input OFF, kinematic rb, collision OFF
@@ -41,8 +41,8 @@ public class CraftingItem : DraggablePhysicsObject
     [SerializeField] private EventReference onGrabSFX;
     [SerializeField] private EventReference onDropSFX;
 
+    private Player owningPlayer;
     private CraftingManager craftingManager;
-
     private Material imageMat;
     private GameObject mirroredArtInstance;
     private bool acceptInput = true;
@@ -61,13 +61,6 @@ public class CraftingItem : DraggablePhysicsObject
     }
     
     public event Action OnUsedInSuccessfulCraft;
-
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-
-        
-    }
 
     protected override void OnDisable()
     {
@@ -215,6 +208,32 @@ public class CraftingItem : DraggablePhysicsObject
         }
     }
 
+    [ContextMenu("Execute actions")]
+    private void ExecuteActions()
+    {
+        foreach(var action in Data.Actions)
+        {
+            if(!action)
+            {
+                Debug.LogError($"Null {nameof(CardAction)} in actions list for {Data.ItemName}!");
+                continue;
+            }
+
+            //TODO: send required info for each card action to the action 
+            action.Initialise(owningPlayer, this);
+            action.Execute();
+        }
+    }
+
+    [ContextMenu("Cancel action execution")]
+    public void CancelActions()
+    {
+        foreach(var action in Data.Actions)
+        {
+            action.Cancel();
+        }
+    }
+
     protected override void OnStartDrag()
     {
         SetCollisionEnabled(false);
@@ -231,12 +250,18 @@ public class CraftingItem : DraggablePhysicsObject
     }
 
     //called when this item is first crafted
-    public void Initialise(CraftingManager craftingManager, CardData itemData, Cursor cursor)
+    public void Initialise(Player owningPlayer, CraftingManager craftingManager, CardData itemData, Cursor cursor, bool wasCrafted)
     {
-        if(craftingManager)
+        this.owningPlayer = owningPlayer;
+
+        if (craftingManager)
         {
             this.craftingManager = craftingManager;
             craftingManager.RegisterCraftingItem(this);
+        }
+        else
+        {
+            Debug.LogError($"Given {nameof(CraftingManager)} is null! This {nameof(CraftingItem)} will not be properly initialised.");
         }
 
         SetCursor(cursor);
@@ -249,6 +274,12 @@ public class CraftingItem : DraggablePhysicsObject
         if (craftingPotentialVFX)
         {
             craftingPotentialVFX.SetActive(false);
+        }
+
+        //TODO/PLACEHOLDER: Execute card actions on craft!
+        if(wasCrafted)
+        {
+            ExecuteActions();
         }
     }
 
@@ -357,5 +388,10 @@ public class CraftingItem : DraggablePhysicsObject
                 nameTextFade.FadeOut();
             }
         }
+    }
+
+    Vector3 ICardActionTarget.GetTargetPosition()
+    {
+        return transform.position;
     }
 }

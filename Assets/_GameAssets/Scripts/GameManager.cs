@@ -1,7 +1,9 @@
+using Fusion;
 using System.Collections.Generic;
 
-public class GameManager : SingletonMonoBehaviour<GameManager>
+public class GameManager : SingletonNetworkBehaviour<GameManager>, IPlayerJoined, IPlayerLeft
 {
+    private List<PlayerRef> playerRefs;
     private List<Player> players;
 
     public Player GetPlayer(int playerIndex)
@@ -12,5 +14,15 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
         }
 
         return players[playerIndex];
+    }
+
+    void IPlayerJoined.PlayerJoined(PlayerRef player)
+    {
+        playerRefs.Add(player);
+    }
+
+    void IPlayerLeft.PlayerLeft(PlayerRef player)
+    {
+        playerRefs.Remove(player);
     }
 }

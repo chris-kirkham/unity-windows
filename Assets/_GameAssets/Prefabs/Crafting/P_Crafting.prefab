@@ -4925,12 +4925,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
+  cursor: {fileID: 0}
   itemDatabase: {fileID: 11400000, guid: c44ec706574b99e46a02a0f04bd2cad9, type: 2}
   thumbnailPrefab: {fileID: 9176190644264876341, guid: 668d21fcae2ec3b4590f94b650ec3915, type: 3}
   windowPrefab: {fileID: 6500830298233221005, guid: 0fcedcac6452e4341b2b3b82bc8fc9f4, type: 3}
   gameOverSequence: {fileID: 0}
   craftSequence: {fileID: 5426547899938034886}
-  crafterBoard: {fileID: 5835052037880426058}
+  crafterBoard: {fileID: 0}
   randomProducts:
   - {fileID: 11400000, guid: 299c2723918579e43af015a05132e2e1, type: 2}
   - {fileID: 11400000, guid: a5ecc6b4dca2d814fb3b56f35b0be370, type: 2}
@@ -9915,6 +9916,7 @@ MonoBehaviour:
   playableDirector: {fileID: 859082464213097581}
   startSequence: {fileID: 0}
   convergeSequence:
+    cursor: {fileID: 0}
     convergePoint: {fileID: 2790847248887420006}
     playableDirector: {fileID: 859082464213097581}
     postMoveToOuterSequence: {fileID: 11400000, guid: 85b25485782cc9a489eb8d1729f309dd, type: 2}
@@ -9924,13 +9926,15 @@ MonoBehaviour:
     convergeInCentreTime: 0.5
   postConvergeSequence: {fileID: 0}
   spawnItemSequence:
+    cursor: {fileID: 0}
     craftingManager: {fileID: 0}
-    craftingBoard: {fileID: 5835052037880426058}
+    craftingBoard: {fileID: 0}
     playableDirector: {fileID: 859082464213097581}
     onItemSpawnSequence: {fileID: 11400000, guid: a7e98e24468f9c5479c718321fed7d46, type: 2}
     inspectSequence:
       lerpToInspectPosTime: 0.5
       inspectHoldTime: 2
+      cursor: {fileID: 0}
     spawnPoint: {fileID: 2790847248887420006}
     multiItemSpawnDelay: 1
     onSpawnInspectTime: 1
@@ -14991,6 +14995,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1444824971671294465, guid: 5c24d6d991c08a249a3d9101b965a35a, type: 3}
+      propertyPath: craftingManager
+      value: 
+      objectReference: {fileID: -559291666634834028}
+    - target: {fileID: 1735005858592772060, guid: 5c24d6d991c08a249a3d9101b965a35a, type: 3}
+      propertyPath: craftingManager
+      value: 
+      objectReference: {fileID: -559291666634834028}
     - target: {fileID: 5071856759666083489, guid: 5c24d6d991c08a249a3d9101b965a35a, type: 3}
       propertyPath: m_Name
       value: P_CraftBoard
@@ -15022,14 +15034,3 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 145744188243229057, guid: 5c24d6d991c08a249a3d9101b965a35a, type: 3}
   m_PrefabInstance: {fileID: 3163865907527510959}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &5835052037880426058 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8868163458549237221, guid: 5c24d6d991c08a249a3d9101b965a35a, type: 3}
-  m_PrefabInstance: {fileID: 3163865907527510959}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5821499f8fec2744e9124dce07000488, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

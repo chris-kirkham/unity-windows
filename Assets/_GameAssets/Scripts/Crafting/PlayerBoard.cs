@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Crafting
 {
-    public class CrafterBoard : MonoBehaviour
+    public class PlayerBoard : MonoBehaviour
     {
         [SerializeField] private Cursor cursor;
         [SerializeField] private CraftingManager craftingManager;
@@ -23,6 +23,8 @@ namespace Crafting
         private Dictionary<CardData, int> activeItemCounts = new Dictionary<CardData, int>(); //{ itemData, number active on board }
 
         public List<CrafterPlacementZone> PlacementPoints => placementPoints;
+
+        public HashSet<CraftingItem> ActiveItems => craftingManager.ActiveItems;
 
         public Dictionary<CardData, int> ActiveItemCounts => activeItemCounts;
 

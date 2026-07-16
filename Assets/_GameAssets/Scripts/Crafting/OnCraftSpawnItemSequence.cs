@@ -12,7 +12,7 @@ namespace Crafting
     {
         [SerializeField] private Cursor cursor;
         [SerializeField] private CraftingManager craftingManager;
-        [SerializeField] private CrafterBoard craftingBoard;
+        [SerializeField] private PlayerBoard craftingBoard;
         [SerializeField] private PlayableDirector playableDirector;
         [SerializeField] private TimelineAsset onItemSpawnSequence;
         [SerializeField] private ItemInspectSequence inspectSequence;
@@ -104,7 +104,7 @@ namespace Crafting
             }
 
             var wasCraftedPreviously = craftingManager.WasItemCraftedPreviously(itemData);
-            var item = craftingManager.SpawnItem(itemData, startPos_WS, startRotation_WS);
+            var item = craftingManager.SpawnItem(itemData, startPos_WS, startRotation_WS, wasCrafted: true);
             
             if (!wasCraftedPreviously && inspectItemOnFirstCraft)
             {

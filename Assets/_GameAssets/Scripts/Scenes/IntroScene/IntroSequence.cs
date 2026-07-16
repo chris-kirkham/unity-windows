@@ -15,7 +15,7 @@ public class IntroSequence : MonoBehaviour
     [SerializeField] private FadeInOutText topText;
     [SerializeField] private List<IntroSeqCraftingItem> startingItemChoices;
     [SerializeField] private List<Transform> itemSpawnTransforms;
-    [SerializeField] private CrafterBoard crafterBoard;
+    [SerializeField] private PlayerBoard crafterBoard;
     [SerializeField] private GameObject postIntroLighting;
 
     private const float spawnAnimFlipTime = 0.1f;
@@ -42,7 +42,7 @@ public class IntroSequence : MonoBehaviour
 
         if (!crafterBoard)
         {
-            crafterBoard = FindFirstObjectByType<CrafterBoard>();
+            crafterBoard = FindFirstObjectByType<PlayerBoard>();
         }
 
         if(postIntroLighting)
