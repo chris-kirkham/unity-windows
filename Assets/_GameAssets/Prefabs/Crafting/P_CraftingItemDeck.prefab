@@ -261,6 +261,7 @@ MonoBehaviour:
   itemZOffset: 0.05
   playerCanPlaceCards: 1
   populateOnEnable: 0
+  shuffleOnPopulate: 0
   singleItemType: 1
   allowAnyItemTypeWhenEmpty: 1
   animateItemToDeckTime: 0.4

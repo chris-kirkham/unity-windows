@@ -13,6 +13,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
     [SerializeField] private float itemZOffset = 0.05f;
     [SerializeField] private bool playerCanPlaceCards = true;
     [SerializeField] private bool populateOnEnable;
+    [SerializeField] private bool shuffleOnPopulate;
     [SerializeField] private bool singleItemType = true;
     //allow any item type to be placed when the deck is empty, even if it's a single-item-type deck.
     //If it is and this is false, the deck's ItemType must be set in code in order to place an item on an empty deck
@@ -21,7 +22,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
     [Header("VFX")]
     [SerializeField] private FadeInOut onHoverPreviewVFX;
 
-    private LinkedList<CraftingItem> deck = new LinkedList<CraftingItem>();
+    private List<CraftingItem> deck = new List<CraftingItem>();
 
     public CardData ItemType { get; set; }
 
@@ -31,13 +32,13 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
 
         if (populateOnEnable)
         {
-            PopulateDeck(startingDeck);
+            PopulateDeck(startingDeck, shuffleOnPopulate);
         }
     }
 
     public CraftingItem PeekTopItem()
     {
-        return deck.Count > 0 ? deck.Last.Value : null;
+        return deck.Count > 0 ? deck[deck.Count - 1] : null;
     }
 
     public bool IsEmpty()
@@ -69,7 +70,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
             yield return Tweening.DoTransform(
                 item.transform, GetBottomDeckPos(), transform.rotation, Vector3.zero, animateItemToDeckTime).WaitForCompletion();
 
-            var topItem = deck.Last.Value;
+            var topItem = PeekTopItem();
             if (TryRemovePlacedObj(topItem))
             {
                 Destroy(topItem.gameObject);
@@ -82,7 +83,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         }
     }
 
-    private void PopulateDeck(CraftingItemDatabase deckItems)
+    private void PopulateDeck(CraftingItemDatabase deckItems, bool shuffle)
     {
         ClearDeck();
 
@@ -91,11 +92,26 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
             return;
         }
 
+        //create a temporary deck list to add spawned items into; they can then be shuffled (or not) before
+        //being added to the deck properly via TryPlaceObject (could shortcut past this, but safer to do it via the DraggablePlacementPoint
+        //stuff in case more is added to that later)
+        var tempDeck = new List<CraftingItem>(deckItems.ItemList.Count); 
+        
         for (int i = 0; i < deckItems.ItemList.Count; i++)
         {
             var itemData = deckItems.ItemList[i];
             var item = craftingManager.SpawnItem(itemData, transform.position, Quaternion.identity);
-            if(!TryPlaceObject(item, PlacementSource.Script))
+            tempDeck.Add(item);
+        }
+
+        if(shuffle)
+        {
+            Shuffle();
+        }
+
+        foreach(var item in tempDeck)
+        {
+            if (!TryPlaceObject(item, PlacementSource.Script))
             {
                 Debug.LogError($"Unable to place item when populating deck for some reason!");
             }
@@ -119,7 +135,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
             return;
         }
 
-        var item = deck.Last.Value;
+        var item = PeekTopItem();
         if (item)
         {
             item.SetState(CraftingItem.State.Draggable);
@@ -134,8 +150,8 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
             return;
         }
 
-        var item = deck.Last.Value;
-        deck.RemoveLast();
+        var item = PeekTopItem();
+        deck.RemoveAt(deck.Count - 1);
 
         if (!item)
         {
@@ -206,7 +222,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
             return;
         }
 
-        if (singleItemType && !IsEmpty() && item.Data != deck.Last.Value.Data)
+        if (singleItemType && !IsEmpty() && item.Data != PeekTopItem().Data)
         {
             Debug.LogError("Added a different item type to a single-item deck! This should be dealt with earlier in code.");
         }
@@ -222,7 +238,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         item.transform.parent = transform;
         item.SetState(CraftingItem.State.Animatable);
 
-        deck.AddLast(item);
+        deck.Add(item);
 
         if (animateToDeck)
         {
@@ -285,6 +301,35 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
             onHoverPreviewVFX.gameObject.SetActive(enabled);
         }
     }
+
+    [ContextMenu("Shuffle deck")]
+    private void Shuffle()
+    {
+        if(deck == null || deck.Count < 2)
+        {
+            return;
+        }
+        
+        //Fisher-Yates algorithm
+        CraftingItem temp = null;
+        Vector3 tempPos;
+        for(int i = deck.Count - 1; i > 0; i--)
+        {
+            int j = UnityEngine.Random.Range(0, i);
+            temp = deck[i];
+
+            //swap item positions
+            tempPos = deck[i].transform.position;
+            deck[i].transform.position = deck[j].transform.position;
+            deck[j].transform.position = tempPos;
+
+            //swap items in list
+            deck[i] = deck[j];
+            deck[j] = temp;
+        }
+    }
+
+    
 
     //ICursorEventListener
     public override void OnCursorEvent(Cursor.EventID e)

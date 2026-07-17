@@ -17,4 +17,4 @@ MonoBehaviour:
   vfxPrefab: {fileID: 4623884788582485257, guid: 51fc260ac4234c24eae4fd6afe93625a, type: 3}
   damageTarget: 0
   damage: 10
-  timeToReachTarget: 2
+  timeToReachTarget: 1.5

@@ -219,13 +219,17 @@ PrefabInstance:
     - target: {fileID: 6312110462525338186, guid: 6d457d275a0868943a3ecd7a06235147, type: 3}
       propertyPath: startingDeck
       value: 
-      objectReference: {fileID: 11400000, guid: c44ec706574b99e46a02a0f04bd2cad9, type: 2}
+      objectReference: {fileID: 11400000, guid: e9df2941debc1b14d9649f6df273f6de, type: 2}
     - target: {fileID: 6312110462525338186, guid: 6d457d275a0868943a3ecd7a06235147, type: 3}
       propertyPath: singleItemType
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6312110462525338186, guid: 6d457d275a0868943a3ecd7a06235147, type: 3}
       propertyPath: populateOnEnable
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6312110462525338186, guid: 6d457d275a0868943a3ecd7a06235147, type: 3}
+      propertyPath: shuffleOnPopulate
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6312110462525338186, guid: 6d457d275a0868943a3ecd7a06235147, type: 3}
