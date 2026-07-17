@@ -267,7 +267,12 @@ MonoBehaviour:
   health: 20
   hand: {fileID: 9123209446487713231}
   board: {fileID: 0}
-  cardActionTargetPoint: {fileID: 103244231631947377}
+  targeter:
+    cursor: {fileID: 2345373750565204295}
+    targetableLayerMask:
+      serializedVersion: 2
+      m_Bits: 64
+  targetablePoint: {fileID: 103244231631947377}
 --- !u!114 &2014804116573804385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1053,6 +1058,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8597685863066880409}
     - target: {fileID: 9074353654284237489, guid: 1b78d8c61f434774c993ce18a6d2b292, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 903327089997796732}
+    - target: {fileID: 9074353654284237489, guid: 1b78d8c61f434774c993ce18a6d2b292, type: 3}
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
@@ -1068,6 +1077,10 @@ PrefabInstance:
       propertyPath: pixelPerfectCamera
       value: 
       objectReference: {fileID: 1278084724086258310}
+    - target: {fileID: 9074353654284237489, guid: 1b78d8c61f434774c993ce18a6d2b292, type: 3}
+      propertyPath: listenerRaycastLayerMask.m_Bits
+      value: 65
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

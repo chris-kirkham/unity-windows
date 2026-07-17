@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 #if UNITY_EDITOR
@@ -52,7 +53,8 @@ public class Cursor : MonoBehaviour
         public int priority;
     }
 
-    [SerializeField] private LayerMask cursorRaycastLayerMask;
+    [SerializeField] private Player player;
+    [SerializeField, FormerlySerializedAs("cursorRaycastLayerMark")] private LayerMask listenerRaycastLayerMask;
     [SerializeField] private Camera cam;
     [SerializeField] private Image cursorImage;
     [SerializeField] private Sprite defaultSprite;
@@ -109,6 +111,11 @@ public class Cursor : MonoBehaviour
         draggablesManager.SetCursor(this);
         eventSystem = FindFirstObjectByType<EventSystem>();
         UnityEngine.Cursor.visible = false; //hide default cursor (TODO: look at using Cursor.SetCursor instead?)
+
+        if(listenerRaycastLayerMask.value == 0)
+        {
+            Debug.LogError($"{nameof(Cursor)}'s raycast mask is set to Nothing!");
+        }
     }
 
     private void Update()
@@ -142,7 +149,7 @@ public class Cursor : MonoBehaviour
             cam.ScreenPointToRay(clampedRawMousePos),
             raycastHits,
             MaxRaycastDist, 
-            cursorRaycastLayerMask, 
+            listenerRaycastLayerMask, 
             queryTriggerInteraction: QueryTriggerInteraction.Collide);
         for(int i = 0; i < raycastHitCount; i++)
         {
@@ -375,6 +382,11 @@ public class Cursor : MonoBehaviour
 
     public void RequestDrag(DraggableObject draggable)
     {
+        if(!player.CanDrag) //TODO: this will probably break a lot
+        {
+            return;
+        }
+
         draggablesManager.RequestDrag(draggable);
     }
 

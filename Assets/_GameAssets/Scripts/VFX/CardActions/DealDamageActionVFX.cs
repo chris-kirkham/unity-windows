@@ -15,7 +15,7 @@ public class DealDamageActionVFX : NetworkBehaviour
         }
     }
 
-    public async Task DoVFX(Vector3 origin, Vector3 target, float travelTime)
+    public async Task DoVFX(Vector3 origin, Vector3 target, float travelTime, ITargetable.TargetableType targetableType)
     {
         if(travelVFX)
         {
@@ -26,7 +26,16 @@ public class DealDamageActionVFX : NetworkBehaviour
                 var t = 0f;
                 do
                 {
-                    transform.position = Vector3.Lerp(origin, target, t);
+                    //TODO: prototype - slerp to cards, lerp to player (to try to avoid the VFX going outside the player's camera view)
+                    if(targetableType == ITargetable.TargetableType.Card)
+                    {
+                        transform.position = Vector3.Slerp(origin, target, t);
+                    }
+                    else //player
+                    {
+                        transform.position = Vector3.Lerp(origin, target, t);
+                    }
+
                     t += Time.deltaTime / travelTime;
                     await Task.Yield();
                 }

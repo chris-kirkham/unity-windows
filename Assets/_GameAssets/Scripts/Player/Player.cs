@@ -1,25 +1,53 @@
 using Crafting;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Serialization;
+using StateMachine;
 
-public class Player : MonoBehaviour, ICardActionTarget, IDamageable
+public class Player : MonoBehaviour, ITargetable, IDamageable
 {
+    public enum State
+    {
+        Default,
+        Targeting,
+        Dead
+    }
+
     [SerializeField] private int health;
     [SerializeField] private PlayerHand hand;
     [SerializeField] private PlayerBoard board;
-    [SerializeField] private Transform cardActionTargetPoint;
+    [SerializeField] private PlayerTargeting targeter;
+    [SerializeField, FormerlySerializedAs("cardActionTargetPoint")] private Transform targetablePoint;
 
-    private int currHealth;
+    public State CurrState { get; private set; }
+
+    public int CurrHealth { get; private set; }
+
+    public int MaxHealth => health;
+
+    public bool CanDrag => CurrState == State.Default; //TODO: prototype!
+
+    private void OnEnable()
+    {
+        SetState(State.Default);
+        targeter.OnEnable();
+    }
+
+    private void OnDisable()
+    {
+        targeter.OnDisable();
+    }
 
     public void Damage(int damage)
     {
-        SetHealth(currHealth - damage);
+        SetHealth(CurrHealth - damage);
     }
 
     private void SetHealth(int health)
     {
-        currHealth = health;
-        if(currHealth <= 0)
+        CurrHealth = health;
+        if(CurrHealth <= 0)
         {
             OnDeath();
         }
@@ -37,17 +65,42 @@ public class Player : MonoBehaviour, ICardActionTarget, IDamageable
         }
     }
 
-    //ICardActionTarget
-    public Vector3 GetTargetPosition()
+    public async Task<ITargetable> DoPlayerTargeting()
     {
-        if(cardActionTargetPoint)
+        SetState(State.Targeting);
+        var target = await targeter.DoTargeting();
+        SetState(State.Default);
+        return target;
+    }
+
+    private void SetState(State state)
+    {
+        CurrState = state;
+    }
+
+    //ITargetable
+    public Vector3 GetPositionAsTarget()
+    {
+        if(targetablePoint)
         {
-            return cardActionTargetPoint.position;
+            return targetablePoint.position;
         }
         else
         {
             Debug.LogWarning($"Player's target point not set! Returning transform.position");
             return transform.position;
         }
+    }
+
+    //ITargetable
+    public ITargetable.TargetableType GetTargetType()
+    {
+        return ITargetable.TargetableType.Player;
+    }
+
+    //ITargetable
+    public void SetTargetingPreviewVisible(bool visible)
+    {
+        Debug.LogError($"TODO: Targeting preview VFX for players");
     }
 }

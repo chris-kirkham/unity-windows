@@ -7,7 +7,7 @@ using FMODUnity;
 using Crafting;
 
 [System.Serializable]
-public class CraftingItem : DraggablePhysicsObject, ICardActionTarget
+public class CraftingItem : DraggablePhysicsObject, ITargetable
 {
     /// <summary>
     /// Animatable = crafting OFF, input OFF, kinematic rb, collision OFF
@@ -209,7 +209,7 @@ public class CraftingItem : DraggablePhysicsObject, ICardActionTarget
     }
 
     [ContextMenu("Execute actions")]
-    private void ExecuteActions()
+    private async void ExecuteActions()
     {
         foreach(var action in Data.Actions)
         {
@@ -219,9 +219,14 @@ public class CraftingItem : DraggablePhysicsObject, ICardActionTarget
                 continue;
             }
 
-            //TODO: send required info for each card action to the action 
             action.Initialise(owningPlayer, this);
-            action.Execute();
+            
+            if(action.IsTargeted)
+            {
+                action.Target = await owningPlayer.DoPlayerTargeting();
+            }
+
+            await action.Execute();
         }
     }
 
@@ -390,8 +395,22 @@ public class CraftingItem : DraggablePhysicsObject, ICardActionTarget
         }
     }
 
-    Vector3 ICardActionTarget.GetTargetPosition()
+    //ITargetable
+    public Vector3 GetPositionAsTarget()
     {
         return transform.position;
+    }
+
+    //ITargetable
+
+    public ITargetable.TargetableType GetTargetType()
+    {
+        return ITargetable.TargetableType.Card;
+    }
+
+    //ITargetable
+    public void SetTargetingPreviewVisible(bool visible)
+    {
+        Debug.LogError("TODO: Targeting preview for cards");
     }
 }

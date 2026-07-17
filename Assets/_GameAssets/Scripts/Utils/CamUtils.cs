@@ -26,4 +26,9 @@ public static class CamUtils
         pos_WorldSpace = Vector3.zero;
         return false;
     }
+
+    public static bool RaycastFromCamera(Camera cam, Vector3 pos_ScreenSpace, out RaycastHit hit, float maxDistance, LayerMask layerMask)
+    {
+        return Physics.Raycast(cam.ScreenPointToRay(pos_ScreenSpace), out hit, maxDistance, layerMask);
+    }
 }

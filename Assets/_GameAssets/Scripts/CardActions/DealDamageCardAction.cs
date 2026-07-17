@@ -6,25 +6,13 @@ using UnityEngine.UIElements;
 [CreateAssetMenu(fileName = "CardAction_DealDamage", menuName = "Card Actions/Deal Damage")]
 public class DealDamageCardAction : CardAction
 {
-    public enum DamageTarget
-    {
-        Card,
-        Player
-    }
-
     [SerializeField] private DealDamageActionVFX vfxPrefab;
-    [SerializeField] private DamageTarget damageTarget;
+    [SerializeField] private ITargetable.TargetableType damageTarget;
     [SerializeField] private int damage;
     [SerializeField] private float timeToReachTarget = 1f;
 
-    private Player targetPlayer;
-
     public override async Task Execute()
     {
-        //TEST
-        Target = owningPlayer;
-        targetPlayer = owningPlayer;
-
         if(Target == null)
         {
             Debug.LogError($"Target is required for this action!");
@@ -45,7 +33,7 @@ public class DealDamageCardAction : CardAction
         if(vfxPrefab)
         {
             var vfx = Instantiate<DealDamageActionVFX>(vfxPrefab, item.transform.position, item.transform.rotation);
-            await vfx.DoVFX(item.transform.position, targetPlayer.GetTargetPosition(), timeToReachTarget);
+            await vfx.DoVFX(item.transform.position, Target.GetPositionAsTarget(), timeToReachTarget, Target.GetTargetType());
         }
         else
         {
@@ -55,12 +43,6 @@ public class DealDamageCardAction : CardAction
 
     private void DealDamage()
     {
-        if(!targetPlayer)
-        {
-            Debug.LogError("Target player is null!");
-            return;
-        }
-
-        targetPlayer.Damage(damage);
+        Debug.Log($"TODO: deal damage to card/player!");
     }
 }

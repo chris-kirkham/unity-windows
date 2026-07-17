@@ -52,7 +52,7 @@ public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
         ((ICursorEventListener)this).RegisterListener(cursor);
     }
 
-    //"Try" because if multiple draggables want to start dragging on the same tick,
+    //"Request" because if multiple draggables want to start dragging on the same tick,
     //the cursor decides which is the best option (why does the cursor do this? maybe move it to a different class)
     public void RequestDrag()
     {

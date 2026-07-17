@@ -6,10 +6,12 @@ public abstract class CardAction : ScriptableObject, IGameAction
     [field: SerializeField] public string ActionName { get; private set; }
     [field: SerializeField] public string ActionDesc { get; private set; }
 
+    [field: SerializeField] public bool IsTargeted { get; private set; } //does this action need to target something?
+
     protected Player owningPlayer;
     protected CraftingItem item;
 
-    public ICardActionTarget Target { protected get; set; }
+    public ITargetable Target { protected get; set; }
 
     public void Initialise(Player owningPlayer, CraftingItem item)
     {
