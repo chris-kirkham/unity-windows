@@ -5,9 +5,10 @@ using UnityEngine;
 using DG.Tweening;
 using FMODUnity;
 using Crafting;
+using Fusion;
 
 [System.Serializable]
-public class CraftingItem : DraggablePhysicsObject, ITargetable
+public class CraftingItem : DraggablePhysicsObject, ITargetable, IHaveHealth
 {
     /// <summary>
     /// Animatable = crafting OFF, input OFF, kinematic rb, collision OFF
@@ -32,6 +33,7 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private FadeInOutText nameTextFade;
     [SerializeField] private TextMeshProUGUI debugImageText; //debug text for when image is missing
+    [SerializeField] private TextMeshProUGUI healthText;
 
     [Header("VFX")]
     [SerializeField] private GameObject onCraftedVFX;
@@ -41,8 +43,9 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable
     [SerializeField] private EventReference onGrabSFX;
     [SerializeField] private EventReference onDropSFX;
 
-    private Player owningPlayer;
     private CraftingManager craftingManager;
+    private Player owningPlayer;
+    private int currHealth;
     private Material imageMat;
     private GameObject mirroredArtInstance;
     private bool acceptInput = true;
@@ -61,6 +64,7 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable
     }
     
     public event Action OnUsedInSuccessfulCraft;
+    public event Action<int> OnHealthChange;
 
     protected override void OnDisable()
     {
@@ -220,12 +224,6 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable
             }
 
             action.Initialise(owningPlayer, this);
-            
-            if(action.IsTargeted)
-            {
-                action.Target = await owningPlayer.DoPlayerTargeting();
-            }
-
             await action.Execute();
         }
     }
@@ -255,6 +253,7 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable
     }
 
     //called when this item is first crafted
+    //[Rpc(RpcSources.All, RpcTargets.All, InvokeLocal = true, Channel = RpcChannel.Reliable, TickAligned = true)]
     public void Initialise(Player owningPlayer, CraftingManager craftingManager, CardData itemData, Cursor cursor, bool wasCrafted)
     {
         this.owningPlayer = owningPlayer;
@@ -412,5 +411,25 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable
     public void SetTargetingPreviewVisible(bool visible)
     {
         Debug.LogError("TODO: Targeting preview for cards");
+    }
+
+    public void SetHealth(int newHealth)
+    {
+        currHealth = newHealth;
+        OnHealthChange?.Invoke(currHealth);
+        if(currHealth <= 0)
+        {
+            OnKilled();
+        }
+    }
+
+    public void DamageHealth(int damage)
+    {
+        SetHealth(currHealth - damage);
+    }
+
+    private void OnKilled()
+    {
+
     }
 }

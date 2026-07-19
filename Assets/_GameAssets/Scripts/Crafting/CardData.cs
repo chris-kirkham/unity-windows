@@ -6,12 +6,15 @@ using UnityEngine.Serialization;
 public class CardData : ScriptableObject
 {
     [SerializeField] private string itemName;
+    [Header("Crafting")]
     //items with a crafting alias can be treated as that item during crafting (I'm sure this won't break anything)
     [SerializeField] private List<CardData> craftingAliases; 
     [SerializeField] private Texture2D thumbnailTex;
     [SerializeField] private CraftingItemWindowContent contentPrefab;
     [SerializeField] private List<CardData> prerequisites;
     [SerializeField] private List<CardData> products;
+    [Header("Stats")]
+    [field: SerializeField] public int Health { get; private set; }
     [Header("Card Actions")]
     [SerializeField] private List<CardAction> actions;
 

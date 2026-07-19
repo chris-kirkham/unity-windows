@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aae3fbf21439b1c4089f148fbfb61554, type: 3}
   m_Name: CardAction_DealDamageToCard
   m_EditorClassIdentifier: Assembly-CSharp::DealDamageCardAction
-  <ActionName>k__BackingField: Damage Card
-  <ActionDesc>k__BackingField: Deal 10 damage to a target card.
-  <IsTargeted>k__BackingField: 1
+  <ActionName>k__BackingField: Damage Cards (Multi)
+  <ActionDesc>k__BackingField: Deal damage to mulitple cards.
+  <targetingBehaviour>k__BackingField: 1
+  <NumTargets>k__BackingField: 4
   vfxPrefab: {fileID: 4623884788582485257, guid: 51fc260ac4234c24eae4fd6afe93625a, type: 3}
   damageTarget: 0
   damage: 10
-  timeToReachTarget: 1.5
+  timeToReachTarget: 2

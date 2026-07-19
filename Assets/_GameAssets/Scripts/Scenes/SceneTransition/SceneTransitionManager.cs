@@ -1,8 +1,8 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
-public class SceneTransitionManager : SingletonMonoBehaviour<SceneTransitionManager>
+//https://doc.photonengine.com/fusion/v2/manual/scene-loading
+public class SceneTransitionManager : SingletonNetworkBehaviour<SceneTransitionManager>
 {
     [SerializeField] private int initialSceneBuildIdx;
     [SerializeField] private int loadingSceneBuildIdx;

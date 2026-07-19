@@ -1,28 +1,42 @@
-using TMPro;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using Fusion;
+using System.Linq;
 
-public class PlayerHUD : MonoBehaviour
+[System.Serializable]
+public class PlayerHUD
 {
-    [SerializeField] private Image currHealthImg;
-    [SerializeField] private TextMeshProUGUI currHealthText;
+    [SerializeField] private List<PlayerHUD_PlayerInfo> playerHUDInfos;
 
-    private int playerMaxHealth;
+    private NetworkRunner runner;
 
-
-    public void SetCurrentHealth(int health)
+    public void Initialise(NetworkRunner runner)
     {
-        if(currHealthImg)
+        this.runner = runner;
+
+        var players = runner.ActivePlayers.ToList();
+        var playerCount = players.Count;
+        
+        if(playerCount > playerHUDInfos.Count)
         {
-            if(playerMaxHealth > 0)
+            Debug.LogError($"More players than {nameof(PlayerHUD_PlayerInfo)}s set!");
+        }
+
+        for(int i = 0; i < playerHUDInfos.Count; i++)
+        {
+            if(i >= playerCount)
             {
-                currHealthImg.fillAmount = health / playerMaxHealth;
+                playerHUDInfos[i].gameObject.SetActive(false);
+            }
+            else
+            {
+                playerHUDInfos[i].Initialise(GameManager.Inst.GetPlayer(i));
             }
         }
+    }
 
-        if(currHealthText)
-        {
-            currHealthText.text = $"{health}/{playerMaxHealth}";
-        }
+    public void UpdateHUD()
+    {
+        
     }
 }

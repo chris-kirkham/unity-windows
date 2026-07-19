@@ -64,14 +64,13 @@ public class DraggablePhysicsObject : DraggableObject
         }
     }
 
-    protected virtual void Update()
-    //protected virtual void FixedUpdate()
+    public override void FixedUpdateNetwork()
     {
         if(rb && isDragging)
         {
             var targetPos = overrideDragPosition.HasValue ? overrideDragPosition.Value : GetTargetPosition();
-            transform.position = targetPos;
-            //rb.MovePosition(targetPos)
+            //transform.position = targetPos;
+            rb.MovePosition(targetPos);
         }
     }
 

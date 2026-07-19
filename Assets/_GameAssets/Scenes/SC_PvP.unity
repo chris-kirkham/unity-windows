@@ -346,6 +346,7 @@ GameObject:
   - component: {fileID: 371501242}
   - component: {fileID: 371501241}
   - component: {fileID: 371501244}
+  - component: {fileID: 371501245}
   m_Layer: 0
   m_Name: Prototype Runner
   m_TagString: Untagged
@@ -465,6 +466,18 @@ MonoBehaviour:
   playerSpawnPoints:
   - {fileID: 774458822}
   - {fileID: 1795295338}
+--- !u!114 &371501245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 371501240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8edbe7108d8a43ab838cf8b8d9453df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Unity::Fusion.RunnerEnableVisibility
 --- !u!4 &774458822 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1760634254568197991, guid: b3ed917719f7467429fca396e2c11717, type: 3}
@@ -567,6 +580,10 @@ PrefabInstance:
     - target: {fileID: 5417924439906590066, guid: b3ed917719f7467429fca396e2c11717, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6785541873828181168, guid: b3ed917719f7467429fca396e2c11717, type: 3}
+      propertyPath: SortKey
+      value: 1572030199
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

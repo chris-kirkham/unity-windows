@@ -1,9 +1,10 @@
+using Fusion;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
 //base class for click-and-draggable items
-public abstract class DraggableObject : MonoBehaviour, ICursorEventListener
+public abstract class DraggableObject : NetworkBehaviour, ICursorEventListener
 {
     [SerializeField] protected Cursor cursor;
     [SerializeField] protected bool dragEnabled = true;

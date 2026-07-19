@@ -1,10 +1,11 @@
+using Fusion;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Crafting
 {
-    public class CraftingManager : MonoBehaviour
+    public class CraftingManager : NetworkBehaviour
     {
         public enum CraftingResultState
         {
@@ -282,7 +283,12 @@ namespace Crafting
 
         public CraftingItem SpawnItem(CardData itemData, Vector3 position, Quaternion rotation, bool wasCrafted = false)
         {
-            var item = Instantiate<CraftingItem>(thumbnailPrefab, position, rotation);
+            //var item = Instantiate<CraftingItem>(thumbnailPrefab, position, rotation);
+            var item = Runner.Spawn<CraftingItem>(
+                thumbnailPrefab,
+                position,
+                rotation,
+                player.Ref);
             item.Initialise(player, this, itemData, cursor, wasCrafted);
             craftedTracker.OnItemCrafted(itemData);
 

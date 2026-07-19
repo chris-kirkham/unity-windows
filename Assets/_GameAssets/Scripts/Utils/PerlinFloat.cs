@@ -3,6 +3,7 @@ using UnityEngine;
 public class PerlinFloat : MonoBehaviour
 {
     [SerializeField] private Vector3 positionFloatAmount;
+    [SerializeField] private bool absoluteY; 
     [SerializeField] private Vector3 rotationFloatAmount;
     [SerializeField] private float positionFloatSpeed;
     [SerializeField] private float rotationFloatSpeed;
@@ -80,7 +81,12 @@ public class PerlinFloat : MonoBehaviour
         //position
         var posTime = (Time.time + positionSeed) * positionFloatSpeed;
         var posX = (Mathf.PerlinNoise(initialPos.x, posTime) - 0.5f) * positionFloatAmount.x;
-        var posY = (Mathf.PerlinNoise(initialPos.y, posTime) - 0.5f) * positionFloatAmount.y;
+
+        var noiseY = Mathf.PerlinNoise(initialPos.y, posTime);
+        //if we only want to use the positive y axis, multiply by 0.5 (so it retains the same magnitude as the other axes
+        noiseY = absoluteY ? noiseY * 0.5f : noiseY - 0.5f;
+        var posY = noiseY * positionFloatAmount.y;
+        
         var posZ = (Mathf.PerlinNoise(initialPos.z, posTime) - 0.5f) * positionFloatAmount.z;
         var newPos = new Vector3(posX, posY, posZ) * rampAmt;
         if (useLocalPosition)

@@ -9,11 +9,11 @@ public class PlayerSpawner : SimulationBehaviour, IPlayerJoined
     [SerializeField] private GameObject playerBoardSidePrefab;
     [SerializeField] private List<Transform> playerSpawnPoints;
 
-    void IPlayerJoined.PlayerJoined(PlayerRef player)
+    void IPlayerJoined.PlayerJoined(PlayerRef playerRef)
     {
-        if(player == Runner.LocalPlayer)
+        if(playerRef == Runner.LocalPlayer)
         {
-            var playerIdx = player.AsIndex;
+            var playerIdx = playerRef.AsIndex - 1;
 
             if(playerIdx >= playerSpawnPoints.Count)
             {
@@ -25,7 +25,11 @@ public class PlayerSpawner : SimulationBehaviour, IPlayerJoined
             var playerBoardSide = Runner.Spawn(playerBoardSidePrefab);
             playerBoardSide.transform.parent = playerSpawnPoints[playerIdx];
             playerBoardSide.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-            Runner.SetPlayerObject(player, playerBoardSide);
+            Runner.SetPlayerObject(playerRef, playerBoardSide);
+            if(GameManager.InstExists())
+            { 
+               GameManager.Inst.RegisterPlayer(playerBoardSide.GetComponentInChildren<Player>(), playerRef); //TODO: REFACTOR WHERE PLAYER CLASS IS AND ITS RELATION TO PLAYER BOARD ETC!
+            }
         }
     }
 }

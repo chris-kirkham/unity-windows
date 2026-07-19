@@ -6,6 +6,7 @@ using StateMachine;
 public class PlayerTargeting : ICursorEventListener
 {
     [SerializeField] private Cursor cursor;
+    [SerializeField] private GameObject targetingVFXPrefab;
     [SerializeField] private LayerMask targetableLayerMask;
 
     private ITargetable currentTarget;

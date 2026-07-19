@@ -1,7 +1,7 @@
 using DG.Tweening;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 [CreateAssetMenu(fileName = "CardAction_DealDamage", menuName = "Card Actions/Deal Damage")]
 public class DealDamageCardAction : CardAction
@@ -11,9 +11,9 @@ public class DealDamageCardAction : CardAction
     [SerializeField] private int damage;
     [SerializeField] private float timeToReachTarget = 1f;
 
-    public override async Task Execute()
+    protected override async Task Execute_PostTargeting()
     {
-        if(Target == null)
+        if(Targets == null)
         {
             Debug.LogError($"Target is required for this action!");
             return;
@@ -32,8 +32,15 @@ public class DealDamageCardAction : CardAction
     {
         if(vfxPrefab)
         {
-            var vfx = Instantiate<DealDamageActionVFX>(vfxPrefab, item.transform.position, item.transform.rotation);
-            await vfx.DoVFX(item.transform.position, Target.GetPositionAsTarget(), timeToReachTarget, Target.GetTargetType());
+            var targetTasks = new Task[Targets.Count];
+            for(int i = 0; i < Targets.Count; i++)
+            {
+                var target = Targets[i];
+                var vfx = Instantiate<DealDamageActionVFX>(vfxPrefab, item.transform.position, item.transform.rotation);
+                targetTasks[i] = vfx.DoVFX(item.transform.position, target.GetPositionAsTarget(), timeToReachTarget, target.GetTargetType());
+            }
+
+            await Task.WhenAll(targetTasks);
         }
         else
         {

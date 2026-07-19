@@ -29,6 +29,11 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
     protected override void OnEnable()
     {
         base.OnEnable();
+    }
+
+    public override void Spawned()
+    {
+        base.Spawned();
 
         if (populateOnEnable)
         {

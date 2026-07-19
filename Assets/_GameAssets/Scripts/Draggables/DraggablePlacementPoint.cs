@@ -1,7 +1,8 @@
+using Fusion;
 using System;
 using UnityEngine;
 
-public abstract class DraggablePlacementPoint : MonoBehaviour, ICursorEventListener
+public abstract class DraggablePlacementPoint : NetworkBehaviour, ICursorEventListener
 {
     [Flags]
     public enum PlacementSource
