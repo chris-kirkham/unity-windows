@@ -561,6 +561,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: P_GameBoard
       objectReference: {fileID: 0}
+    - target: {fileID: 1760634254568197991, guid: b3ed917719f7467429fca396e2c11717, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3358849541167770850, guid: b3ed917719f7467429fca396e2c11717, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0

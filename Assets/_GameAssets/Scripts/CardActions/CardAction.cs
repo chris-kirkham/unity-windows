@@ -31,7 +31,7 @@ public abstract class CardAction : ScriptableObject, IGameAction
 
     protected async Task DoTargeting()
     {
-        Targets = await owningPlayer.DoPlayerTargeting(targetingBehaviour, NumTargets);
+        Targets = await owningPlayer.DoPlayerTargeting(item.transform, targetingBehaviour, NumTargets);
     }
 
     public async Task Execute()

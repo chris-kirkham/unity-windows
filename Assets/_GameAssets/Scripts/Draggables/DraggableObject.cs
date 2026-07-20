@@ -50,7 +50,7 @@ public abstract class DraggableObject : NetworkBehaviour, ICursorEventListener
 
     public virtual void Initialise(Cursor cursor)
     {
-        ((ICursorEventListener)this).RegisterListener(cursor);
+        SetCursor(cursor);
     }
 
     //"Request" because if multiple draggables want to start dragging on the same tick,
@@ -181,7 +181,7 @@ public abstract class DraggableObject : NetworkBehaviour, ICursorEventListener
         }
     }
 
-    public void SetCursor(Cursor cursor)
+    protected void SetCursor(Cursor cursor)
     {
         if(this.cursor && cursor != this.cursor)
         {

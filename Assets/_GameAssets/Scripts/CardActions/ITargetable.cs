@@ -11,7 +11,9 @@ public interface ITargetable
 
     public TargetableType GetTargetType(); 
 
-    public Vector3 GetPositionAsTarget();
+    public Vector3 GetTargetPosition();
+
+    public Transform GetTargetTransform();
 
     public void SetTargetingPreviewVisible(bool visible);
 }

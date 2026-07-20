@@ -47,7 +47,8 @@ public class DraggablePhysicsObject : DraggableObject
     protected override void OnEndDrag()
     {
         base.OnEndDrag();
-
+    
+        /*
         if(!IsPlaced) //let object fall/move with physics if not placed at a point
         {
             if (rb)
@@ -62,15 +63,17 @@ public class DraggablePhysicsObject : DraggableObject
                 coll.enabled = true;
             }
         }
+        */
     }
 
-    public override void FixedUpdateNetwork()
+    //public override void FixedUpdateNetwork()
+    public void LateUpdate()
     {
         if(rb && isDragging)
         {
             var targetPos = overrideDragPosition.HasValue ? overrideDragPosition.Value : GetTargetPosition();
             //transform.position = targetPos;
-            rb.MovePosition(targetPos);
+            //rb.MovePosition(targetPos);
         }
     }
 
@@ -88,7 +91,6 @@ public class DraggablePhysicsObject : DraggableObject
             distFromCamera = Mathf.Max(MinDistFromCamera, Vector3.Distance(cam.transform.position, hitPointWithHeightOffset));
             var targetPos_WS = hit.point + ((cam.transform.position - hit.point).normalized * targetDistanceAboveGround);
 
-            //rb.MovePosition(targetPos_WS);
             return targetPos_WS;
         }
 

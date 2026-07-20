@@ -516,8 +516,8 @@ GameObject:
   - component: {fileID: 7443485276598698092}
   - component: {fileID: 9176190644264876341}
   - component: {fileID: 437282539546797569}
-  - component: {fileID: 6009771894387638647}
-  - component: {fileID: 8482013834590739793}
+  - component: {fileID: 2897230933030349739}
+  - component: {fileID: 4641073951985180253}
   m_Layer: 6
   m_Name: P_CraftingItem
   m_TagString: Untagged
@@ -646,7 +646,7 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 3
---- !u!114 &6009771894387638647
+--- !u!114 &2897230933030349739
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -658,16 +658,16 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
-  SortKey: 4025841764
+  SortKey: 3804325612
   ObjectInterest: 1
   Flags: 262145
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 9176190644264876341}
-  - {fileID: 8482013834590739793}
+  - {fileID: 4641073951985180253}
   - {fileID: 3566361184038001505}
   ForceRemoteRenderTimeframe: 0
---- !u!114 &8482013834590739793
+--- !u!114 &4641073951985180253
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

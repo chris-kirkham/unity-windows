@@ -88,6 +88,14 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         }
     }
 
+
+    //DEBUG
+    [ContextMenu("Populate")]
+    private void Populate()
+    {
+        PopulateDeck(startingDeck, false);
+    }
+
     private void PopulateDeck(CraftingItemDatabase deckItems, bool shuffle)
     {
         ClearDeck();
@@ -109,10 +117,12 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
             tempDeck.Add(item);
         }
 
+        /*
         if(shuffle)
         {
             Shuffle();
         }
+        */
 
         foreach(var item in tempDeck)
         {
@@ -219,7 +229,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         }
     }
 
-    private void AddItemToTopDeck(CraftingItem item, bool animateToDeck = true)
+    private void AddItemToTopDeck(CraftingItem item, bool animateToDeck = false)
     {
         if(!item)
         {
@@ -240,6 +250,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
             //maybe make cards added to infinite decks scale down to zero as they move to the deck?
         }
 
+        item.transform.SetParent(transform, worldPositionStays: true);
         item.transform.parent = transform;
         item.SetState(CraftingItem.State.Animatable);
 
@@ -251,6 +262,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         }
         else
         {
+            Debug.Log($"Setting item {item.name} position to top deck position {GetTopDeckPos()} on frame {Time.frameCount}!");
             item.transform.position = GetTopDeckPos();
         }
     }

@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_UseGravity
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2897230933030349739, guid: 668d21fcae2ec3b4590f94b650ec3915, type: 3}
+      propertyPath: SortKey
+      value: 1452530269
+      objectReference: {fileID: 0}
     - target: {fileID: 3031105451998031914, guid: 668d21fcae2ec3b4590f94b650ec3915, type: 3}
       propertyPath: m_Name
       value: P_IntroSequenceCraftingItem

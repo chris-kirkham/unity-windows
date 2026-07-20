@@ -3,7 +3,7 @@ using UnityEngine;
 
 //world-space visualiser for other players' cursor movements
 [RequireComponent(typeof(NetworkTransform))]
-public class PlayerCursorVisualiser : NetworkBehaviour
+public class WorldSpaceCursorVisualiser : NetworkBehaviour
 {
     [SerializeField] private bool visibleForLocalPlayer; //TODO!
     [SerializeField] private Cursor cursor;
@@ -20,9 +20,11 @@ public class PlayerCursorVisualiser : NetworkBehaviour
         }
     }
 
-    private void LateUpdate()
+    public override void FixedUpdateNetwork()
     {
-        if(!cursor)
+        base.FixedUpdateNetwork();
+        
+        if (!cursor)
         {
             return;
         }

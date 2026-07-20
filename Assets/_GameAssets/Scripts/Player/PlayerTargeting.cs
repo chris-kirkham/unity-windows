@@ -1,16 +1,21 @@
+using StateMachine;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using StateMachine;
+using static UnityEngine.GraphicsBuffer;
 
 [System.Serializable]   
 public class PlayerTargeting : ICursorEventListener
 {
     [SerializeField] private Cursor cursor;
-    [SerializeField] private GameObject targetingVFXPrefab;
     [SerializeField] private LayerMask targetableLayerMask;
+    [SerializeField] private WorldSpaceCursorVisualiser worldSpaceCursor;
+    [SerializeField] private PlayerTargetingVisualiserLine targetingLinePrefab;
+    private List<PlayerTargetingVisualiserLine> activeTargetingLines;
 
-    private ITargetable currentTarget;
-    private bool targetingActive = false;
+    private ITargetable nextTarget;
+    private bool waitingForNextTarget = false;
 
     private const float MaxTargetRaycastDist = 100f;
     private const bool SearchInChildren = true;
@@ -26,22 +31,74 @@ public class PlayerTargeting : ICursorEventListener
         ((ICursorEventListener)this).DeregisterListener(cursor);
     }
 
-    public async Task<ITargetable> DoTargeting()
+    public async Task<List<ITargetable>> DoPlayerTargeting(Transform targetingCard, CardAction.TargetingBehaviour targetingBehaviour, int numTargets)
     {
+        DestroyActiveTargetingLines();
+
         if (!cursor)
         {
             Debug.LogError($"No {nameof(Cursor)} set for this PlayerTargeter!");
             return null;
         }
 
-        currentTarget = null;
-        targetingActive = true;
-        while(targetingActive)
+        //initialise targeting viz lines
+        activeTargetingLines = new List<PlayerTargetingVisualiserLine>(numTargets);
+        for (int i = 0; i < numTargets; i++)
+        {
+            var line = GameObject.Instantiate(targetingLinePrefab, targetingCard.position, targetingCard.rotation);
+            line.SetTargetTransform(worldSpaceCursor.transform); //lines follow world-space cursor initially
+            activeTargetingLines.Add(line);
+        }
+
+        var targets = new List<ITargetable>(numTargets);
+        if (targetingBehaviour == CardAction.TargetingBehaviour.PlayerChoosesTargets)
+        {
+            for (int i = 0; i < numTargets; i++)
+            {
+                var target = await WaitForNextTarget();
+                targets.Add(target);
+                if (target != null)
+                {
+                    activeTargetingLines[i].SetTargetTransform(target.GetTargetTransform());
+                }
+            }
+        }
+        else if (targetingBehaviour == CardAction.TargetingBehaviour.RandomTargets)
+        {
+            //TODO: Pick random targets from other players' sides
+            throw new NotImplementedException();
+        }
+
+        DestroyActiveTargetingLines();
+        return targets;
+    }
+
+    public async Task<ITargetable> WaitForNextTarget() //routine which waits for next target selection from player input
+    {
+        nextTarget = null;
+        waitingForNextTarget = true;
+        while (waitingForNextTarget)
         {
             await Task.Yield();
         }
 
-        return currentTarget;
+        return nextTarget;
+    }
+
+    public void CancelTargeting()
+    {
+        DestroyActiveTargetingLines();
+    }
+
+    private void DestroyActiveTargetingLines()
+    {
+        if (activeTargetingLines != null && activeTargetingLines.Count > 0)
+        {
+            foreach (var line in activeTargetingLines)
+            {
+                GameObject.Destroy(line.gameObject);
+            }
+        }
     }
 
     private bool TryFetchTarget(out ITargetable target)
@@ -76,26 +133,30 @@ public class PlayerTargeting : ICursorEventListener
 
     public void OnCursorEvent(Cursor.EventID e)
     {
-        if(!targetingActive)
+        if(!waitingForNextTarget)
         {
             return;
         }
 
-        if(e == Cursor.EventID.LeftClickDown)
+        if (e == Cursor.EventID.MouseMove)
         {
-            if(currentTarget != null) //found target, let targeting function return
-            {
-                targetingActive = false; 
-            }
+            TryFetchTarget(out nextTarget);
         }
-        else if(e == Cursor.EventID.MouseMove)
+        else if (e == Cursor.EventID.LeftClickDown)
         {
-            TryFetchTarget(out currentTarget);
+            if(nextTarget != null) //found target, let targeting function return
+            {
+                waitingForNextTarget = false; 
+            }
         }
         else if(e == Cursor.EventID.RightClickDown) //cancel targeting
         {
-            currentTarget = null;
-            targetingActive = false;
+            nextTarget = null;
+            waitingForNextTarget = false;
+            CancelTargeting();
+            //TODO: send targeting cancellation to player
+            //TODO/FEATURE: allow cancelling only previous target? Or would that get tedious if player wants to cancel all
+            //...this is just a minor QoL feature, don't prioritise it
         }
     }
 }

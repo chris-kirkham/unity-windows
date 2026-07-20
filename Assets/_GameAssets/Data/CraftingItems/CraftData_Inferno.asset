@@ -20,3 +20,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c03eaadaeb521804ba15be4202e99e2a, type: 2}
   - {fileID: 11400000, guid: c03eaadaeb521804ba15be4202e99e2a, type: 2}
   products: []
+  <Health>k__BackingField: 2
+  actions:
+  - {fileID: 11400000, guid: 28781c89b66ce4c42940043bed5aaa76, type: 2}

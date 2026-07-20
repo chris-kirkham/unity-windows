@@ -78,6 +78,11 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable, IHaveHealth
         RemoveAllItemContacts();
     }
 
+    private void Update()
+    {
+        Debug.Log($"Position of item {name} changed to {transform.position} at frame {Time.frameCount}");
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (!canBeUsedInCraft)
@@ -197,6 +202,7 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable, IHaveHealth
         }
 
         //mirror card art on rear
+        /*
         if (mirrorableArtRoot)
         {
             if (mirroredArtInstance)
@@ -204,12 +210,14 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable, IHaveHealth
                 Destroy(mirroredArtInstance);
             }
 
+            //TODO: Need to change to network runner spawn?
             mirroredArtInstance = Instantiate<GameObject>(
                 mirrorableArtRoot,
                 mirrorableArtRoot.transform.parent,
                 worldPositionStays: true);
             mirroredArtInstance.transform.localScale = new Vector3(-1f, 1f, -1f);
         }
+        */
     }
 
     [ContextMenu("Execute actions")]
@@ -268,7 +276,6 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable, IHaveHealth
             Debug.LogError($"Given {nameof(CraftingManager)} is null! This {nameof(CraftingItem)} will not be properly initialised.");
         }
 
-        SetCursor(cursor);
         base.Initialise(cursor);
         
         Data = itemData;
@@ -394,25 +401,29 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable, IHaveHealth
         }
     }
 
-    //ITargetable
-    public Vector3 GetPositionAsTarget()
+#region ITargetable
+    public Vector3 GetTargetPosition()
     {
         return transform.position;
     }
 
-    //ITargetable
+    public Transform GetTargetTransform()
+    {
+        return transform;
+    }
 
     public ITargetable.TargetableType GetTargetType()
     {
         return ITargetable.TargetableType.Card;
     }
 
-    //ITargetable
     public void SetTargetingPreviewVisible(bool visible)
     {
         Debug.LogError("TODO: Targeting preview for cards");
     }
+    #endregion
 
+#region IHaveHealth
     public void SetHealth(int newHealth)
     {
         currHealth = newHealth;
@@ -427,6 +438,7 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable, IHaveHealth
     {
         SetHealth(currHealth - damage);
     }
+#endregion
 
     private void OnKilled()
     {

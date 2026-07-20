@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Fusion;
 using System;
+using NUnit.Framework;
+using Unity.VisualScripting;
 
 public class Player : SimulationBehaviour, ITargetable, IHaveHealth
 {
@@ -76,25 +78,17 @@ public class Player : SimulationBehaviour, ITargetable, IHaveHealth
         }
     }
 
-    public async Task<List<ITargetable>> DoPlayerTargeting(CardAction.TargetingBehaviour targetingBehaviour, int numTargets)
+    public async Task<List<ITargetable>> DoPlayerTargeting(Transform targetingCard, CardAction.TargetingBehaviour targetingBehaviour, int numTargets)
     {
         SetState(State.Targeting);
-
-        var targets = new List<ITargetable>(numTargets);
-        if (targetingBehaviour == CardAction.TargetingBehaviour.PlayerChoosesTargets)
-        {
-            for (int i = 0; i < numTargets; i++)
-            {
-                targets.Add(await targeter.DoTargeting());
-            }
-        }
-        else if(targetingBehaviour == CardAction.TargetingBehaviour.RandomTargets)
-        {
-            //TODO: Pick random targets from other players' sides
-        }
-
+        var targets = await targeter.DoPlayerTargeting(targetingCard, targetingBehaviour, numTargets);
         SetState(State.Default);
         return targets;
+    }
+
+    public void CancelPlayerTargeting()
+    {
+        Debug.LogError($"TODO: implement targeting cancel behaviour");
     }
 
     private void SetState(State state)
@@ -103,7 +97,7 @@ public class Player : SimulationBehaviour, ITargetable, IHaveHealth
     }
 
     //ITargetable
-    public Vector3 GetPositionAsTarget()
+    public Vector3 GetTargetPosition()
     {
         if(targetablePoint)
         {
@@ -113,6 +107,20 @@ public class Player : SimulationBehaviour, ITargetable, IHaveHealth
         {
             Debug.LogWarning($"Player's target point not set! Returning transform.position");
             return transform.position;
+        }
+    }
+
+    //ITargetable
+    public Transform GetTargetTransform()
+    {
+        if(targetablePoint)
+        {
+            return targetablePoint.transform;
+        }
+        else
+        {
+            Debug.LogWarning($"Player's target point not set! Returning transform");
+            return transform;
         }
     }
 

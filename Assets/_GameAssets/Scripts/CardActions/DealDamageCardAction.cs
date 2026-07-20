@@ -37,7 +37,7 @@ public class DealDamageCardAction : CardAction
             {
                 var target = Targets[i];
                 var vfx = Instantiate<DealDamageActionVFX>(vfxPrefab, item.transform.position, item.transform.rotation);
-                targetTasks[i] = vfx.DoVFX(item.transform.position, target.GetPositionAsTarget(), timeToReachTarget, target.GetTargetType());
+                targetTasks[i] = vfx.DoVFX(item.transform.position, target.GetTargetPosition(), timeToReachTarget, target.GetTargetType());
             }
 
             await Task.WhenAll(targetTasks);

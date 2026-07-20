@@ -273,6 +273,8 @@ MonoBehaviour:
     targetableLayerMask:
       serializedVersion: 2
       m_Bits: 64
+    worldSpaceCursor: {fileID: 6196437988984825015}
+    targetingLinePrefab: {fileID: 6794524135089619381, guid: b9ac0dbcea0e177489c0caacbb5eef9a, type: 3}
   targetablePoint: {fileID: 103244231631947377}
   hud:
     playerHUDInfos: []

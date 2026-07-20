@@ -104,10 +104,10 @@ public abstract class DraggablePlacementPoint : NetworkBehaviour, ICursorEventLi
     {
         this.cursor = cursor;
         ((ICursorEventListener)this).RegisterListener(cursor);
-#if UNITY_EDITOR
-        Debug.Log($"Registered {nameof(ICursorEventListener)} {name}");
-#endif
-        cursor.DraggablesMgr.DragTargetChanged += OnDragTargetChanged;
+        if(cursor)
+        {
+            cursor.DraggablesMgr.DragTargetChanged += OnDragTargetChanged;
+        }
     }
 
     protected virtual void OnDragTargetChanged()
