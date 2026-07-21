@@ -1,28 +1,61 @@
 using DG.Tweening;
-using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 [System.Serializable]
 public class ItemInspectSequence
 {
     [SerializeField] private float lerpToInspectPosTime = 1f;
     [SerializeField] private float inspectHoldTime = 1f;
-    [SerializeField] private Cursor cursor;
 
-    public IEnumerator InspectItem(CraftingItem item)
+    private Cursor cursor;
+    private CraftingItem item;
+    private bool isInspecting;
+    
+    public void OnEnable(Cursor cursor)
     {
-        item.SetState(CraftingItem.State.Animatable);
+        this.cursor = cursor;
+        //((ICursorEventListener)this).RegisterListener(cursor);
+    }
+
+    public void OnDisable()
+    {
+        //((ICursorEventListener)this).DeregisterListener(cursor);
+    }
+
+    public async Task InspectItem(CraftingItem item)
+    {
+        this.item = item;
+        isInspecting = true;
+        item.SetOnInspectVFX(true);
+        item.SetState(CraftingItem.State.Draggable);
 
         var cam = cursor.Cam;
-        item.transform.localScale = Vector3.zero;
-        yield return Tweening.DoTransform(
+        //item.transform.localScale = Vector3.zero;
+        var targetPos = cam.transform.position + (cam.transform.forward * 2f);
+        
+        item.SetDragPositionOverride(targetPos);
+
+        await Tweening.DoTransform(
             item.transform,
-            cam.transform.position + (cam.transform.forward * 2f),
-            Quaternion.identity,
+            targetPos,
+            cam.transform.rotation,
             Vector3.one,
-            lerpToInspectPosTime).WaitForCompletion();
-        item.SetOnInspectVFX(true);
-        yield return new WaitForSeconds(inspectHoldTime);
+            lerpToInspectPosTime).AsyncWaitForCompletion();
+
+
+        while (isInspecting)
+        {
+            await Task.Yield();
+        }
+    }
+
+    public void Cancel()
+    {
+        item.SetDragPositionOverride(null);
+        item.SetState(CraftingItem.State.Active);
         item.SetOnInspectVFX(false);
+        isInspecting = false;
     }
 }

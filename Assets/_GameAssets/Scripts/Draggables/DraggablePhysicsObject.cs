@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DraggablePhysicsObject : DraggableObject
@@ -7,11 +8,14 @@ public class DraggablePhysicsObject : DraggableObject
     [SerializeField] private float targetDistanceAboveGround = 10f;
     [SerializeField] private LayerMask groundRaycastMask;
     [SerializeField] private float moveSpeed = 1f;
+    [SerializeField] private float lerpBackFromPosOverrideTime = 0.5f;
 
     private const float MinDistFromCamera = 1f;
     private const float MaxRaycastDist = 100f;
 
-    private Vector3? overrideDragPosition = null;
+    private bool lerpBackFromPositionOverride = false;
+    private float lerpBackFromPosOverrideStartTime;
+    private bool hadPosOverrideLastTick = false;
 
     protected override void OnEnable()
     {
@@ -48,7 +52,6 @@ public class DraggablePhysicsObject : DraggableObject
     {
         base.OnEndDrag();
     
-        /*
         if(!IsPlaced) //let object fall/move with physics if not placed at a point
         {
             if (rb)
@@ -63,22 +66,54 @@ public class DraggablePhysicsObject : DraggableObject
                 coll.enabled = true;
             }
         }
-        */
     }
 
-    //public override void FixedUpdateNetwork()
-    public void LateUpdate()
+    public override void FixedUpdateNetwork()
+    //public void LateUpdate()
     {
         if(rb && isDragging)
         {
-            var targetPos = overrideDragPosition.HasValue ? overrideDragPosition.Value : GetTargetPosition();
+            var targetPos = GetDragPosition();
+            if(dragPositionOverride.HasValue)
+            {
+                hadPosOverrideLastTick = true;
+            }
+            else //position override lerp stuff... a lot of faff just to make things look smoother...
+            {
+                if(hadPosOverrideLastTick)
+                {
+                    lerpBackFromPositionOverride = true;
+                    lerpBackFromPosOverrideStartTime = Time.time;
+                    hadPosOverrideLastTick = false;
+                }
+
+                if(Time.time - lerpBackFromPosOverrideStartTime < lerpBackFromPosOverrideTime)
+                {
+                    var t = (Time.time - lerpBackFromPosOverrideStartTime) / lerpBackFromPosOverrideTime;
+                    transform.position = Vector3.Lerp(transform.position, targetPos, t);
+                    if(t >= 1f)
+                    {
+                        lerpBackFromPositionOverride = false;
+                    }
+                }
+                else
+                {
+                    transform.position = targetPos;
+                }
+            }
+
             //transform.position = targetPos;
             //rb.MovePosition(targetPos);
         }
     }
 
-    private Vector3 GetTargetPosition()
+    public override Vector3 GetDragPosition()
     {
+        if(dragPositionOverride.HasValue)
+        {
+            return dragPositionOverride.Value;
+        }
+
         var cam = cursor.Cam;
         var cursorPos = cursor.ClampedPosition_SS;
 

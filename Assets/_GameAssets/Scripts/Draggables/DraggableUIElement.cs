@@ -38,6 +38,12 @@ public class DraggableUIElement : DraggableObject
         }
     }
 
+    public override Vector3 GetDragPosition()
+    {
+        //TODO: Update this class to work with the newer drag system, or get rid of it if we don't need it!
+        throw new System.NotImplementedException();
+    }
+
     private void OnDrawGizmos()
     {
         if (!handleRect)

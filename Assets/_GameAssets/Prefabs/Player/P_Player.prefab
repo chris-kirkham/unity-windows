@@ -265,19 +265,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
   health: 20
+  cursor: {fileID: 2345373750565204295}
   hand: {fileID: 9123209446487713231}
   board: {fileID: 0}
-  targeter:
-    cursor: {fileID: 2345373750565204295}
-    targetingVFXPrefab: {fileID: 0}
-    targetableLayerMask:
-      serializedVersion: 2
-      m_Bits: 64
-    worldSpaceCursor: {fileID: 6196437988984825015}
-    targetingLinePrefab: {fileID: 6794524135089619381, guid: b9ac0dbcea0e177489c0caacbb5eef9a, type: 3}
   targetablePoint: {fileID: 103244231631947377}
   hud:
     playerHUDInfos: []
+  targeting:
+    targetableLayerMask:
+      serializedVersion: 2
+      m_Bits: 65
+    worldSpaceCursor: {fileID: 6196437988984825015}
+    targetingLinePrefab: {fileID: 6794524135089619381, guid: b9ac0dbcea0e177489c0caacbb5eef9a, type: 3}
+  inspect:
+    lerpToInspectPosTime: 0.4
+    inspectHoldTime: 1
 --- !u!114 &2014804116573804385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -293,9 +295,9 @@ MonoBehaviour:
   SortKey: 2377424615
   ObjectInterest: 1
   Flags: 262145
-  NestedObjects: []
+  NestedObjects:
+  - {fileID: 6143097010295968044}
   NetworkedBehaviours:
-  - {fileID: 9123209446487713231}
   - {fileID: 6196437988984825015}
   - {fileID: 9132781885820900696}
   ForceRemoteRenderTimeframe: 0
@@ -891,6 +893,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5685296785712732448}
     m_Modifications:
+    - target: {fileID: 143321164941074263, guid: bcb743fc0ec41c4408ed52fc6d40a044, type: 3}
+      propertyPath: SortKey
+      value: 3011851557
+      objectReference: {fileID: 0}
     - target: {fileID: 3035885050652289972, guid: bcb743fc0ec41c4408ed52fc6d40a044, type: 3}
       propertyPath: cursor
       value: 
@@ -901,11 +907,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3175261471116481487, guid: bcb743fc0ec41c4408ed52fc6d40a044, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.81
+      value: -0.7
       objectReference: {fileID: 0}
     - target: {fileID: 3175261471116481487, guid: bcb743fc0ec41c4408ed52fc6d40a044, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 4.57
+      value: 4.32
       objectReference: {fileID: 0}
     - target: {fileID: 3175261471116481487, guid: bcb743fc0ec41c4408ed52fc6d40a044, type: 3}
       propertyPath: m_LocalRotation.w
@@ -944,6 +950,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bcb743fc0ec41c4408ed52fc6d40a044, type: 3}
+--- !u!114 &6143097010295968044 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 143321164941074263, guid: bcb743fc0ec41c4408ed52fc6d40a044, type: 3}
+  m_PrefabInstance: {fileID: 6106186177502449275}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
 --- !u!4 &8695690593605442996 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3175261471116481487, guid: bcb743fc0ec41c4408ed52fc6d40a044, type: 3}

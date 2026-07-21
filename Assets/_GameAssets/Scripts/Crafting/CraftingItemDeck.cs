@@ -229,7 +229,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         }
     }
 
-    private void AddItemToTopDeck(CraftingItem item, bool animateToDeck = false)
+    private void AddItemToTopDeck(CraftingItem item, bool animateToDeck = true)
     {
         if(!item)
         {
@@ -262,7 +262,7 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         }
         else
         {
-            Debug.Log($"Setting item {item.name} position to top deck position {GetTopDeckPos()} on frame {Time.frameCount}!");
+            //Debug.Log($"Setting item {item.name} position to top deck position {GetTopDeckPos()} on frame {Time.frameCount}!");
             item.transform.position = GetTopDeckPos();
         }
     }

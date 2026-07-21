@@ -41,6 +41,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3175261471116481487}
   - component: {fileID: 3035885050652289972}
+  - component: {fileID: 143321164941074263}
   m_Layer: 0
   m_Name: P_PlayerHand
   m_TagString: Untagged
@@ -76,8 +77,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f9ec9ac3a5edf14a80d5660c93ba93f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHand
+  cursor: {fileID: 0}
   returnable: 1
+  craftingManager: {fileID: 0}
   maxCards: 10
   cardOffset: {x: 0.5, y: 0.05, z: 0}
   cardRoll: 0
   cardParent: {fileID: 8512259989145195904}
+--- !u!114 &143321164941074263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6504536283507574755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
+  SortKey: 599166564
+  ObjectInterest: 1
+  Flags: 262145
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 3035885050652289972}
+  ForceRemoteRenderTimeframe: 0

@@ -594,6 +594,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   moveSpeed: 1
+  lerpBackFromPosOverrideTime: 0.5
   itemData: {fileID: 0}
   canvasRect: {fileID: 0}
   image: {fileID: 4753229391315967444}
@@ -683,7 +684,7 @@ MonoBehaviour:
   SyncScale: 1
   SyncParent: 0
   _autoAOIOverride: 1
-  DisableSharedModeInterpolation: 0
+  DisableSharedModeInterpolation: 1
 --- !u!1 &5011019677542531290
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,19 +1,17 @@
-using StateMachine;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
 
 [System.Serializable]   
 public class PlayerTargeting : ICursorEventListener
 {
-    [SerializeField] private Cursor cursor;
     [SerializeField] private LayerMask targetableLayerMask;
     [SerializeField] private WorldSpaceCursorVisualiser worldSpaceCursor;
     [SerializeField] private PlayerTargetingVisualiserLine targetingLinePrefab;
     private List<PlayerTargetingVisualiserLine> activeTargetingLines;
 
+    private Cursor cursor;
     private ITargetable nextTarget;
     private bool waitingForNextTarget = false;
 
@@ -21,8 +19,9 @@ public class PlayerTargeting : ICursorEventListener
     private const bool SearchInChildren = true;
     private const bool SearchInParents = true;
 
-    public void OnEnable()
+    public void OnEnable(Cursor cursor)
     {
+        this.cursor = cursor;
         ((ICursorEventListener)this).RegisterListener(cursor);
     }
 

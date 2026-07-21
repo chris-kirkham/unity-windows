@@ -288,8 +288,9 @@ namespace Crafting
                 thumbnailPrefab,
                 position,
                 rotation,
-                player.Ref);
-            item.Initialise(player, this, itemData, cursor, wasCrafted);
+                player.Ref,
+                (Runner, item) => item.GetComponent<CraftingItem>().Initialise(player, this, itemData, cursor, wasCrafted));
+            //item.Initialise(player, this, itemData, cursor, wasCrafted);
             craftedTracker.OnItemCrafted(itemData);
 
             return item;

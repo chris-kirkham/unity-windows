@@ -44,7 +44,9 @@ public class Cursor : MonoBehaviour
         RightClickUp = 1 << 6,
         MiddleClickDown = 1 << 7,
         MiddleClickUp = 1 << 8,
-        MAX = 1 << 9
+        MouseWheelUp = 1 << 9,
+        MouseWheelDown = 1 << 10,
+        MAX = 1 << 11
     }
 
     public struct SpriteOverride
@@ -395,6 +397,41 @@ public class Cursor : MonoBehaviour
         draggablesManager.EndDrag(draggable);
     }
 
+    //returns the first ICursorEventListener of type T which the cursor is hovering over.
+    //Since the list isn't necessarily ordered, this doesn't mean the closest one!
+    public bool TryGetHoveredListenerOfType<T>(out T listener) where T : ICursorEventListener
+    {
+        listener = default(T);
+
+        foreach(var hoveredListener in hoveredListeners)
+        {
+            if(hoveredListener != null && hoveredListener is T)
+            {
+                listener =(T)hoveredListener;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /*
+    //TODO: make MonoBehaviour interface for interfaces we need to get transform etc. from!!
+    public bool TryGetClosestHoveredListenerOfType<T>(out T listener) where T : ICursorEventListener
+    {
+        listener = default(T);
+
+        var minDist = float.MaxValue;
+        foreach(var hoveredListener in hoveredListeners)
+        {
+            if(hoveredListener != null && hoveredListener is T)
+            {
+                var dist = 
+            }
+        }
+    }
+    */
+
     private void OnDrawGizmos()
     {
 #if UNITY_EDITOR
@@ -435,6 +472,20 @@ public class Cursor : MonoBehaviour
     {
         var floatVal = value.Get<float>();
         OnMouseButtonPressedOrUnpressed(2, floatVal > 0f);
+    }
+
+    private void OnMouseScrollWheel(InputValue value)
+    {
+        //N.B. input system registers a 0 value when releasing the scroll wheel
+        var floatVal = value.Get<float>();
+        if (floatVal > 0f)
+        {
+            AddEvent(EventID.MouseWheelUp);
+        }
+        else if(floatVal < 0f) 
+        {
+            AddEvent(EventID.MouseWheelDown);
+        }
     }
 
     private void OnMouseButtonPressedOrUnpressed(int button, bool pressed)

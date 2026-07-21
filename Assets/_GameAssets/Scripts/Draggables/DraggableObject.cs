@@ -12,6 +12,8 @@ public abstract class DraggableObject : NetworkBehaviour, ICursorEventListener
     [SerializeField] protected bool initialiseOnEnable;
 
     protected bool isDragging;
+    
+    protected Vector3? dragPositionOverride = null;
 
     protected virtual Sprite OnHoverDragSprite { get; set; }
 
@@ -194,6 +196,13 @@ public abstract class DraggableObject : NetworkBehaviour, ICursorEventListener
         {
             ((ICursorEventListener)this).RegisterListener(cursor);
         }
+    }
+
+    public abstract Vector3 GetDragPosition();
+
+    public virtual void SetDragPositionOverride(Vector3? position)
+    {
+        dragPositionOverride = position;
     }
 
     private DraggablePlacementPoint GetBestAvailablePlacementPoint()

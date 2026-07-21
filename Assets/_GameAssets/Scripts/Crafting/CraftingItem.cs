@@ -78,11 +78,6 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable, IHaveHealth
         RemoveAllItemContacts();
     }
 
-    private void Update()
-    {
-        Debug.Log($"Position of item {name} changed to {transform.position} at frame {Time.frameCount}");
-    }
-
     private void OnTriggerEnter(Collider other)
     {
         if (!canBeUsedInCraft)
