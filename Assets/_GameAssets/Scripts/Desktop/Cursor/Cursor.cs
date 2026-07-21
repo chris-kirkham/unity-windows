@@ -137,7 +137,7 @@ public class Cursor : MonoBehaviour
 
         if (debugDisplay)
         {
-            debugDisplay.SetCursorDebugInfo(this, draggablesManager.DragRequests);
+            debugDisplay.SetCursorDebugInfo(this);
         }
     }
 
@@ -413,6 +413,24 @@ public class Cursor : MonoBehaviour
         }
 
         return false;
+    }
+
+    public int GetHoveredListenersOfType<T>(T[] listeners) where T : ICursorEventListener
+    {
+        var matchingListenerCount = 0;
+
+        var count = Mathf.Min(hoveredListeners.Count, listeners.Length);
+        for(int i = 0; i < count; i++)
+        {
+            var listener = hoveredListeners[i];
+            if(listener != null && listener is T)
+            {
+                listeners[matchingListenerCount] = (T)listener;
+                matchingListenerCount++;
+            }
+        }
+
+        return matchingListenerCount;
     }
 
     /*

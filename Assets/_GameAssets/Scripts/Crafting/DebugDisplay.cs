@@ -38,12 +38,13 @@ public class DebugDisplay : MonoBehaviour
         }
     }
 
-    public void SetCursorDebugInfo(Cursor cursor, HashSet<DraggableObject> dragRequests)
+    public void SetCursorDebugInfo(Cursor cursor)
     {
         cursorDebugInfo = "Cursor: ";
-        cursorDebugInfo += $"screen-space pos = {cursor.ClampedPosition_SS}, world pos = {cursor.ClampedPosition_WS}\n";
+        cursorDebugInfo += $"screen-space pos: {cursor.ClampedPosition_SS}, world pos: {cursor.ClampedPosition_WS}\n";
         var currDragTargetName = cursor.CurrentDragTarget ? cursor.CurrentDragTarget.name : "none";
-        var dragRequestsDebug = dragRequests.Count > 0 ? $", drag requests = {string.Join(", ", dragRequests)}" : "";
-        cursorDebugInfo += $"drag target = {currDragTargetName}{dragRequestsDebug}";
+        var dragRequests = cursor.DraggablesMgr.DragRequests;
+        var dragRequestsDebug = dragRequests.Count > 0 ? $", drag requests: {string.Join(", ", dragRequests)}" : "";
+        cursorDebugInfo += $"drag target: {currDragTargetName}{dragRequestsDebug}";
     }
 }

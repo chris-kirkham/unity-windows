@@ -100,7 +100,7 @@ public class DraggablesManager
                 continue;
             }
 
-            var dist = Mathf.Abs(draggable.transform.position.y - cursor.Cam.transform.position.y);
+            var dist = GetDraggableScore(draggable.transform);
             if (dist < minDist)
             {
                 bestDraggable = draggable;
@@ -109,5 +109,11 @@ public class DraggablesManager
         }
 
         return bestDraggable;
+    }
+
+    //Lower the better, like in golf!
+    public float GetDraggableScore(Transform draggable)
+    {
+        return Mathf.Abs(draggable.position.y - cursor.Cam.transform.position.y);
     }
 }

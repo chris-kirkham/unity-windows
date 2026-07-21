@@ -4,8 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Crafting;
+using Fusion;
 
-public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
+public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener, IAfterSpawned
 {
     [SerializeField] private CraftingManager craftingManager;
     [SerializeField] private CraftingItemDatabase startingDeck;
@@ -41,6 +42,11 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         }
     }
 
+    public void AfterSpawned()
+    {
+
+    }
+
     public CraftingItem PeekTopItem()
     {
         return deck.Count > 0 ? deck[deck.Count - 1] : null;
@@ -56,6 +62,13 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         return transform.position
             + (deck.Count * itemHeight * Vector3.up)
             + (deck.Count * itemZOffset * Vector3.forward);
+    }
+
+    private Vector3 GetTopDeckPos(int deckCount)
+    {
+        return transform.position
+        + (deckCount * itemHeight * Vector3.up)
+        + (deckCount * itemZOffset * Vector3.forward);
     }
 
     private Vector3 GetBottomDeckPos()
@@ -113,16 +126,14 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         for (int i = 0; i < deckItems.ItemList.Count; i++)
         {
             var itemData = deckItems.ItemList[i];
-            var item = craftingManager.SpawnItem(itemData, transform.position, Quaternion.identity);
+            var item = craftingManager.SpawnItem(itemData, GetTopDeckPos(i), Quaternion.identity);
             tempDeck.Add(item);
         }
 
-        /*
         if(shuffle)
         {
             Shuffle();
         }
-        */
 
         foreach(var item in tempDeck)
         {
@@ -175,13 +186,13 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         }
 
         var itemData = item.Data;
-        item.transform.parent = null;
+        item.transform.SetParent(null, worldPositionStays: true);
         item.SetState(CraftingItem.State.Active);
 
         //TODO: prototype - infinite deck - spawn new item to replace removed one
         if (GameplaySettings.InfiniteDecks && deck.Count < 1)
         {
-            var newItem = craftingManager.SpawnItem(itemData, GetTopDeckPos(), Quaternion.identity);
+            var newItem = craftingManager.SpawnItem(itemData, GetTopDeckPos(), Quaternion.identity, transform);
             if(!TryPlaceObject(newItem, PlacementSource.Script))
             {
                 Debug.LogError("Unable to replace item in deck for some reason!");
@@ -251,7 +262,6 @@ public class CraftingItemDeck : DraggablePlacementPoint, ICursorEventListener
         }
 
         item.transform.SetParent(transform, worldPositionStays: true);
-        item.transform.parent = transform;
         item.SetState(CraftingItem.State.Animatable);
 
         deck.Add(item);

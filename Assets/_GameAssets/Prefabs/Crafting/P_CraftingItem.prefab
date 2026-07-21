@@ -593,7 +593,7 @@ MonoBehaviour:
   groundRaycastMask:
     serializedVersion: 2
     m_Bits: 8
-  moveSpeed: 1
+  moveSpeed: 10
   lerpBackFromPosOverrideTime: 0.5
   itemData: {fileID: 0}
   canvasRect: {fileID: 0}

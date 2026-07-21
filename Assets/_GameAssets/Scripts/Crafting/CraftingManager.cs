@@ -281,7 +281,7 @@ namespace Crafting
             craftSequence.DoCraftSequence(ingredients, successfulCrafts);
         }
 
-        public CraftingItem SpawnItem(CardData itemData, Vector3 position, Quaternion rotation, bool wasCrafted = false)
+        public CraftingItem SpawnItem(CardData itemData, Vector3 position, Quaternion rotation, Transform parent = null, bool wasCrafted = false)
         {
             //var item = Instantiate<CraftingItem>(thumbnailPrefab, position, rotation);
             var item = Runner.Spawn<CraftingItem>(
@@ -289,8 +289,12 @@ namespace Crafting
                 position,
                 rotation,
                 player.Ref,
-                (Runner, item) => item.GetComponent<CraftingItem>().Initialise(player, this, itemData, cursor, wasCrafted));
-            //item.Initialise(player, this, itemData, cursor, wasCrafted);
+                (Runner, item) =>
+                {
+                    item.transform.SetParent(parent);
+                    item.GetComponent<CraftingItem>().Initialise(player, this, itemData, cursor, wasCrafted);
+                });
+
             craftedTracker.OnItemCrafted(itemData);
 
             return item;

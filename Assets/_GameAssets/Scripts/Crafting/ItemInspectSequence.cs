@@ -40,7 +40,7 @@ public class ItemInspectSequence
         await Tweening.DoTransform(
             item.transform,
             targetPos,
-            cam.transform.rotation,
+            cam.transform.rotation * Quaternion.Euler(-90f, 0f, 0f),
             Vector3.one,
             lerpToInspectPosTime).AsyncWaitForCompletion();
 
@@ -53,6 +53,7 @@ public class ItemInspectSequence
 
     public void Cancel()
     {
+        item.transform.DORotateQuaternion(Quaternion.identity, lerpToInspectPosTime);
         item.SetDragPositionOverride(null);
         item.SetState(CraftingItem.State.Active);
         item.SetOnInspectVFX(false);
