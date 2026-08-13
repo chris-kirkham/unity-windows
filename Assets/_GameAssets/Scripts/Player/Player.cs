@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Fusion;
 using System;
-using NUnit.Framework;
-using Unity.VisualScripting;
 
 public class Player : SimulationBehaviour, ITargetable, IHaveHealth, ICursorEventListener
 {
@@ -18,6 +16,7 @@ public class Player : SimulationBehaviour, ITargetable, IHaveHealth, ICursorEven
     }
 
     [SerializeField] private int health;
+    [SerializeField] private int maxHealth;
     [SerializeField] private Cursor cursor;
     [SerializeField] private PlayerHand hand;
     [SerializeField] private PlayerBoard board;
@@ -33,7 +32,7 @@ public class Player : SimulationBehaviour, ITargetable, IHaveHealth, ICursorEven
 
     public int CurrHealth { get; private set; }
 
-    public int MaxHealth => health;
+    public int MaxHealth => maxHealth;
 
     public bool CanDrag => CurrState == State.Default; //TODO: prototype!
 
@@ -42,7 +41,7 @@ public class Player : SimulationBehaviour, ITargetable, IHaveHealth, ICursorEven
     private void OnEnable()
     {
         SetState(State.Default);
-        targeting.OnEnable(cursor);
+        targeting.OnEnable(this, cursor);
         inspect.OnEnable(cursor);
         ((ICursorEventListener)this).RegisterListener(cursor);
     }
@@ -59,37 +58,15 @@ public class Player : SimulationBehaviour, ITargetable, IHaveHealth, ICursorEven
         hud.UpdateHUD();
     }
 
-    public void DamageHealth(int damage)
-    {
-        SetHealth(CurrHealth - damage);
-    }
-
-    public void SetHealth(int health)
-    {
-        CurrHealth = health;
-        OnHealthChange?.Invoke(CurrHealth);
-        if (CurrHealth <= 0)
-        {
-            OnDeath();
-        }
-    }
-
-    private void OnDeath()
-    {
-        if(board)
-        {
-            //cancel player's active card actions
-            foreach(var item in board.ActiveItems)
-            {
-                item.CancelActions();
-            }
-        }
-    }
-
-    public async Task<List<ITargetable>> DoPlayerTargeting(Transform targetingCard, CardAction.TargetingBehaviour targetingBehaviour, int numTargets)
+    public async Task<List<ITargetable>> DoPlayerTargeting(
+        Transform targetingCard,
+        ITargetable.TargetableType targetableTypeMask, 
+        TargetedCardAction.TargetingBehaviour targetingBehaviour, 
+        TargetedCardAction.TargetTeam targetTeam,
+        int numTargets)
     {
         SetState(State.Targeting);
-        var targets = await targeting.DoPlayerTargeting(targetingCard, targetingBehaviour, numTargets);
+        var targets = await targeting.DoPlayerTargeting(targetingCard, targetableTypeMask, targetingBehaviour, targetTeam, numTargets);
         SetState(State.Default);
         return targets;
     }
@@ -117,7 +94,41 @@ public class Player : SimulationBehaviour, ITargetable, IHaveHealth, ICursorEven
         CurrState = state;
     }
 
-    //ITargetable
+#region IHaveHealth
+    public void SetHealth(int health)
+    {
+        CurrHealth = health;
+        OnHealthChange?.Invoke(CurrHealth);
+        if (CurrHealth <= 0)
+        {
+            OnKilled();
+        }
+    }
+
+    public void AddHealth(int healthToAdd)
+    {
+        SetHealth(Mathf.Min(CurrHealth + healthToAdd, MaxHealth));
+    }
+
+    public void DamageHealth(int damage)
+    {
+        SetHealth(CurrHealth - damage);
+    }
+#endregion
+
+    private void OnKilled()
+    {
+        if (board)
+        {
+            //cancel player's active card actions
+            foreach (var item in board.ActiveItems)
+            {
+                item.CancelActions();
+            }
+        }
+    }
+
+    #region ITargetable
     public Vector3 GetTargetPosition()
     {
         if(targetablePoint)
@@ -131,7 +142,6 @@ public class Player : SimulationBehaviour, ITargetable, IHaveHealth, ICursorEven
         }
     }
 
-    //ITargetable
     public Transform GetTargetTransform()
     {
         if(targetablePoint)
@@ -145,17 +155,21 @@ public class Player : SimulationBehaviour, ITargetable, IHaveHealth, ICursorEven
         }
     }
 
-    //ITargetable
-    public ITargetable.TargetableType GetTargetType()
+    public ITargetable.TargetableType GetTargetableType()
     {
         return ITargetable.TargetableType.Player;
     }
 
-    //ITargetable
     public void SetTargetingPreviewVisible(bool visible)
     {
         Debug.LogError($"TODO: Targeting preview VFX for players");
     }
+
+    public Player GetOwningPlayer()
+    {
+        return this;
+    }
+#endregion
 
     public void OnCursorEvent(Cursor.EventID e)
     {

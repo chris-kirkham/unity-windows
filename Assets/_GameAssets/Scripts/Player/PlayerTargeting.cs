@@ -11,6 +11,7 @@ public class PlayerTargeting : ICursorEventListener
     [SerializeField] private PlayerTargetingVisualiserLine targetingLinePrefab;
     private List<PlayerTargetingVisualiserLine> activeTargetingLines;
 
+    private Player player;
     private Cursor cursor;
     private ITargetable nextTarget;
     private bool waitingForNextTarget = false;
@@ -19,8 +20,9 @@ public class PlayerTargeting : ICursorEventListener
     private const bool SearchInChildren = true;
     private const bool SearchInParents = true;
 
-    public void OnEnable(Cursor cursor)
+    public void OnEnable(Player player, Cursor cursor)
     {
+        this.player = player;
         this.cursor = cursor;
         ((ICursorEventListener)this).RegisterListener(cursor);
     }
@@ -30,7 +32,12 @@ public class PlayerTargeting : ICursorEventListener
         ((ICursorEventListener)this).DeregisterListener(cursor);
     }
 
-    public async Task<List<ITargetable>> DoPlayerTargeting(Transform targetingCard, CardAction.TargetingBehaviour targetingBehaviour, int numTargets)
+    public async Task<List<ITargetable>> DoPlayerTargeting(
+        Transform targetingCard,
+        ITargetable.TargetableType targetableTypeMask, 
+        TargetedCardAction.TargetingBehaviour targetingBehaviour, 
+        TargetedCardAction.TargetTeam targetTeam,
+        int numTargets)
     {
         DestroyActiveTargetingLines();
 
@@ -50,11 +57,17 @@ public class PlayerTargeting : ICursorEventListener
         }
 
         var targets = new List<ITargetable>(numTargets);
-        if (targetingBehaviour == CardAction.TargetingBehaviour.PlayerChoosesTargets)
+        if (targetingBehaviour == TargetedCardAction.TargetingBehaviour.PlayerChoosesTargets)
         {
             for (int i = 0; i < numTargets; i++)
             {
-                var target = await WaitForNextTarget();
+                ITargetable target = null;
+                do
+                {
+                    target = await WaitForNextTarget();
+                }
+                while (!IsTargetValid(target, targetTeam, targetableTypeMask));
+                
                 targets.Add(target);
                 if (target != null)
                 {
@@ -62,7 +75,7 @@ public class PlayerTargeting : ICursorEventListener
                 }
             }
         }
-        else if (targetingBehaviour == CardAction.TargetingBehaviour.RandomTargets)
+        else if (targetingBehaviour == TargetedCardAction.TargetingBehaviour.RandomTargets)
         {
             //TODO: Pick random targets from other players' sides
             throw new NotImplementedException();
@@ -70,6 +83,38 @@ public class PlayerTargeting : ICursorEventListener
 
         DestroyActiveTargetingLines();
         return targets;
+
+        bool IsTargetValid(ITargetable target, TargetedCardAction.TargetTeam targetTeam, ITargetable.TargetableType targetableTypeMask)
+        {
+            if(target == null)
+            {
+                return false;
+            }
+
+            //TODO: make this work for teams rather than just self/enemy
+            if (targetTeam == TargetedCardAction.TargetTeam.Friendly && target.GetOwningPlayer() != player) 
+            {
+                return false;
+            }
+
+            //TODO: make this work for teams rather than just self/enemy
+            if (targetTeam == TargetedCardAction.TargetTeam.Enemy && target.GetOwningPlayer() == player)
+            {
+                return false;
+            }
+
+            if(targetableTypeMask.HasFlag(ITargetable.TargetableType.Card) && target is CraftingItem)
+            {
+                return true;
+            }
+
+            if(targetableTypeMask.HasFlag(ITargetable.TargetableType.Player) && target is Player)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 
     public async Task<ITargetable> WaitForNextTarget() //routine which waits for next target selection from player input

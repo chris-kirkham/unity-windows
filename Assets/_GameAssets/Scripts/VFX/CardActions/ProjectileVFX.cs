@@ -2,7 +2,7 @@ using Fusion;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class DealDamageActionVFX : NetworkBehaviour
+public class ProjectileVFX : NetworkBehaviour
 {
     [SerializeField] private GameObject travelVFX;
     [SerializeField] private GameObject onHitVFX;

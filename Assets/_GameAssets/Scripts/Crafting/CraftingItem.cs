@@ -407,7 +407,7 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable, IHaveHealth
         return transform;
     }
 
-    public ITargetable.TargetableType GetTargetType()
+    public ITargetable.TargetableType GetTargetableType()
     {
         return ITargetable.TargetableType.Card;
     }
@@ -416,7 +416,12 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable, IHaveHealth
     {
         Debug.LogError("TODO: Targeting preview for cards");
     }
-    #endregion
+
+    public Player GetOwningPlayer()
+    {
+        return owningPlayer;
+    }
+#endregion
 
 #region IHaveHealth
     public void SetHealth(int newHealth)
@@ -427,6 +432,11 @@ public class CraftingItem : DraggablePhysicsObject, ITargetable, IHaveHealth
         {
             OnKilled();
         }
+    }
+
+    public void AddHealth(int healthToAdd)
+    {
+        SetHealth(currHealth + healthToAdd); //TODO: max health?
     }
 
     public void DamageHealth(int damage)

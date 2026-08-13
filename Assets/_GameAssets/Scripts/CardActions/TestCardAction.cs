@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CardAction_Test", menuName = "Card Actions/Test")]
 public class TestCardAction : CardAction, IGameAction
 {
-    protected override async Task Execute_PostTargeting()
+    public override async Task Execute()
     {
         await new Task(() => { Debug.Log("Test action executed!"); });
     }
