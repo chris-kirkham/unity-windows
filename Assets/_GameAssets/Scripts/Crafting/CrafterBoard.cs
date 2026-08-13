@@ -23,6 +23,10 @@ namespace Crafting
 
         public Dictionary<CraftingItemData, int> ActiveItemCounts => activeItemCounts;
 
+        //testing different board fill configurations!
+        private const bool FillFromCentreHorizontal = true;
+        private const bool FillFromCentreVertical = false;
+
         private void OnEnable()
         {
             PopulateGrid();
@@ -58,20 +62,42 @@ namespace Crafting
             }
         }
 
+        //loop through decks in grid; add item to stack of same items if desired and if one exists,
+        //otherwise add item to the first empty deck
         public void MoveItemToGrid(CraftingItem item, bool stackSameItems = true)
         {
             Vector2Int? firstEmpty = null;
+            
+            int x;
+            int xStart = FillFromCentreHorizontal 
+                ? (gridCells.x % 2 == 0 ? (gridCells.x / 2) - 1 : (gridCells.x / 2))
+                : 0;
+            int xInc = 1;
 
-            //loop through decks in grid; add item to stack of same items if desired and if one exists,
-            //otherwise add item to the first empty deck
-            for(int y = 0; y < gridCells.y; y++)
+            int y;
+            int yStart = FillFromCentreVertical 
+                ? (gridCells.y % 2 == 0 ? (gridCells.y / 2) - 1 : (gridCells.y / 2))
+                : 0;
+            int yInc = 1;
+            
+            for (y = yStart; y >= 0 && y < gridCells.y; IncrementGridCell(ref y, ref yInc, FillFromCentreVertical))
             {
-                for(int x = 0; x < gridCells.x; x++)
+                xInc = 1;
+                for(x = xStart; x >= 0 && x < gridCells.x; IncrementGridCell(ref x, ref xInc, FillFromCentreHorizontal))
                 {
                     var deck = grid[x, y];
                     if (deck.IsEmpty())
                     {
-                        if (firstEmpty == null)
+                        //if we've found an empty deck and we aren't stacking same item types, place the item on that deck
+                        if(!stackSameItems)
+                        {
+                            PlaceItemInBoardDeck(item, deck);
+                            return;
+                        }
+
+                        //otherwise, if this is the first empty deck found, log it to use if we don't find any deck of the same item type to stack
+                        //(TODO: this could be made more efficient/simpler by caching the coords of decks with items in a dictionary and checking those before looping)
+                        if (firstEmpty == null) 
                         {
                             firstEmpty = new Vector2Int(x, y);
                             continue;
@@ -92,6 +118,21 @@ namespace Crafting
             else
             {
                 Debug.LogError($"No empty cell found in deck! What to do here???");
+            }
+
+            void IncrementGridCell(ref int cellIdx, ref int increment, bool fillFromCentre)
+            {
+                if(fillFromCentre)
+                {
+                    Debug.Log($"Incrementing grid cell from centre: current cell = ({x},{y}),  current index = {cellIdx}, current increment = {increment}");
+                    cellIdx += increment;
+                    increment = (increment > 0 ? increment + 1 : increment - 1) * -1;
+                    Debug.Log($"Incremented grid cell from centre: new index = {cellIdx}, new increment = {increment}");
+                }
+                else
+                {
+                    cellIdx++;
+                }
             }
         }
 
