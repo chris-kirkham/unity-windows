@@ -598,6 +598,7 @@ MonoBehaviour:
   debugImageText: {fileID: 8143671448318490687}
   onCraftedVFX: {fileID: 1289895630832583794}
   craftingPotentialVFX: {fileID: 2408735184587056423}
+  perlinFloat: {fileID: 4579748560507648321}
   onGrabSFX:
     Guid:
       Data1: 2045340819

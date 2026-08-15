@@ -36,6 +36,7 @@ public class CraftingItem : DraggablePhysicsObject
     [Header("VFX")]
     [SerializeField] private GameObject onCraftedVFX;
     [SerializeField] private GameObject craftingPotentialVFX;
+    [SerializeField] private PerlinFloat perlinFloat;
 
     [Header("SFX")]
     [SerializeField] private EventReference onGrabSFX;
@@ -357,19 +358,24 @@ public class CraftingItem : DraggablePhysicsObject
 
     public void SetOnInspectVFX(bool inspecting)
     {
-        if (inspecting)
+        if(nameTextFade)
         {
-            if (nameTextFade)
+            if(inspecting)
             {
                 nameTextFade.FadeIn();
             }
-        }
-        else
-        {
-            if (nameTextFade)
+            else
             {
                 nameTextFade.FadeOut();
             }
+        }
+    }
+
+    public void SetFloatingVFX(bool floating)
+    {
+        if (perlinFloat)
+        {
+            perlinFloat.enabled = floating;
         }
     }
 }

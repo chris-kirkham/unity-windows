@@ -97,9 +97,25 @@ PrefabInstance:
       value: Gallery body
       objectReference: {fileID: 0}
     - target: {fileID: 8885852988185673379, guid: bf28262b421b9084c9dffd9d85d9ed63, type: 3}
+      propertyPath: m_fontSize
+      value: 40.85
+      objectReference: {fileID: 0}
+    - target: {fileID: 8885852988185673379, guid: bf28262b421b9084c9dffd9d85d9ed63, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 8885852988185673379, guid: bf28262b421b9084c9dffd9d85d9ed63, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 36
+      objectReference: {fileID: 0}
+    - target: {fileID: 8885852988185673379, guid: bf28262b421b9084c9dffd9d85d9ed63, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: 7248069339218223144, guid: fb85acbd10686564f908a40923c60fcf, type: 2}
+      objectReference: {fileID: 7439161872897458936, guid: 3f07920de7e09f6499667dcafdf0dc76, type: 2}
+    - target: {fileID: 8885852988185673379, guid: bf28262b421b9084c9dffd9d85d9ed63, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8885852988185673379, guid: bf28262b421b9084c9dffd9d85d9ed63, type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 0

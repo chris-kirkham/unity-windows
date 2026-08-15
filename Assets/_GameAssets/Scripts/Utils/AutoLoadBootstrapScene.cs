@@ -5,7 +5,7 @@ class AutoLoadBootstrapScene
 {
     private const int BoostrapSceneIndex = 0;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    //[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void LoadBoostrapScene()
     {
         var activeSceneIdx = SceneManager.GetActiveScene().buildIndex;

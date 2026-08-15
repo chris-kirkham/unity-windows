@@ -7,11 +7,6 @@ public class SceneTransitionManager : SingletonMonoBehaviour<SceneTransitionMana
     [SerializeField] private int initialSceneBuildIdx;
     [SerializeField] private int loadingSceneBuildIdx;
 
-    private void Start()
-    {
-        LoadInitialScene();
-    }
-
     [ContextMenu("Load initial scene")]
     private void LoadInitialScene()
     {
@@ -38,8 +33,18 @@ public class SceneTransitionManager : SingletonMonoBehaviour<SceneTransitionMana
 
         //load loading scene additively before unloading active scene
         async = SceneManager.LoadSceneAsync(loadingSceneBuildIdx, LoadSceneMode.Additive);
-        yield return LoadingScreen.Inst.FadeInRoutine();
+
         yield return async;
+
+        if (LoadingScreen.InstExists())
+        {
+            yield return LoadingScreen.Inst.FadeInRoutine();
+        }
+        else
+        {
+            Debug.LogError($"Instance of {nameof(LoadingScreen)} not present! It should have been loaded by now!");
+        }
+
         SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex(loadingSceneBuildIdx));
 
         //unload previous scene, if any
@@ -63,7 +68,11 @@ public class SceneTransitionManager : SingletonMonoBehaviour<SceneTransitionMana
 
         //unload loading scene async
         async = SceneManager.UnloadSceneAsync(loadingSceneBuildIdx);
-        yield return LoadingScreen.Inst.FadeOutRoutine();
+        if(LoadingScreen.InstExists())
+        {
+            yield return LoadingScreen.Inst.FadeOutRoutine();
+        }
+
         yield return async;
     }
 }

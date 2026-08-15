@@ -178,7 +178,6 @@ namespace Crafting
             return numResults;
         }
 
-
         private int GetCraftResultsAllItems(ICollection<CraftingItem> ingredients, CraftingItemData[] results, CraftingResultState[] resultStates)
         {
             if (ingredients.Count < 2)

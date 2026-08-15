@@ -67,4 +67,28 @@ public class CraftingItemDatabase : ScriptableObject
             tier++;
         }
     }
+
+
+    //returns the list of items that the given item is a direct prerequisite for, in this database.
+    //Returns an empty list if the given item data isn't in this database
+    //(TODO: should this be in some CraftingUtilities class?)
+    public List<CraftingItemData> GetItemPrerequisiteForList(CraftingItemData itemData)
+    {
+        if(!ItemList.Contains(itemData))
+        {
+            Debug.LogWarning($"Item {itemData.ItemName} is not in this item database!");
+            return new List<CraftingItemData>();
+        }
+
+        var items = new List<CraftingItemData>();
+        foreach(var otherItemData in itemList)
+        {
+            if(otherItemData.Prerequisites.Contains(itemData))
+            {
+                items.Add(otherItemData);
+            }
+        }
+
+        return items;
+    }
 }
