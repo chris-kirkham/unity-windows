@@ -1,9 +1,12 @@
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class LoadingScreen : SingletonMonoBehaviour<LoadingScreen>
 {
+    [SerializeField] private float fadeInTime = 1f;
+    [SerializeField] private float fadeOutTime = 1f;
     [SerializeField] private GameObject loadingObjectRoot;
     [SerializeField] private Image progressBar;
 
@@ -13,15 +16,15 @@ public class LoadingScreen : SingletonMonoBehaviour<LoadingScreen>
         progressBar.fillAmount = Mathf.Clamp01(progress);
     }
 
-    public IEnumerator FadeInRoutine()
+    public async Task FadeInRoutine()
     {
         loadingObjectRoot.SetActive(true);
-        yield return new WaitForSeconds(1f);
+        await Task.Delay((int)fadeInTime * 1000);
     }
 
-    public IEnumerator FadeOutRoutine()
+    public async Task FadeOutRoutine()
     {
-        yield return new WaitForSeconds(1f);
+        await Task.Delay((int)fadeOutTime * 1000);
         loadingObjectRoot.SetActive(false);
     }
 }

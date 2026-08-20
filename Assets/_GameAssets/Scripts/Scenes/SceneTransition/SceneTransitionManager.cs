@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -13,32 +14,24 @@ public class SceneTransitionManager : SingletonMonoBehaviour<SceneTransitionMana
         SceneManager.LoadScene(initialSceneBuildIdx, LoadSceneMode.Single);
     }
 
-    public void LoadSceneWithLoadingScreen(int sceneBuildIdx)
+    //TODO: implement callback here so we can unload stuff manually on scene change?
+    public async void LoadScene(int sceneBuildIdx, bool useLoadingScreen = true)
     {
-        StartCoroutine(LoadSceneWithLoadingScreenRoutine(sceneBuildIdx));
-    }
-
-    private IEnumerator LoadSceneWithLoadingScreenRoutine(int sceneBuildIdx)
-    {
-        AsyncOperation async = null;
-
         if(sceneBuildIdx < 0 || sceneBuildIdx >= SceneManager.sceneCountInBuildSettings)
         {
             Debug.LogErrorFormat($"Given scene build index {0} is invalid! Cannot load scene.", sceneBuildIdx);
-            yield break;
+            return;
         }
 
         //get scene about to be unloaded
         var prevScene = SceneManager.GetActiveScene();
 
         //load loading scene additively before unloading active scene
-        async = SceneManager.LoadSceneAsync(loadingSceneBuildIdx, LoadSceneMode.Additive);
-
-        yield return async;
+        await SceneManager.LoadSceneAsync(loadingSceneBuildIdx, LoadSceneMode.Additive);
 
         if (LoadingScreen.InstExists())
         {
-            yield return LoadingScreen.Inst.FadeInRoutine();
+            await LoadingScreen.Inst.FadeInRoutine();
         }
         else
         {
@@ -50,12 +43,11 @@ public class SceneTransitionManager : SingletonMonoBehaviour<SceneTransitionMana
         //unload previous scene, if any
         if (prevScene.IsValid())
         {
-            async = SceneManager.UnloadSceneAsync(prevScene);
-            yield return async;
+            await SceneManager.UnloadSceneAsync(prevScene);
         }
 
         //load target scene async
-        async = SceneManager.LoadSceneAsync(sceneBuildIdx, LoadSceneMode.Additive); 
+        var async = SceneManager.LoadSceneAsync(sceneBuildIdx, LoadSceneMode.Additive); 
         while(!async.isDone)
         {
             if(LoadingScreen.InstExists())
@@ -63,16 +55,16 @@ public class SceneTransitionManager : SingletonMonoBehaviour<SceneTransitionMana
                 LoadingScreen.Inst.SetProgressBar(async.progress);
             }
 
-            yield return null;
+            await Task.Yield();
         }
 
         //unload loading scene async
         async = SceneManager.UnloadSceneAsync(loadingSceneBuildIdx);
         if(LoadingScreen.InstExists())
         {
-            yield return LoadingScreen.Inst.FadeOutRoutine();
+            await LoadingScreen.Inst.FadeOutRoutine();
         }
 
-        yield return async;
+        await async;
     }
 }

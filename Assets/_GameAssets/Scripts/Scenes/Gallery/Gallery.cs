@@ -1,11 +1,14 @@
 using Crafting;
 using DG.Tweening;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Gallery : MonoBehaviour
 {
-    [SerializeField] private CraftingManager craftingManager;
+    [SerializeField] private CraftingManager craftingManager; //TODO: make sure this is the player's crafting manager
     [SerializeField] private Transform itemSpawnPoint;
     [SerializeField] private CraftingItemDatabase itemDatabase; //TODO: replace with saved player crafting progress data when you make it
 
@@ -14,15 +17,23 @@ public class Gallery : MonoBehaviour
     [SerializeField] private TextMeshProUGUI itemTierText;
     [SerializeField] private TextMeshProUGUI itemPrerequisitesText;
     [SerializeField] private TextMeshProUGUI itemPrerequisiteForText;
+    [SerializeField] private SceneTransitionButton mainMenuButton;
 
     private CraftingItem currentItem;
     private int currentItemIndex;
 
-    private void Start()
+    private List<CraftingItemData> craftedItems;
+
+    private void OnEnable()
     {
         if(itemDatabase)
         {
             SetItemByIndex(0);
+        }
+
+        if(craftingManager)
+        {
+            craftedItems = craftingManager.GetUniqueItemsCrafted();
         }
     }
 
@@ -30,8 +41,7 @@ public class Gallery : MonoBehaviour
     private async void SetItemByIndex(int itemIdx)
     {
         currentItemIndex = itemIdx;
-        var itemData = itemDatabase.ItemList[itemIdx];
-
+        var itemData = craftedItems[itemIdx];
         SetItemInfoUI(itemData);
 
         if(currentItem)

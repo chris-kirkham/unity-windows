@@ -1,21 +1,42 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 class AutoLoadBootstrapScene
 {
-    private const int BoostrapSceneIndex = 0;
+    private const int BoostrapSceneIndex = (int)SceneBuildIndex.Bootstrap;
 
-    //[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void LoadBoostrapScene()
     {
-        var activeSceneIdx = SceneManager.GetActiveScene().buildIndex;
-        if (activeSceneIdx != BoostrapSceneIndex) 
+        var activeSceneIndexes = new List<int>();
+
+        for(int i = 0; i < SceneManager.sceneCount; i++) //TODO: should be .loadedSceneCount?
         {
-            SceneManager.UnloadScene(activeSceneIdx); //TODO: I don't want this to be async!
-            Debug.Log($"Loading boostrap scene...");
-            SceneManager.LoadScene(0, LoadSceneMode.Single);
-            SceneManager.LoadScene(activeSceneIdx, LoadSceneMode.Additive);
-            Debug.Log($"Bootstrap scene loaded!");
+            activeSceneIndexes.Add(SceneManager.GetSceneAt(i).buildIndex);
+        }
+
+        var isBootstrapSceneOpen = activeSceneIndexes.Contains(BoostrapSceneIndex);
+        if (!isBootstrapSceneOpen) 
+        {
+            Debug.Log("Unloading active scenes...");
+            foreach(var buildIdx in activeSceneIndexes)
+            {
+                SceneManager.UnloadScene(buildIdx); //TODO: I don't want this to be async!
+            }
+            
+            Debug.Log("Loading boostrap scene...");
+            
+            SceneManager.LoadScene(BoostrapSceneIndex, LoadSceneMode.Single);
+         
+            Debug.Log("Bootstrap scene loaded! Reloading other scene(s)...");
+
+            foreach (var buildIdx in activeSceneIndexes)
+            {
+                SceneManager.LoadScene(buildIdx, LoadSceneMode.Additive);
+            }
+
+            Debug.Log("All scene(s) loaded!");
         }
     }
 }
